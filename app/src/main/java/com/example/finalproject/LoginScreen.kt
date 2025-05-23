@@ -1,5 +1,6 @@
 package com.example.finalproject
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,10 +25,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,9 +39,13 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
-    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+    var isLoggingIn by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val auth = Firebase.auth
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -58,9 +66,9 @@ fun LoginScreen(
             )
 
             OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text("Nome de utilizador") },
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
@@ -70,6 +78,7 @@ fun LoginScreen(
                     focusedTextColor = MaterialTheme.colorScheme.onSurface
                 ),
                 keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
                 )
             )
@@ -108,9 +117,18 @@ fun LoginScreen(
 
             Button(
                 onClick = {
-                    if (username.isNotEmpty() && password.isNotEmpty()) {
-                        // No futuro, implementar verificação real de credenciais
-                        onLoginSuccess()
+                    if (email.isNotEmpty() && password.isNotEmpty()) {
+                        isLoggingIn = true
+                        auth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                isLoggingIn = false
+                                if (task.isSuccessful) {
+                                    onLoginSuccess()
+                                } else {
+                                    errorMessage = "Erro ao fazer login: ${task.exception?.message}"
+                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                }
+                            }
                     } else {
                         errorMessage = "Por favor, preencha todos os campos"
                     }
