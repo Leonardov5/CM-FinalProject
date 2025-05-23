@@ -25,11 +25,30 @@ class MainActivity : ComponentActivity() {
             FinalProjectTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     var isLoggedIn by remember { mutableStateOf(false) }
+                    var showRegister by remember { mutableStateOf(false) }
 
-                    if (isLoggedIn) {
-                        HomeScreen(modifier = Modifier.padding(innerPadding))
-                    } else {
-                        LoginScreen(onLoginSuccess = { isLoggedIn = true })
+                    when {
+                        isLoggedIn -> {
+                            HomeScreen(modifier = Modifier.padding(innerPadding))
+                        }
+                        showRegister -> {
+                            RegisterScreen(
+                                onRegisterSuccess = {
+                                    // Voltar para a tela de login após registro bem-sucedido
+                                    showRegister = false
+                                },
+                                onNavigateToLogin = {
+                                    // Voltar para a tela de login quando clicar no botão
+                                    showRegister = false
+                                }
+                            )
+                        }
+                        else -> {
+                            LoginScreen(
+                                onLoginSuccess = { isLoggedIn = true },
+                                onNavigateToRegister = { showRegister = true }
+                            )
+                        }
                     }
                 }
             }
@@ -49,7 +68,10 @@ fun HomeScreen(modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     FinalProjectTheme {
-        LoginScreen(onLoginSuccess = {})
+        LoginScreen(
+            onLoginSuccess = {},
+            onNavigateToRegister = {}
+        )
     }
 }
 
