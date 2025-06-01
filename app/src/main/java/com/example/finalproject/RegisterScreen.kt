@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,10 +32,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.example.finalproject.data.RepositoryProvider
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,8 +49,7 @@ fun RegisterScreen(
     var isRegistering by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val db = Firebase.firestore
-    val auth = Firebase.auth
+    val coroutineScope = rememberCoroutineScope()
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -170,26 +168,26 @@ fun RegisterScreen(
                             errorMessage = "As passwords não coincidem"
                         else -> {
                             isRegistering = true
-                            auth.createUserWithEmailAndPassword(email, password)
-                                .addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        val user = auth.currentUser
-                                        db.collection("user")
-                                            .add(hashMapOf("username" to username, "email" to email, "uid" to user?.uid))
-                                            .addOnSuccessListener {
-                                                isRegistering = false
-                                                Toast.makeText(context, "Registro bem-sucedido!", Toast.LENGTH_SHORT).show()
-                                                onRegisterSuccess()
-                                            }
-                                            .addOnFailureListener { e ->
-                                                isRegistering = false
-                                                errorMessage = "Erro ao registrar: ${e.message}"
-                                            }
+                            coroutineScope.launch {
+                                try {
+                                    val registerSuccess = RepositoryProvider.userRepository.registerUser(email, password)
+
+                                    if (registerSuccess) {
+                                        // Usuário registrado com sucesso
+                                        isRegistering = false
+                                        Toast.makeText(context, "Registro bem-sucedido!", Toast.LENGTH_SHORT).show()
+                                        onRegisterSuccess()
                                     } else {
                                         isRegistering = false
-                                        errorMessage = "Erro ao registrar: ${task.exception?.message}"
+                                        errorMessage = "Erro ao registrar: verifique se o email é válido ou já está em uso"
+                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                                     }
+                                } catch (e: Exception) {
+                                    isRegistering = false
+                                    errorMessage = "Erro ao registrar: ${e.message}"
+                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                                 }
+                            }
                         }
                     }
                 },
@@ -199,7 +197,14 @@ fun RegisterScreen(
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
-                Text("Registrar")
+                if (isRegistering) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.height(24.dp)
+                    )
+                } else {
+                    Text("Registrar")
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -211,7 +216,7 @@ fun RegisterScreen(
                     contentColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                Text("Já tem uma conta? Faça login")
+                Text("Já tem uma conta? Entrar")
             }
         }
     }

@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,8 +31,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.example.finalproject.data.RepositoryProvider
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +46,7 @@ fun LoginScreen(
     var isLoggingIn by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val auth = Firebase.auth
+    val coroutineScope = rememberCoroutineScope()
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -119,16 +120,22 @@ fun LoginScreen(
                 onClick = {
                     if (email.isNotEmpty() && password.isNotEmpty()) {
                         isLoggingIn = true
-                        auth.signInWithEmailAndPassword(email, password)
-                            .addOnCompleteListener { task ->
+                        coroutineScope.launch {
+                            try {
+                                val loginSuccess = RepositoryProvider.userRepository.loginUser(email, password)
                                 isLoggingIn = false
-                                if (task.isSuccessful) {
+                                if (loginSuccess) {
                                     onLoginSuccess()
                                 } else {
-                                    errorMessage = "Erro ao fazer login: ${task.exception?.message}"
+                                    errorMessage = "Credenciais inválidas"
                                     Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                                 }
+                            } catch (e: Exception) {
+                                isLoggingIn = false
+                                errorMessage = "Erro ao fazer login: ${e.message}"
+                                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                             }
+                        }
                     } else {
                         errorMessage = "Por favor, preencha todos os campos"
                     }
