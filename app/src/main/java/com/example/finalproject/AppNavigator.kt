@@ -1,0 +1,54 @@
+package com.example.finalproject
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import com.example.finalproject.components.BottomNavigation
+import com.example.finalproject.pages.ProjectsScreen
+import com.example.finalproject.pages.TaskManagementScreen
+import com.example.finalproject.pages.UpdatesScreen
+
+/**
+ * Navegador principal do aplicativo que gerencia a navegação entre as diferentes telas
+ * utilizando a barra de navegação inferior
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppNavigator(isLoggedIn: Boolean) {
+    if (!isLoggedIn) {
+        // Se o usuário não estiver logado, mostrar a tela de login
+        LoginScreen(
+            onLoginSuccess = { /* Será implementado no MainActivity */ },
+            onNavigateToRegister = { /* Será implementado no MainActivity */ }
+        )
+        return
+    }
+
+    // Estado para controlar a tela atual
+    var currentRoute by remember { mutableStateOf("tasks") }
+
+    Scaffold(
+        bottomBar = {
+            BottomNavigation(
+                currentRoute = currentRoute,
+                onNavigate = { route ->
+                    // Atualizar a rota atual quando o usuário navegar
+                    currentRoute = route
+                }
+            )
+        }
+    ) { paddingValues ->
+        // Conteúdo da tela atual
+        when (currentRoute) {
+            "tasks" -> TaskManagementScreen(modifier = Modifier.padding(paddingValues))
+            "projects" -> ProjectsScreen(modifier = Modifier.padding(paddingValues))
+            "updates" -> UpdatesScreen(modifier = Modifier.padding(paddingValues))
+        }
+    }
+}

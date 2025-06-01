@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.finalproject.pages.TaskManagementScreen
 import com.example.finalproject.ui.theme.FinalProjectTheme
 
 class MainActivity : ComponentActivity() {
@@ -23,32 +24,31 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FinalProjectTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    var isLoggedIn by remember { mutableStateOf(false) }
-                    var showRegister by remember { mutableStateOf(false) }
+                var isLoggedIn by remember { mutableStateOf(false) }
+                var showRegister by remember { mutableStateOf(false) }
 
-                    when {
-                        isLoggedIn -> {
-                            HomeScreen(modifier = Modifier.padding(innerPadding))
-                        }
-                        showRegister -> {
-                            RegisterScreen(
-                                onRegisterSuccess = {
-                                    // Voltar para a tela de login após registro bem-sucedido
-                                    showRegister = false
-                                },
-                                onNavigateToLogin = {
-                                    // Voltar para a tela de login quando clicar no botão
-                                    showRegister = false
-                                }
-                            )
-                        }
-                        else -> {
-                            LoginScreen(
-                                onLoginSuccess = { isLoggedIn = true },
-                                onNavigateToRegister = { showRegister = true }
-                            )
-                        }
+                when {
+                    isLoggedIn -> {
+                        // Usar o AppNavigator para gerenciar a navegação entre as telas
+                        AppNavigator(isLoggedIn = true)
+                    }
+                    showRegister -> {
+                        RegisterScreen(
+                            onRegisterSuccess = {
+                                // Voltar para a tela de login após registro bem-sucedido
+                                showRegister = false
+                            },
+                            onNavigateToLogin = {
+                                // Voltar para a tela de login quando clicar no botão
+                                showRegister = false
+                            }
+                        )
+                    }
+                    else -> {
+                        LoginScreen(
+                            onLoginSuccess = { isLoggedIn = true },
+                            onNavigateToRegister = { showRegister = true }
+                        )
                     }
                 }
             }

@@ -173,7 +173,6 @@ fun RegisterScreen(
                                     val registerSuccess = RepositoryProvider.userRepository.registerUser(email, password)
 
                                     if (registerSuccess) {
-                                        // Usuário registrado com sucesso
                                         isRegistering = false
                                         Toast.makeText(context, "Registro bem-sucedido!", Toast.LENGTH_SHORT).show()
                                         onRegisterSuccess()

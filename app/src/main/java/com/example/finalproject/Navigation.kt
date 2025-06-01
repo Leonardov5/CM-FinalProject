@@ -14,7 +14,7 @@ import androidx.navigation.compose.rememberNavController
 sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Register : Screen("register")
-    object Main : Screen("main") // Tela principal após o login
+    object TaskManagement : Screen("task_management") // Tela de gerenciamento de tarefas
 }
 
 @Composable
@@ -30,7 +30,7 @@ fun AppNavigation(
             LoginScreen(
                 onLoginSuccess = {
                     // Navegar para a tela principal após o login bem-sucedido
-                    navController.navigate(Screen.Main.route) {
+                    navController.navigate(Screen.TaskManagement.route) {
                         // Limpar a pilha de navegação para que o usuário não possa voltar para a tela de login
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
@@ -59,10 +59,9 @@ fun AppNavigation(
         }
 
         // Aqui você pode adicionar mais composables para outras telas do seu aplicativo
-        composable(route = Screen.Main.route) {
-            // Substitua pelo seu composable principal
-            // Por enquanto, vamos usar um placeholder simples
-            MainPlaceholder(navController)
+        composable(route = Screen.TaskManagement.route) {
+            // Usando a tela de gerenciamento de tarefas
+            com.example.finalproject.pages.TaskManagementScreen()
         }
     }
 }
