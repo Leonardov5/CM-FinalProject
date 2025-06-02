@@ -33,6 +33,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.finalproject.data.RepositoryProvider
+import com.example.finalproject.ui.theme.backgroundLight
+import com.example.finalproject.ui.theme.onBackgroundLight
+import com.example.finalproject.ui.theme.onPrimaryLight
+import com.example.finalproject.ui.theme.outlineLight
+import com.example.finalproject.ui.theme.primaryLight
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +58,7 @@ fun RegisterScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+        color = backgroundLight
     ) {
         Column(
             modifier = Modifier
@@ -65,7 +70,7 @@ fun RegisterScreen(
             Text(
                 text = "Criar Conta",
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
+                color = primaryLight,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
@@ -76,10 +81,10 @@ fun RegisterScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface
+                    focusedIndicatorColor = primaryLight,
+                    unfocusedIndicatorColor = outlineLight,
+                    cursorColor = primaryLight,
+                    focusedTextColor = onBackgroundLight
                 ),
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
@@ -95,10 +100,10 @@ fun RegisterScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface
+                    focusedIndicatorColor = primaryLight,
+                    unfocusedIndicatorColor = outlineLight,
+                    cursorColor = primaryLight,
+                    focusedTextColor = onBackgroundLight
                 ),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -116,10 +121,10 @@ fun RegisterScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface
+                    focusedIndicatorColor = primaryLight,
+                    unfocusedIndicatorColor = outlineLight,
+                    cursorColor = primaryLight,
+                    focusedTextColor = onBackgroundLight
                 ),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -137,10 +142,10 @@ fun RegisterScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface
+                    focusedIndicatorColor = primaryLight,
+                    unfocusedIndicatorColor = outlineLight,
+                    cursorColor = primaryLight,
+                    focusedTextColor = onBackgroundLight
                 ),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -192,13 +197,13 @@ fun RegisterScreen(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = primaryLight,
+                    contentColor = onPrimaryLight
                 )
             ) {
                 if (isRegistering) {
                     CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = onPrimaryLight,
                         modifier = Modifier.height(24.dp)
                     )
                 } else {
@@ -212,7 +217,7 @@ fun RegisterScreen(
                 onClick = onNavigateToLogin,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.primary
+                    contentColor = primaryLight
                 )
             ) {
                 Text("Já tem uma conta? Entrar")

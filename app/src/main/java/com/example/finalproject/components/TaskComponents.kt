@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
@@ -42,16 +43,16 @@ fun TabRow(
         }
     ) {
         Tab(
-            selected = selectedTab == TaskStatus.ON_GOING,
-            onClick = { onTabSelected(TaskStatus.ON_GOING) },
-            text = { Text("On-Going") },
+            selected = selectedTab == TaskStatus.TO_DO,
+            onClick = { onTabSelected(TaskStatus.TO_DO) },
+            text = { Text("To-Do") },
             selectedContentColor = primaryLight,
             unselectedContentColor = outlineLight
         )
         Tab(
-            selected = selectedTab == TaskStatus.TO_DO,
-            onClick = { onTabSelected(TaskStatus.TO_DO) },
-            text = { Text("To-Do") },
+            selected = selectedTab == TaskStatus.ON_GOING,
+            onClick = { onTabSelected(TaskStatus.ON_GOING) },
+            text = { Text("On-Going") },
             selectedContentColor = primaryLight,
             unselectedContentColor = outlineLight
         )
@@ -66,119 +67,55 @@ fun TabRow(
 }
 
 @Composable
-fun TaskCard(task: Task) {
-    var isExpanded by remember { mutableStateOf(task.id == 1) } // First task expanded by default
-    val rotationAngle by animateFloatAsState(
-        targetValue = if (isExpanded) 180f else 0f,
-        label = "rotation"
-    )
-
+fun TaskCard(task: Task, onClick: () -> Unit = {}) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .animateContentSize(),
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         color = secondaryContainerLight,
         shadowElevation = 2.dp
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Header Row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { isExpanded = !isExpanded },
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Icon(
+                imageVector = Icons.Default.List,
+                contentDescription = null,
+                tint = onSecondaryContainerLight,
+                modifier = Modifier.size(24.dp)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = task.title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
-                    color = onPrimaryContainerLight,
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    color = onSecondaryContainerLight
                 )
 
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowUp,
-                    contentDescription = if (isExpanded) "Collapse" else "Expand",
-                    modifier = Modifier.rotate(rotationAngle),
-                    tint = onPrimaryContainerLight
+                Text(
+                    text = "Criado: ${task.created ?: "Data não disponível"}",
+                    fontSize = 12.sp,
+                    color = onSecondaryContainerLight.copy(alpha = 0.7f)
                 )
             }
 
-            // Expanded Content
-            if (isExpanded) {
-                Spacer(modifier = Modifier.height(12.dp))
-
-                task.created?.let { created ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Created:",
-                            fontSize = 14.sp,
-                            color = onPrimaryContainerLight,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = created,
-                            fontSize = 14.sp,
-                            color = onPrimaryContainerLight,
-                            modifier = Modifier.padding(start = 4.dp)
-                        )
-                    }
-                }
-
-                task.priority?.let { priority ->
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Priority:",
-                            fontSize = 14.sp,
-                            color = onPrimaryContainerLight,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = priority.toString(),
-                            fontSize = 14.sp,
-                            color = onPrimaryContainerLight,
-                            modifier = Modifier.padding(start = 4.dp)
-                        )
-                    }
-                }
-
-                task.description?.let { description ->
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        Text(
-                            text = "Description:",
-                            fontSize = 14.sp,
-                            color = onPrimaryContainerLight,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = description,
-                            fontSize = 14.sp,
-                            color = onPrimaryContainerLight,
-                            modifier = Modifier
-                                .padding(start = 4.dp)
-                                .weight(1f)
-                        )
-                    }
-                }
+            IconButton(onClick = onClick) {
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowUp,
+                    contentDescription = "Ver detalhes",
+                    modifier = Modifier.rotate(90f),
+                    tint = onSecondaryContainerLight
+                )
             }
         }
     }
 }
-

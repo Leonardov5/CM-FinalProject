@@ -32,6 +32,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.finalproject.data.RepositoryProvider
+import com.example.finalproject.ui.theme.backgroundLight
+import com.example.finalproject.ui.theme.onBackgroundLight
+import com.example.finalproject.ui.theme.onPrimaryContainerLight
+import com.example.finalproject.ui.theme.onPrimaryLight
+import com.example.finalproject.ui.theme.outlineLight
+import com.example.finalproject.ui.theme.primaryContainerLight
+import com.example.finalproject.ui.theme.primaryLight
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,7 +57,7 @@ fun LoginScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+        color = backgroundLight
     ) {
         Column(
             modifier = Modifier
@@ -62,7 +69,7 @@ fun LoginScreen(
             Text(
                 text = "Bem-vindo",
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
+                color = primaryLight,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
@@ -73,10 +80,10 @@ fun LoginScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface
+                    focusedIndicatorColor = primaryLight,
+                    unfocusedIndicatorColor = outlineLight,
+                    cursorColor = primaryLight,
+                    focusedTextColor = onBackgroundLight
                 ),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -94,10 +101,10 @@ fun LoginScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface
+                    focusedIndicatorColor = primaryLight,
+                    unfocusedIndicatorColor = outlineLight,
+                    cursorColor = primaryLight,
+                    focusedTextColor = onBackgroundLight
                 ),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -142,8 +149,8 @@ fun LoginScreen(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = primaryLight,
+                    contentColor = onPrimaryLight
                 )
             ) {
                 Text("Entrar")
@@ -155,7 +162,7 @@ fun LoginScreen(
                 onClick = onNavigateToRegister,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.primary
+                    contentColor = primaryLight
                 )
             ) {
                 Text("Criar nova conta")

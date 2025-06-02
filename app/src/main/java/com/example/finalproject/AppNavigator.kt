@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.finalproject.components.BottomNavigation
+import com.example.finalproject.pages.ProfileScreen
 import com.example.finalproject.pages.ProjectsScreen
 import com.example.finalproject.pages.TaskManagementScreen
 import com.example.finalproject.pages.UpdatesScreen
@@ -32,23 +33,40 @@ fun AppNavigator(isLoggedIn: Boolean) {
 
     // Estado para controlar a tela atual
     var currentRoute by remember { mutableStateOf("tasks") }
+    var showProfileScreen by remember { mutableStateOf(false) }
 
-    Scaffold(
-        bottomBar = {
-            BottomNavigation(
-                currentRoute = currentRoute,
-                onNavigate = { route ->
-                    // Atualizar a rota atual quando o usuário navegar
-                    currentRoute = route
-                }
-            )
-        }
-    ) { paddingValues ->
-        // Conteúdo da tela atual
-        when (currentRoute) {
-            "tasks" -> TaskManagementScreen(modifier = Modifier.padding(paddingValues))
-            "projects" -> ProjectsScreen(modifier = Modifier.padding(paddingValues))
-            "updates" -> UpdatesScreen(modifier = Modifier.padding(paddingValues))
+    if (showProfileScreen) {
+        // Mostrar a tela de perfil quando o usuário clicar no ícone de perfil
+        ProfileScreen(
+            onBackPressed = { showProfileScreen = false }
+        )
+    } else {
+        Scaffold(
+            bottomBar = {
+                BottomNavigation(
+                    currentRoute = currentRoute,
+                    onNavigate = { route ->
+                        // Atualizar a rota atual quando o usuário navegar
+                        currentRoute = route
+                    }
+                )
+            }
+        ) { paddingValues ->
+            // Conteúdo da tela atual
+            when (currentRoute) {
+                "tasks" -> TaskManagementScreen(
+                    modifier = Modifier.padding(paddingValues),
+                    onProfileClick = { showProfileScreen = true }
+                )
+                "projects" -> ProjectsScreen(
+                    modifier = Modifier.padding(paddingValues),
+                    onProfileClick = { showProfileScreen = true }
+                )
+                "updates" -> UpdatesScreen(
+                    modifier = Modifier.padding(paddingValues),
+                    onProfileClick = { showProfileScreen = true }
+                )
+            }
         }
     }
 }

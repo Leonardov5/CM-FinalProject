@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.finalproject.data.service.AuthService
 import com.example.finalproject.pages.TaskManagementScreen
 import com.example.finalproject.ui.theme.FinalProjectTheme
 
@@ -24,7 +25,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FinalProjectTheme {
-                var isLoggedIn by remember { mutableStateOf(false) }
+                // Verificar o estado de autenticação real usando o AuthService
+                var isLoggedIn by remember { mutableStateOf(AuthService.isAuthenticated()) }
                 var showRegister by remember { mutableStateOf(false) }
 
                 when {

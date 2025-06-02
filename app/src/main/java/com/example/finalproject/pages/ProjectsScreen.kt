@@ -28,7 +28,10 @@ import com.example.finalproject.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProjectsScreen(modifier: Modifier = Modifier) {
+fun ProjectsScreen(
+    modifier: Modifier = Modifier,
+    onProfileClick: () -> Unit = {}
+) {
     val projects = remember {
         listOf(
             "Marketing Campaign 2025",
@@ -76,7 +79,7 @@ fun ProjectsScreen(modifier: Modifier = Modifier) {
                 }
             },
             actions = {
-                IconButton(onClick = { }) {
+                IconButton(onClick = onProfileClick) {
                     Icon(
                         Icons.Default.AccountCircle,
                         contentDescription = "Profile",

@@ -39,7 +39,10 @@ data class Update(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpdatesScreen(modifier: Modifier = Modifier) {
+fun UpdatesScreen(
+    modifier: Modifier = Modifier,
+    onProfileClick: () -> Unit = {}
+) {
     val updates = remember {
         listOf(
             Update(1, "Task assigned", "You've been assigned to the task 'Create wireframes'", "Jun 1, 2025", true),
@@ -87,7 +90,7 @@ fun UpdatesScreen(modifier: Modifier = Modifier) {
                 }
             },
             actions = {
-                IconButton(onClick = { }) {
+                IconButton(onClick = onProfileClick) {
                     Icon(
                         Icons.Default.AccountCircle,
                         contentDescription = "Profile",

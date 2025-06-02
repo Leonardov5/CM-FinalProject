@@ -54,6 +54,9 @@ dependencies {
     implementation(libs.storage.kt)
     implementation(libs.ktor.client.android)
 
+    //icons
+    implementation(libs.androidx.material.icons.extended)
+
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
