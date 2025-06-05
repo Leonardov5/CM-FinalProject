@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,19 +26,32 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FinalProjectTheme {
-                // Verificar o estado de autenticação real usando o AuthService
+                // Usar o LaunchedEffect para verificar a autenticação ao iniciar
                 var isLoggedIn by remember { mutableStateOf(AuthService.isAuthenticated()) }
                 var showRegister by remember { mutableStateOf(false) }
 
+                // Usar LaunchedEffect para garantir que a verificação de autenticação
+                // só aconteça uma vez ao iniciar e não em cada recomposição
+                LaunchedEffect(Unit) {
+                    isLoggedIn = AuthService.isAuthenticated()
+                }
+
                 when {
                     isLoggedIn -> {
-                        // Usar o AppNavigator para gerenciar a navegação entre as telas
-                        AppNavigator(isLoggedIn = true)
+                        // O usuário já está logado, mostrar diretamente a tela de tarefas
+                        AppNavigator(
+                            isLoggedIn = true,
+                            onLogout = {
+                                // Ao fazer logout, atualizar o estado para mostrar a tela de login
+                                isLoggedIn = false
+                            }
+                        )
                     }
                     showRegister -> {
                         RegisterScreen(
                             onRegisterSuccess = {
-                                // Voltar para a tela de login após registro bem-sucedido
+                                // Após registro bem-sucedido, definir como logado e ir para tarefas
+                                isLoggedIn = true
                                 showRegister = false
                             },
                             onNavigateToLogin = {
@@ -48,7 +62,10 @@ class MainActivity : ComponentActivity() {
                     }
                     else -> {
                         LoginScreen(
-                            onLoginSuccess = { isLoggedIn = true },
+                            onLoginSuccess = {
+                                // Após login bem-sucedido, definir como logado
+                                isLoggedIn = true
+                            },
                             onNavigateToRegister = { showRegister = true }
                         )
                     }
@@ -76,4 +93,3 @@ fun GreetingPreview() {
         )
     }
 }
-

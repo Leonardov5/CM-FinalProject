@@ -68,8 +68,20 @@ object AuthService {
     suspend fun logout(): Boolean {
         return try {
             withContext(Dispatchers.IO) {
-                supabase.auth.signOut()
+                try {
+                    // Tenta fazer logout no servidor
+                    supabase.auth.signOut()
+                } catch (e: Exception) {
+                    // Se falhar no servidor, apenas loga o erro
+                    e.printStackTrace()
+                    // Não retorna false aqui, pois ainda queremos limpar a sessão local
+                }
+
+                // Limpa qualquer sessão local, independentemente do resultado do signOut()
+                supabase.auth.clearSession()
             }
+            // Sempre retorna true, pois mesmo que o logout no servidor falhe,
+            // ainda removemos a sessão localmente
             true
         } catch (e: Exception) {
             e.printStackTrace()
@@ -91,5 +103,42 @@ object AuthService {
      */
     fun getCurrentUserEmail(): String? {
         return supabase.auth.currentUserOrNull()?.email
+    }
+
+    /**
+     * Atualiza o email do usuário atual na autenticação do Supabase
+     * @param email O novo email do usuário
+     * @param password A senha atual do usuário para verificação
+     * @return true se a atualização for bem-sucedida, false caso contrário
+     */
+    suspend fun updateEmail(email: String, password: String): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                // Primeiro, verificar se a senha está correta fazendo login
+                try {
+                    // Verificar a senha atual
+                    val currentEmail = getCurrentUserEmail() ?: return@withContext false
+
+                    // Faz login para verificar a senha (sem alterar a sessão atual)
+                    supabase.auth.signInWith(Email) {
+                        this.email = currentEmail
+                        this.password = password
+                    }
+
+                    // Se chegou aqui, a senha está correta, então podemos atualizar o email
+                    supabase.auth.modifyUser {
+                        this.email = email
+                    }
+
+                    true
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    false
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
     }
 }

@@ -1,10 +1,22 @@
 package com.example.finalproject.data.model
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
 /**
- * Modelo que representa um usuário no sistema
+ * Modelo de dados para representar um usuário
  */
+@Serializable
 data class User(
-    val id: String,
-    val email: String,
-    val displayName: String? = null
+    @SerialName("utilizador_uuid")
+    val id: String = "",
+    val nome: String = "",
+    val fotografia: String? = null,
+    val username: String = "",
+    val email: String = "",
+    val tipo: String = "normal",
+    @SerialName("created_at")
+    val createdAt: String = "",
+    @SerialName("updated_at")
+    val updatedAt: String = ""
 )

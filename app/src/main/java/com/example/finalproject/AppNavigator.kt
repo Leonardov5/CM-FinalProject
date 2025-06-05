@@ -21,7 +21,10 @@ import com.example.finalproject.pages.UpdatesScreen
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigator(isLoggedIn: Boolean) {
+fun AppNavigator(
+    isLoggedIn: Boolean,
+    onLogout: () -> Unit
+) {
     if (!isLoggedIn) {
         // Se o usuário não estiver logado, mostrar a tela de login
         LoginScreen(
@@ -38,7 +41,11 @@ fun AppNavigator(isLoggedIn: Boolean) {
     if (showProfileScreen) {
         // Mostrar a tela de perfil quando o usuário clicar no ícone de perfil
         ProfileScreen(
-            onBackPressed = { showProfileScreen = false }
+            onBackPressed = { showProfileScreen = false },
+            onLogout = {
+                showProfileScreen = false
+                onLogout()  // Chamar o callback onLogout
+            }
         )
     } else {
         Scaffold(

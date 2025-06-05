@@ -1,6 +1,7 @@
 package com.example.finalproject.pages
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.*
@@ -43,18 +45,29 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    onLogout: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
     // Estados para campos do perfil
-    var name by remember { mutableStateOf("Leonardo Vieira") }
-    var username by remember { mutableStateOf("leonardovieira") }
-    var email by remember { mutableStateOf(AuthService.getCurrentUserEmail() ?: "user@example.com") }
+    var name by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var originalEmail by remember { mutableStateOf("") } // Para rastrear se o email foi alterado
     var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(true) }
+    var isSaving by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var successMessage by remember { mutableStateOf<String?>(null) }
+
+    // Estado para controlar o diálogo de verificação de senha para alteração de email
+    var showEmailPasswordDialog by remember { mutableStateOf(false) }
+    var passwordForEmailChange by remember { mutableStateOf("") }
+    var showPasswordForEmailChange by remember { mutableStateOf(false) }
 
     // Estados para controle de UI
     var isPasswordChangeVisible by remember { mutableStateOf(false) }
@@ -63,6 +76,105 @@ fun ProfileScreen(
     var showCurrentPassword by remember { mutableStateOf(false) }
     var showNewPassword by remember { mutableStateOf(false) }
     var showConfirmPassword by remember { mutableStateOf(false) }
+
+    // Carregar dados do usuário quando a tela for aberta
+    LaunchedEffect(Unit) {
+        isLoading = true
+        try {
+            val user = com.example.finalproject.data.service.UserService.getCurrentUserData()
+            if (user != null) {
+                name = user.nome
+                username = user.username
+                email = user.email
+                originalEmail = user.email // Armazena o email original para comparação
+            }
+        } catch (e: Exception) {
+            errorMessage = "Erro ao carregar dados: ${e.message}"
+        } finally {
+            isLoading = false
+        }
+    }
+
+    // Função para salvar o perfil sem alterar o email
+    fun saveProfileWithoutEmailChange() {
+        coroutineScope.launch {
+            isSaving = true
+            errorMessage = null
+            successMessage = null
+
+            try {
+                val success = com.example.finalproject.data.service.UserService.updateUserData(
+                    username = username,
+                    nome = name
+                )
+
+                if (success) {
+                    successMessage = "Perfil atualizado com sucesso!"
+                } else {
+                    errorMessage = "Não foi possível atualizar o perfil"
+                }
+            } catch (e: Exception) {
+                errorMessage = "Erro ao atualizar: ${e.message}"
+            } finally {
+                isSaving = false
+            }
+        }
+    }
+
+
+    // Função para salvar as alterações do perfil
+    fun saveProfileChanges() {
+        // Verificar se o email foi alterado
+        if (email != originalEmail) {
+            // Se o email foi alterado, mostrar diálogo para confirmar senha
+            showEmailPasswordDialog = true
+            return
+        }
+
+        // Se o email não foi alterado, apenas salvar as outras alterações
+        saveProfileWithoutEmailChange()
+    }
+
+    // Função para salvar o perfil com alteração de email (requer verificação de senha)
+    fun saveProfileWithEmailChange(password: String) {
+        coroutineScope.launch {
+            isSaving = true
+            errorMessage = null
+            successMessage = null
+
+            try {
+                // Primeiro, verificar se a senha está correta e atualizar o email na autenticação
+                val emailUpdateSuccess = AuthService.updateEmail(email, password)
+
+                if (emailUpdateSuccess) {
+                    // Depois de atualizar o email na autenticação, atualizamos no banco de dados
+                    val updateInDbSuccess = com.example.finalproject.data.service.UserService.updateUserData(
+                        username = username,
+                        nome = name,
+                        email = email  // Precisamos adicionar este parâmetro ao UserService.updateUserData
+                    )
+
+                    if (updateInDbSuccess) {
+                        successMessage = "Perfil e email atualizados com sucesso!"
+                        originalEmail = email // Atualizar o email original para evitar repetir o diálogo
+                    } else {
+                        errorMessage = "Email atualizado na autenticação, mas houve um problema ao atualizar o perfil no banco de dados."
+                    }
+                } else {
+                    // Senha incorreta ou problema ao atualizar o email
+                    errorMessage = "Senha incorreta ou problema ao atualizar o email."
+                    email = originalEmail // Restaurar o email original
+                }
+            } catch (e: Exception) {
+                errorMessage = "Erro ao atualizar: ${e.message}"
+                email = originalEmail // Restaurar o email original em caso de erro
+            } finally {
+                isSaving = false
+                passwordForEmailChange = "" // Limpar a senha por segurança
+                showEmailPasswordDialog = false
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -86,7 +198,7 @@ fun ProfileScreen(
                     Box {
                         IconButton(onClick = { isLanguageMenuExpanded = true }) {
                             Icon(
-                                imageVector = Icons.Default.LocationOn,
+                                imageVector = Icons.Outlined.Language,
                                 contentDescription = "Alterar idioma",
                                 tint = primaryLight
                             )
@@ -357,21 +469,47 @@ fun ProfileScreen(
             // Botão de salvar alterações
             Button(
                 onClick = {
-                    // Implementar lógica para salvar as alterações de perfil
-                    coroutineScope.launch {
-                        // Enviar dados para o backend
-                    }
+                    saveProfileChanges()
                 },
                 modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading && !isSaving,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = primaryLight,
                     contentColor = onPrimaryLight
                 )
             ) {
-                Text("Salvar Alterações")
+                if (isSaving) {
+                    CircularProgressIndicator(
+                        color = onPrimaryLight,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Text("Salvar Alterações")
+                }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Mensagens de feedback
+            AnimatedVisibility(visible = successMessage != null) {
+                Text(
+                    text = successMessage ?: "",
+                    color = Color.Green,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
+            }
+
+            AnimatedVisibility(visible = errorMessage != null) {
+                Text(
+                    text = errorMessage ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Botão de logout
             OutlinedButton(
@@ -379,7 +517,7 @@ fun ProfileScreen(
                     coroutineScope.launch {
                         if (AuthService.logout()) {
                             // Voltar para a tela de login
-                            onBackPressed()
+                            onLogout()
                         }
                     }
                 },
@@ -392,6 +530,77 @@ fun ProfileScreen(
             }
 
             Spacer(modifier = Modifier.height(32.dp))
+        }
+
+        // Diálogo para confirmar senha ao alterar email
+        if (showEmailPasswordDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    showEmailPasswordDialog = false
+                    email = originalEmail // Restaurar o email original se o usuário cancelar
+                    passwordForEmailChange = "" // Limpar a senha por segurança
+                },
+                title = { Text("Confirmar senha") },
+                text = {
+                    Column {
+                        Text("Para alterar seu email, por favor confirme sua senha atual:")
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedTextField(
+                            value = passwordForEmailChange,
+                            onValueChange = { passwordForEmailChange = it },
+                            label = { Text("Senha atual") },
+                            visualTransformation = if (showPasswordForEmailChange)
+                                VisualTransformation.None
+                            else
+                                PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Password,
+                                imeAction = ImeAction.Done
+                            ),
+                            trailingIcon = {
+                                IconButton(onClick = { showPasswordForEmailChange = !showPasswordForEmailChange }) {
+                                    Icon(
+                                        imageVector = if (showPasswordForEmailChange)
+                                            Icons.Rounded.VisibilityOff
+                                        else
+                                            Icons.Rounded.Visibility,
+                                        contentDescription = if (showPasswordForEmailChange)
+                                            "Ocultar senha"
+                                        else
+                                            "Mostrar senha"
+                                    )
+                                }
+                            },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            if (passwordForEmailChange.isNotEmpty()) {
+                                saveProfileWithEmailChange(passwordForEmailChange)
+                            }
+                        },
+                        enabled = passwordForEmailChange.isNotEmpty()
+                    ) {
+                        Text("Confirmar")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showEmailPasswordDialog = false
+                            email = originalEmail // Restaurar o email original
+                            passwordForEmailChange = "" // Limpar a senha por segurança
+                        }
+                    ) {
+                        Text("Cancelar")
+                    }
+                }
+            )
         }
     }
 }

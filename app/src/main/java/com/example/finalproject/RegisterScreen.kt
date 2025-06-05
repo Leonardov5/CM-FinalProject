@@ -33,6 +33,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.finalproject.data.RepositoryProvider
+import com.example.finalproject.data.service.AuthService
+import com.example.finalproject.data.service.UserService
 import com.example.finalproject.ui.theme.backgroundLight
 import com.example.finalproject.ui.theme.onBackgroundLight
 import com.example.finalproject.ui.theme.onPrimaryLight
@@ -46,6 +48,7 @@ fun RegisterScreen(
     onRegisterSuccess: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
+    var fullName by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -73,6 +76,25 @@ fun RegisterScreen(
                 color = primaryLight,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
+
+            OutlinedTextField(
+                value = fullName,
+                onValueChange = { fullName = it },
+                label = { Text("Nome Completo") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = primaryLight,
+                    unfocusedIndicatorColor = outlineLight,
+                    cursorColor = primaryLight,
+                    focusedTextColor = onBackgroundLight
+                ),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
                 value = username,
@@ -167,7 +189,7 @@ fun RegisterScreen(
             Button(
                 onClick = {
                     when {
-                        username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() ->
+                        fullName.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() ->
                             errorMessage = "Por favor, preencha todos os campos"
                         password != confirmPassword ->
                             errorMessage = "As passwords não coincidem"
@@ -175,12 +197,41 @@ fun RegisterScreen(
                             isRegistering = true
                             coroutineScope.launch {
                                 try {
-                                    val registerSuccess = RepositoryProvider.userRepository.registerUser(email, password)
+                                    // Registrar o usuário no sistema de autenticação
+                                    val registerSuccess = AuthService.register(email, password)
 
                                     if (registerSuccess) {
-                                        isRegistering = false
-                                        Toast.makeText(context, "Registro bem-sucedido!", Toast.LENGTH_SHORT).show()
-                                        onRegisterSuccess()
+                                        // Após registro bem-sucedido, fazer login automaticamente
+                                        val loginSuccess = AuthService.login(email, password)
+
+                                        if (loginSuccess) {
+                                            // Salvar os dados do usuário na base de dados (sem a senha)
+                                            val userDataSaved = UserService.saveUserData(
+                                                username = username,
+                                                email = email,
+                                                nome = fullName,
+                                                tipo = "normal"
+                                            )
+
+                                            if (userDataSaved) {
+                                                isRegistering = false
+                                                Toast.makeText(context, "Registro bem-sucedido!", Toast.LENGTH_SHORT).show()
+                                                onRegisterSuccess()
+                                            } else {
+                                                isRegistering = false
+                                                // O usuário foi criado, mas os dados não foram salvos
+                                                Toast.makeText(
+                                                    context,
+                                                    "Registro realizado, mas houve um problema ao salvar seus dados.",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                                onRegisterSuccess()
+                                            }
+                                        } else {
+                                            isRegistering = false
+                                            errorMessage = "Registro realizado, mas falha ao fazer login automático"
+                                            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                        }
                                     } else {
                                         isRegistering = false
                                         errorMessage = "Erro ao registrar: verifique se o email é válido ou já está em uso"
