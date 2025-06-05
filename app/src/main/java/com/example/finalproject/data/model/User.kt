@@ -13,7 +13,7 @@ data class User(
     val nome: String = "",
     val fotografia: String? = null,
     val username: String = "",
-    val email: String = "",
+    var email: String = "",
     val tipo: String = "normal",
     @SerialName("created_at")
     val createdAt: String = "",

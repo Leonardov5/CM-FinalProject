@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import com.example.finalproject.data.service.AuthService
+import com.example.finalproject.data.service.UserService
 import com.example.finalproject.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -81,12 +82,14 @@ fun ProfileScreen(
     LaunchedEffect(Unit) {
         isLoading = true
         try {
+            AuthService.refreshSession()
             val user = com.example.finalproject.data.service.UserService.getCurrentUserData()
             if (user != null) {
                 name = user.nome
                 username = user.username
-                email = user.email
-                originalEmail = user.email // Armazena o email original para comparação
+                // Buscar o email do serviço de autenticação em vez do objeto User
+                email = AuthService.getCurrentUserEmail() ?: ""
+                originalEmail = email // Armazena o email original para comparação
             }
         } catch (e: Exception) {
             errorMessage = "Erro ao carregar dados: ${e.message}"
@@ -151,11 +154,10 @@ fun ProfileScreen(
                     val updateInDbSuccess = com.example.finalproject.data.service.UserService.updateUserData(
                         username = username,
                         nome = name,
-                        email = email  // Precisamos adicionar este parâmetro ao UserService.updateUserData
                     )
 
                     if (updateInDbSuccess) {
-                        successMessage = "Perfil e email atualizados com sucesso!"
+                        successMessage = "Perfil atualizado com sucesso! Verifique seu email para confirmar a alteração."
                         originalEmail = email // Atualizar o email original para evitar repetir o diálogo
                     } else {
                         errorMessage = "Email atualizado na autenticação, mas houve um problema ao atualizar o perfil no banco de dados."
@@ -447,9 +449,55 @@ fun ProfileScreen(
                         // Botão de atualizar senha
                         Button(
                             onClick = {
-                                // Implementar lógica para atualizar a senha
                                 coroutineScope.launch {
-                                    // Validar senhas e enviar para o backend
+                                    // Validar as senhas
+                                    if (currentPassword.isBlank()) {
+                                        errorMessage = "A senha atual é obrigatória"
+                                        return@launch
+                                    }
+
+                                    if (newPassword.isBlank()) {
+                                        errorMessage = "A nova senha é obrigatória"
+                                        return@launch
+                                    }
+
+                                    if (newPassword != confirmPassword) {
+                                        errorMessage = "As senhas não coincidem"
+                                        return@launch
+                                    }
+
+                                    if (newPassword.length < 6) {
+                                        errorMessage = "A senha deve ter pelo menos 6 caracteres"
+                                        return@launch
+                                    }
+
+                                    // Limpar mensagens anteriores
+                                    errorMessage = null
+                                    successMessage = null
+
+                                    // Mostrar indicador de loading
+                                    isSaving = true
+
+                                    try {
+                                        // Chamar o serviço para atualizar a senha
+                                        val success = AuthService.updatePassword(currentPassword, newPassword)
+
+                                        if (success) {
+                                            successMessage = "Senha atualizada com sucesso!"
+                                            // Limpar os campos de senha
+                                            currentPassword = ""
+                                            newPassword = ""
+                                            confirmPassword = ""
+                                            // Fechar a seção de alteração de senha
+                                            isPasswordChangeVisible = false
+                                        } else {
+                                            errorMessage = "Não foi possível atualizar a senha. Verifique se a senha atual está correta."
+                                        }
+                                    } catch (e: Exception) {
+                                        errorMessage = "Erro ao atualizar a senha: ${e.message}"
+                                    } finally {
+                                        isSaving = false
+                                    }
                                 }
                             },
                             modifier = Modifier.align(Alignment.End),

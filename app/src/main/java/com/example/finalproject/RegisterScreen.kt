@@ -208,7 +208,6 @@ fun RegisterScreen(
                                             // Salvar os dados do usuário na base de dados (sem a senha)
                                             val userDataSaved = UserService.saveUserData(
                                                 username = username,
-                                                email = email,
                                                 nome = fullName,
                                                 tipo = "normal"
                                             )

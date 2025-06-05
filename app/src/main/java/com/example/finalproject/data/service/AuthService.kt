@@ -106,6 +106,61 @@ object AuthService {
     }
 
     /**
+     * Refresca a sessão do usuário atual
+     * @return true se a sessão for atualizada com sucesso, false caso contrário
+     */
+    suspend fun refreshSession(): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                supabase.auth.refreshCurrentSession()
+            }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    /**
+     * Atualiza a senha do usuário atual
+     * @param currentPassword A senha atual do usuário
+     * @param newPassword A nova senha do usuário
+     * @return true se a atualização for bem-sucedida, false caso contrário
+     */
+    suspend fun updatePassword(currentPassword: String, newPassword: String): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                try {
+                    // Verificar a senha atual
+                    val currentEmail = getCurrentUserEmail() ?: return@withContext false
+
+                    // Faz login para verificar a senha atual
+                    supabase.auth.signInWith(Email) {
+                        this.email = currentEmail
+                        this.password = currentPassword
+                    }
+
+                    // Se chegou aqui, a senha está correta, então podemos atualizar a senha
+                    supabase.auth.modifyUser {
+                        this.password = newPassword
+                    }
+
+                    // Atualizar a sessão para refletir as alterações
+                        supabase.auth.refreshCurrentSession()
+
+                    true
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    false
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    /**
      * Atualiza o email do usuário atual na autenticação do Supabase
      * @param email O novo email do usuário
      * @param password A senha atual do usuário para verificação
