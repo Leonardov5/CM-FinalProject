@@ -1,11 +1,16 @@
 package com.example.finalproject.pages
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -13,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.rounded.Visibility
@@ -26,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -33,15 +40,21 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
+import androidx.compose.ui.zIndex
 import com.example.finalproject.data.service.AuthService
+import com.example.finalproject.data.service.StorageService
+import com.example.finalproject.data.service.SupabaseProvider
 import com.example.finalproject.data.service.UserService
 import com.example.finalproject.ui.theme.*
+import io.github.jan.supabase.gotrue.auth
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.net.URL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,6 +78,12 @@ fun ProfileScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var successMessage by remember { mutableStateOf<String?>(null) }
 
+    // Estados para gerenciamento de imagem
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var profileImageUrl by remember { mutableStateOf<String?>(null) }
+    var isUploadingImage by remember { mutableStateOf(false) }
+    var profileImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
     // Estado para controlar o diálogo de verificação de senha para alteração de email
     var showEmailPasswordDialog by remember { mutableStateOf(false) }
     var passwordForEmailChange by remember { mutableStateOf("") }
@@ -78,23 +97,114 @@ fun ProfileScreen(
     var showNewPassword by remember { mutableStateOf(false) }
     var showConfirmPassword by remember { mutableStateOf(false) }
 
-    // Carregar dados do usuário quando a tela for aberta
-    LaunchedEffect(Unit) {
-        isLoading = true
-        try {
-            AuthService.refreshSession()
-            val user = com.example.finalproject.data.service.UserService.getCurrentUserData()
-            if (user != null) {
-                name = user.nome
-                username = user.username
-                // Buscar o email do serviço de autenticação em vez do objeto User
-                email = AuthService.getCurrentUserEmail() ?: ""
-                originalEmail = email // Armazena o email original para comparação
+    // Função para lidar com a seleção de imagem e iniciar o upload
+    fun handleImageSelection(uri: Uri) {
+        coroutineScope.launch {
+            isUploadingImage = true
+            errorMessage = null
+
+            try {
+                // Carregar a imagem localmente antes do upload para exibição imediata
+                val inputStream = context.contentResolver.openInputStream(uri)
+                profileImageBitmap = BitmapFactory.decodeStream(inputStream)
+                inputStream?.close()
+
+                val imageUrl = StorageService.uploadProfileImage(context, uri)
+
+                if (imageUrl != null) {
+                    // Atualizar a URL da imagem no banco de dados
+                    val success = UserService.updateUserData(
+                        fotografia = imageUrl
+                    )
+
+                    if (success) {
+                        profileImageUrl = imageUrl
+                        successMessage = "Foto de perfil atualizada com sucesso!"
+                    } else {
+                        errorMessage = "Não foi possível atualizar a foto no perfil"
+                    }
+                } else {
+                    errorMessage = "Erro ao fazer upload da imagem"
+                }
+            } catch (e: Exception) {
+                errorMessage = "Erro ao processar a imagem: ${e.message}"
+            } finally {
+                isUploadingImage = false
             }
-        } catch (e: Exception) {
-            errorMessage = "Erro ao carregar dados: ${e.message}"
-        } finally {
-            isLoading = false
+        }
+    }
+
+    // Launcher para seleção de imagem da galeria
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            selectedImageUri = it
+            // Iniciar upload quando uma imagem for selecionada
+            handleImageSelection(it)
+        }
+    }
+
+    // Função para carregar imagem de URL
+    suspend fun loadImageFromUrl(url: String): Bitmap? {
+        return withContext(Dispatchers.IO) {
+            try {
+                println("Tentando carregar imagem da URL: $url")
+
+                // Usar HttpURLConnection para maior controle e logs detalhados
+                val connection = URL(url).openConnection() as java.net.HttpURLConnection
+                connection.connectTimeout = 15000 // 15 segundos de timeout
+                connection.readTimeout = 15000
+                connection.doInput = true
+
+                // Adicionar token de autenticação ao cabeçalho da requisição
+                // Este é o ponto chave para resolver o erro 400
+                val session = SupabaseProvider.client.auth.currentSessionOrNull()
+                if (session != null) {
+                    val token = session.accessToken
+                    connection.setRequestProperty("Authorization", "Bearer $token")
+                    println("Token de autenticação adicionado ao cabeçalho")
+                } else {
+                    println("Aviso: Sessão nula, não foi possível adicionar token de autenticação")
+                }
+
+                connection.connect()
+
+                val responseCode = connection.responseCode
+                println("Resposta HTTP: $responseCode")
+
+                if (responseCode == 200) {
+                    val inputStream = connection.inputStream
+                    val bitmap = BitmapFactory.decodeStream(inputStream)
+                    inputStream.close()
+
+                    if (bitmap != null) {
+                        println("Bitmap carregado com sucesso. Tamanho: ${bitmap.width}x${bitmap.height}")
+                        bitmap
+                    } else {
+                        println("Falha ao decodificar o bitmap (null)")
+                        null
+                    }
+                } else {
+                    println("Falha ao carregar imagem. Código de resposta: $responseCode")
+
+                    // Log adicional para depuração em caso de falha
+                    try {
+                        val errorStream = connection.errorStream
+                        val errorMessage = errorStream?.bufferedReader()?.use { it.readText() }
+                        println("Mensagem de erro: $errorMessage")
+                        errorStream?.close()
+                    } catch (e: Exception) {
+                        println("Não foi possível ler o erro: ${e.message}")
+                    }
+
+                    null
+                }
+            } catch (e: Exception) {
+                println("Exceção ao carregar imagem: ${e.javaClass.simpleName} - ${e.message}")
+                e.printStackTrace()
+                null
+            }
         }
     }
 
@@ -106,7 +216,7 @@ fun ProfileScreen(
             successMessage = null
 
             try {
-                val success = com.example.finalproject.data.service.UserService.updateUserData(
+                val success = UserService.updateUserData(
                     username = username,
                     nome = name
                 )
@@ -123,7 +233,6 @@ fun ProfileScreen(
             }
         }
     }
-
 
     // Função para salvar as alterações do perfil
     fun saveProfileChanges() {
@@ -151,7 +260,7 @@ fun ProfileScreen(
 
                 if (emailUpdateSuccess) {
                     // Depois de atualizar o email na autenticação, atualizamos no banco de dados
-                    val updateInDbSuccess = com.example.finalproject.data.service.UserService.updateUserData(
+                    val updateInDbSuccess = UserService.updateUserData(
                         username = username,
                         nome = name,
                     )
@@ -178,6 +287,62 @@ fun ProfileScreen(
         }
     }
 
+    // Carregar dados do usuário quando a tela for aberta
+    LaunchedEffect(Unit) {
+        isLoading = true
+        try {
+            AuthService.refreshSession()
+            val user = UserService.getCurrentUserData()
+            if (user != null) {
+                name = user.nome
+                username = user.username
+                // Buscar o email do serviço de autenticação em vez do objeto User
+                email = AuthService.getCurrentUserEmail() ?: ""
+                originalEmail = email // Armazena o email original para comparação
+
+                // Carregar URL da imagem de perfil
+                if (user.fotografia.isNullOrEmpty()) {
+                    // Se não tiver uma imagem no banco de dados, tenta obter do Storage
+                    profileImageUrl = StorageService.getProfileImageUrl()
+                    println("Carregando imagem do storage: $profileImageUrl")
+                } else {
+                    profileImageUrl = user.fotografia
+                    println("Carregando imagem do banco de dados: $profileImageUrl")
+                }
+
+                // Carregar o bitmap da imagem, independente da fonte
+                if (profileImageUrl != null) {
+                    try {
+                        profileImageBitmap = loadImageFromUrl(profileImageUrl!!)
+                        println("Imagem carregada com sucesso")
+                    } catch (e: Exception) {
+                        println("Erro ao carregar imagem: ${e.message}")
+                        // Tentar carregar diretamente do Supabase como fallback
+                        val userId = AuthService.getCurrentUserId()
+                        if (userId != null) {
+                            try {
+                                val newUrl = StorageService.getProfileImageUrl(userId)
+                                if (newUrl != null) {
+                                    profileImageUrl = newUrl
+                                    profileImageBitmap = loadImageFromUrl(newUrl)
+                                    println("Imagem carregada pelo fallback")
+                                }
+                            } catch (e2: Exception) {
+                                println("Fallback também falhou: ${e2.message}")
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            errorMessage = "Erro ao carregar dados: ${e.message}"
+            println("Erro no LaunchedEffect: ${e.message}")
+            e.printStackTrace()
+        } finally {
+            isLoading = false
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -190,7 +355,7 @@ fun ProfileScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Voltar"
                         )
                     }
@@ -270,52 +435,69 @@ fun ProfileScreen(
 
             // Foto do perfil
             Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                primaryLight,
-                                secondaryLight
-                            )
-                        )
-                    )
-                    .border(2.dp, Color.White, CircleShape),
-                contentAlignment = Alignment.Center
+                modifier = Modifier.size(120.dp)
             ) {
-                Text(
-                    text = name.split(" ").take(2).joinToString("") { it.take(1) }.uppercase(),
-                    color = Color.White,
-                    fontSize = 36.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                // Botão para alterar a foto
+                // Imagem circular com o conteúdo da foto
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f))
-                        .alpha(0f)
-                        .clickable {
-                            // Implementar lógica para alterar a foto
-                        }
-                )
+                        .clip(CircleShape)
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    primaryLight,
+                                    secondaryLight
+                                )
+                            )
+                        )
+                        .border(2.dp, Color.White, CircleShape)
+                        .clickable(enabled = !isUploadingImage) {
+                            imagePickerLauncher.launch("image/*")
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isUploadingImage) {
+                        // Mostrar indicador de carregamento enquanto a imagem está sendo enviada
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    } else if (profileImageBitmap != null) {
+                        // Mostrar a imagem de perfil
+                        // Adicionando um log para verificar o tamanho do bitmap
+                        println("Exibindo imagem de perfil. Tamanho: ${profileImageBitmap!!.width}x${profileImageBitmap!!.height}")
 
-                // Ícone de câmera para indicar que pode alterar a foto
+                        Image(
+                            bitmap = profileImageBitmap!!.asImageBitmap(),
+                            contentDescription = "Foto de perfil",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        // Mostrar as iniciais do nome quando não há imagem
+                        Text(
+                            text = name.split(" ").take(2).joinToString("") { it.take(1) }.uppercase(),
+                            color = Color.White,
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                // Ícone de câmera para indicar que pode alterar a foto - FORA do clip circular
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .size(36.dp)
                         .clip(CircleShape)
                         .background(surfaceVariantLight)
-                        .clickable {
-                            // Implementar lógica para alterar a foto
+                        .clickable(enabled = !isUploadingImage) {
+                            imagePickerLauncher.launch("image/*")
                         },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Info,
+                        imageVector = Icons.Default.CameraAlt,
                         contentDescription = "Alterar foto",
                         tint = primaryLight,
                         modifier = Modifier.size(20.dp)
