@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -44,17 +45,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
+import com.example.finalproject.R
+import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.data.service.AuthService
 import com.example.finalproject.data.service.StorageService
 import com.example.finalproject.data.service.SupabaseProvider
 import com.example.finalproject.data.service.UserService
 import com.example.finalproject.ui.theme.*
+import com.example.finalproject.utils.updateAppLanguage
 import io.github.jan.supabase.gotrue.auth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.URL
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,6 +101,30 @@ fun ProfileScreen(
     var showCurrentPassword by remember { mutableStateOf(false) }
     var showNewPassword by remember { mutableStateOf(false) }
     var showConfirmPassword by remember { mutableStateOf(false) }
+
+// Pré-carregar strings localizadas
+    val profileTitle = stringResource(id = R.string.profile_title)
+    val changeLanguage = stringResource(id = R.string.change_language)
+    val portuguese = stringResource(id = R.string.portuguese)
+    val english = stringResource(id = R.string.english)
+    val back = stringResource(id = R.string.back)
+    val profileUpdateSuccess = stringResource(id = R.string.profile_update_success)
+    val profileUpdateError = stringResource(id = R.string.profile_update_error)
+    val passwordUpdateSuccess = stringResource(id = R.string.password_update_success)
+    val passwordUpdateError = stringResource(id = R.string.password_update_error)
+    val uploadImageError = stringResource(id = R.string.upload_image_error)
+    val profileImageUpdateSuccess = stringResource(id = R.string.profile_image_update_success)
+    val profileImageUpdateError = stringResource(id = R.string.profile_image_update_error)
+
+
+
+    LaunchedEffect(Unit) {
+        val savedLanguage = PreferencesManager.getLanguage(context)
+        updateAppLanguage(context, savedLanguage)
+        println("Carregando idioma: $savedLanguage")
+
+        selectedLanguage = if (savedLanguage == "pt") portuguese else english
+    }
 
     // Função para lidar com a seleção de imagem e iniciar o upload
     fun handleImageSelection(uri: Uri) {
@@ -348,7 +377,7 @@ fun ProfileScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Meu Perfil",
+                        text = profileTitle,
                         fontWeight = FontWeight.Medium
                     )
                 },
@@ -356,17 +385,16 @@ fun ProfileScreen(
                     IconButton(onClick = onBackPressed) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Voltar"
+                            contentDescription = back,
                         )
                     }
                 },
                 actions = {
-                    // Botão de idioma com dropdown
                     Box {
                         IconButton(onClick = { isLanguageMenuExpanded = true }) {
                             Icon(
                                 imageVector = Icons.Outlined.Language,
-                                contentDescription = "Alterar idioma",
+                                contentDescription = changeLanguage,
                                 tint = primaryLight
                             )
                         }
@@ -381,13 +409,16 @@ fun ProfileScreen(
                             )
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Português") },
+                                text = { Text(portuguese) },
                                 onClick = {
-                                    selectedLanguage = "Português"
+                                    selectedLanguage = portuguese
+                                    PreferencesManager.saveLanguage(context, "pt")
+                                    updateAppLanguage(context, "pt")
+                                    (context as? android.app.Activity)?.recreate() // Recria a atividade
                                     isLanguageMenuExpanded = false
                                 },
                                 leadingIcon = {
-                                    if (selectedLanguage == "Português") {
+                                    if (selectedLanguage == portuguese) {
                                         Icon(
                                             Icons.Default.Check,
                                             contentDescription = null,
@@ -396,14 +427,18 @@ fun ProfileScreen(
                                     }
                                 }
                             )
+
                             DropdownMenuItem(
-                                text = { Text("English") },
+                                text = { Text(english) },
                                 onClick = {
-                                    selectedLanguage = "English"
+                                    selectedLanguage = english
+                                    PreferencesManager.saveLanguage(context, "en")
+                                    updateAppLanguage(context, "en")
+                                    (context as? android.app.Activity)?.recreate() // Recria a atividade
                                     isLanguageMenuExpanded = false
                                 },
                                 leadingIcon = {
-                                    if (selectedLanguage == "English") {
+                                    if (selectedLanguage == english) {
                                         Icon(
                                             Icons.Default.Check,
                                             contentDescription = null,
@@ -437,7 +472,6 @@ fun ProfileScreen(
             Box(
                 modifier = Modifier.size(120.dp)
             ) {
-                // Imagem circular com o conteúdo da foto
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -457,24 +491,18 @@ fun ProfileScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     if (isUploadingImage) {
-                        // Mostrar indicador de carregamento enquanto a imagem está sendo enviada
                         CircularProgressIndicator(
                             color = Color.White,
                             modifier = Modifier.size(40.dp)
                         )
                     } else if (profileImageBitmap != null) {
-                        // Mostrar a imagem de perfil
-                        // Adicionando um log para verificar o tamanho do bitmap
-                        println("Exibindo imagem de perfil. Tamanho: ${profileImageBitmap!!.width}x${profileImageBitmap!!.height}")
-
                         Image(
                             bitmap = profileImageBitmap!!.asImageBitmap(),
-                            contentDescription = "Foto de perfil",
+                            contentDescription = stringResource(id = R.string.update_profile_image),
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
                     } else {
-                        // Mostrar as iniciais do nome quando não há imagem
                         Text(
                             text = name.split(" ").take(2).joinToString("") { it.take(1) }.uppercase(),
                             color = Color.White,
@@ -484,7 +512,6 @@ fun ProfileScreen(
                     }
                 }
 
-                // Ícone de câmera para indicar que pode alterar a foto - FORA do clip circular
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -498,7 +525,7 @@ fun ProfileScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.CameraAlt,
-                        contentDescription = "Alterar foto",
+                        contentDescription = stringResource(id = R.string.update_profile_image),
                         tint = primaryLight,
                         modifier = Modifier.size(20.dp)
                     )
@@ -511,7 +538,7 @@ fun ProfileScreen(
             ProfileTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = "Nome Completo",
+                label = stringResource(id = R.string.name_label),
                 leadingIcon = Icons.Default.Person
             )
 
@@ -520,7 +547,7 @@ fun ProfileScreen(
             ProfileTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = "Nome de Usuário",
+                label = stringResource(id = R.string.username_label),
                 leadingIcon = Icons.Default.AccountCircle
             )
 
@@ -529,170 +556,10 @@ fun ProfileScreen(
             ProfileTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = "Email",
+                label = stringResource(id = R.string.email_label),
                 leadingIcon = Icons.Default.Email,
                 keyboardType = KeyboardType.Email
             )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Seção de alteração de senha
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                color = surfaceVariantLight.copy(alpha = 0.5f),
-                shadowElevation = 0.dp
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                isPasswordChangeVisible = !isPasswordChangeVisible
-                            },
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = null,
-                                tint = primaryLight
-                            )
-
-                            Spacer(modifier = Modifier.width(12.dp))
-
-                            Text(
-                                text = "Alterar Senha",
-                                fontWeight = FontWeight.Medium,
-                                color = onBackgroundLight
-                            )
-                        }
-
-                        val rotation by animateFloatAsState(
-                            targetValue = if (isPasswordChangeVisible) 180f else 0f,
-                            label = "rotation"
-                        )
-
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = null,
-                            modifier = Modifier.rotate(rotation),
-                            tint = onBackgroundLight
-                        )
-                    }
-
-                    if (isPasswordChangeVisible) {
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Campo de senha atual
-                        ProfileTextField(
-                            value = currentPassword,
-                            onValueChange = { currentPassword = it },
-                            label = "Senha Atual",
-                            leadingIcon = Icons.Default.Lock,
-                            isPassword = true,
-                            showPassword = showCurrentPassword,
-                            onTogglePasswordVisibility = { showCurrentPassword = !showCurrentPassword }
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Campo de nova senha
-                        ProfileTextField(
-                            value = newPassword,
-                            onValueChange = { newPassword = it },
-                            label = "Nova Senha",
-                            leadingIcon = Icons.Default.Lock,
-                            isPassword = true,
-                            showPassword = showNewPassword,
-                            onTogglePasswordVisibility = { showNewPassword = !showNewPassword }
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Campo de confirmação de senha
-                        ProfileTextField(
-                            value = confirmPassword,
-                            onValueChange = { confirmPassword = it },
-                            label = "Confirmar Nova Senha",
-                            leadingIcon = Icons.Default.Lock,
-                            isPassword = true,
-                            showPassword = showConfirmPassword,
-                            onTogglePasswordVisibility = { showConfirmPassword = !showConfirmPassword }
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Botão de atualizar senha
-                        Button(
-                            onClick = {
-                                coroutineScope.launch {
-                                    // Validar as senhas
-                                    if (currentPassword.isBlank()) {
-                                        errorMessage = "A senha atual é obrigatória"
-                                        return@launch
-                                    }
-
-                                    if (newPassword.isBlank()) {
-                                        errorMessage = "A nova senha é obrigatória"
-                                        return@launch
-                                    }
-
-                                    if (newPassword != confirmPassword) {
-                                        errorMessage = "As senhas não coincidem"
-                                        return@launch
-                                    }
-
-                                    if (newPassword.length < 6) {
-                                        errorMessage = "A senha deve ter pelo menos 6 caracteres"
-                                        return@launch
-                                    }
-
-                                    // Limpar mensagens anteriores
-                                    errorMessage = null
-                                    successMessage = null
-
-                                    // Mostrar indicador de loading
-                                    isSaving = true
-
-                                    try {
-                                        // Chamar o serviço para atualizar a senha
-                                        val success = AuthService.updatePassword(currentPassword, newPassword)
-
-                                        if (success) {
-                                            successMessage = "Senha atualizada com sucesso!"
-                                            // Limpar os campos de senha
-                                            currentPassword = ""
-                                            newPassword = ""
-                                            confirmPassword = ""
-                                            // Fechar a seção de alteração de senha
-                                            isPasswordChangeVisible = false
-                                        } else {
-                                            errorMessage = "Não foi possível atualizar a senha. Verifique se a senha atual está correta."
-                                        }
-                                    } catch (e: Exception) {
-                                        errorMessage = "Erro ao atualizar a senha: ${e.message}"
-                                    } finally {
-                                        isSaving = false
-                                    }
-                                }
-                            },
-                            modifier = Modifier.align(Alignment.End),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = primaryLight,
-                                contentColor = onPrimaryLight
-                            )
-                        ) {
-                            Text("Atualizar Senha")
-                        }
-                    }
-                }
-            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -714,29 +581,8 @@ fun ProfileScreen(
                         modifier = Modifier.size(24.dp)
                     )
                 } else {
-                    Text("Salvar Alterações")
+                    Text(stringResource(id = R.string.save_changes))
                 }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Mensagens de feedback
-            AnimatedVisibility(visible = successMessage != null) {
-                Text(
-                    text = successMessage ?: "",
-                    color = Color.Green,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
-            }
-
-            AnimatedVisibility(visible = errorMessage != null) {
-                Text(
-                    text = errorMessage ?: "",
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -746,7 +592,6 @@ fun ProfileScreen(
                 onClick = {
                     coroutineScope.launch {
                         if (AuthService.logout()) {
-                            // Voltar para a tela de login
                             onLogout()
                         }
                     }
@@ -756,84 +601,12 @@ fun ProfileScreen(
                     contentColor = primaryLight
                 )
             ) {
-                Text("Sair da Conta")
+                Text(stringResource(id = R.string.logout_button))
             }
-
-            Spacer(modifier = Modifier.height(32.dp))
-        }
-
-        // Diálogo para confirmar senha ao alterar email
-        if (showEmailPasswordDialog) {
-            AlertDialog(
-                onDismissRequest = {
-                    showEmailPasswordDialog = false
-                    email = originalEmail // Restaurar o email original se o usuário cancelar
-                    passwordForEmailChange = "" // Limpar a senha por segurança
-                },
-                title = { Text("Confirmar senha") },
-                text = {
-                    Column {
-                        Text("Para alterar seu email, por favor confirme sua senha atual:")
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        OutlinedTextField(
-                            value = passwordForEmailChange,
-                            onValueChange = { passwordForEmailChange = it },
-                            label = { Text("Senha atual") },
-                            visualTransformation = if (showPasswordForEmailChange)
-                                VisualTransformation.None
-                            else
-                                PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Password,
-                                imeAction = ImeAction.Done
-                            ),
-                            trailingIcon = {
-                                IconButton(onClick = { showPasswordForEmailChange = !showPasswordForEmailChange }) {
-                                    Icon(
-                                        imageVector = if (showPasswordForEmailChange)
-                                            Icons.Rounded.VisibilityOff
-                                        else
-                                            Icons.Rounded.Visibility,
-                                        contentDescription = if (showPasswordForEmailChange)
-                                            "Ocultar senha"
-                                        else
-                                            "Mostrar senha"
-                                    )
-                                }
-                            },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            if (passwordForEmailChange.isNotEmpty()) {
-                                saveProfileWithEmailChange(passwordForEmailChange)
-                            }
-                        },
-                        enabled = passwordForEmailChange.isNotEmpty()
-                    ) {
-                        Text("Confirmar")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            showEmailPasswordDialog = false
-                            email = originalEmail // Restaurar o email original
-                            passwordForEmailChange = "" // Limpar a senha por segurança
-                        }
-                    ) {
-                        Text("Cancelar")
-                    }
-                }
-            )
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

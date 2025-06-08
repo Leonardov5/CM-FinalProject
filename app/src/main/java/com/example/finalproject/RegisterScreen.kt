@@ -20,6 +20,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,10 +29,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.data.RepositoryProvider
 import com.example.finalproject.data.service.AuthService
 import com.example.finalproject.data.service.UserService
@@ -40,6 +43,7 @@ import com.example.finalproject.ui.theme.onBackgroundLight
 import com.example.finalproject.ui.theme.onPrimaryLight
 import com.example.finalproject.ui.theme.outlineLight
 import com.example.finalproject.ui.theme.primaryLight
+import com.example.finalproject.utils.updateAppLanguage
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,7 +61,22 @@ fun RegisterScreen(
     var isRegistering by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        val savedLanguage = PreferencesManager.getLanguage(context)
+        updateAppLanguage(context, savedLanguage)
+    }
+
     val coroutineScope = rememberCoroutineScope()
+
+    // Pré-carregar strings localizadas
+    val fillAllFieldsMessage = stringResource(id = R.string.fill_all_fields)
+    val passwordsDoNotMatchMessage = stringResource(id = R.string.passwords_do_not_match)
+    val registrationSuccessMessage = stringResource(id = R.string.registration_success)
+    val registrationErrorMessage = stringResource(id = R.string.registration_error)
+    val userDataSaveErrorMessage = stringResource(id = R.string.user_data_save_error)
+    val autoLoginFailedMessage = stringResource(id = R.string.auto_login_failed)
+    val registrationFailedMessage = stringResource(id = R.string.registration_failed)
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -71,7 +90,7 @@ fun RegisterScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Criar Conta",
+                text = stringResource(id = R.string.create_account),
                 style = MaterialTheme.typography.headlineMedium,
                 color = primaryLight,
                 modifier = Modifier.padding(bottom = 24.dp)
@@ -80,7 +99,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = fullName,
                 onValueChange = { fullName = it },
-                label = { Text("Nome Completo") },
+                label = { Text(stringResource(id = R.string.full_name_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
@@ -99,7 +118,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Nome de utilizador") },
+                label = { Text(stringResource(id = R.string.username_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
@@ -118,7 +137,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") },
+                label = { Text(stringResource(id = R.string.email_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
@@ -138,7 +157,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text(stringResource(id = R.string.password_label)) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
@@ -159,7 +178,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
-                label = { Text("Confirmar Password") },
+                label = { Text(stringResource(id = R.string.confirm_password_label)) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
@@ -190,9 +209,9 @@ fun RegisterScreen(
                 onClick = {
                     when {
                         fullName.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() ->
-                            errorMessage = "Por favor, preencha todos os campos"
+                            errorMessage = fillAllFieldsMessage
                         password != confirmPassword ->
-                            errorMessage = "As passwords não coincidem"
+                            errorMessage = passwordsDoNotMatchMessage
                         else -> {
                             isRegistering = true
                             coroutineScope.launch {
@@ -214,31 +233,27 @@ fun RegisterScreen(
 
                                             if (userDataSaved) {
                                                 isRegistering = false
-                                                Toast.makeText(context, "Registro bem-sucedido!", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(context, registrationSuccessMessage, Toast.LENGTH_SHORT).show()
                                                 onRegisterSuccess()
                                             } else {
                                                 isRegistering = false
                                                 // O usuário foi criado, mas os dados não foram salvos
-                                                Toast.makeText(
-                                                    context,
-                                                    "Registro realizado, mas houve um problema ao salvar seus dados.",
-                                                    Toast.LENGTH_LONG
-                                                ).show()
+                                                Toast.makeText(context, userDataSaveErrorMessage, Toast.LENGTH_LONG).show()
                                                 onRegisterSuccess()
                                             }
                                         } else {
                                             isRegistering = false
-                                            errorMessage = "Registro realizado, mas falha ao fazer login automático"
+                                            errorMessage = autoLoginFailedMessage
                                             Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                                         }
                                     } else {
                                         isRegistering = false
-                                        errorMessage = "Erro ao registrar: verifique se o email é válido ou já está em uso"
+                                        errorMessage = registrationFailedMessage
                                         Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                                     }
                                 } catch (e: Exception) {
                                     isRegistering = false
-                                    errorMessage = "Erro ao registrar: ${e.message}"
+                                    errorMessage = registrationErrorMessage.format(e.message ?: "")
                                     Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                                 }
                             }
@@ -257,7 +272,7 @@ fun RegisterScreen(
                         modifier = Modifier.height(24.dp)
                     )
                 } else {
-                    Text("Registrar")
+                    Text(stringResource(id = R.string.register_button))
                 }
             }
 
@@ -270,7 +285,7 @@ fun RegisterScreen(
                     contentColor = primaryLight
                 )
             ) {
-                Text("Já tem uma conta? Entrar")
+                Text(stringResource(id = R.string.already_have_account))
             }
         }
     }
