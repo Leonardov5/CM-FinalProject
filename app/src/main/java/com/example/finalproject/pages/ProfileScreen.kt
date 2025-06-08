@@ -59,7 +59,22 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.URL
+import com.example.finalproject.data.local.AppDatabase
+import com.example.finalproject.data.sync.UserSyncManager
+import com.example.finalproject.data.local.LocalUser
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+suspend fun isOnline(): Boolean {
+    val isOline = SupabaseProvider.isDatabaseConnected()
+    println("isOnline: $isOline")
+    return isOline
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,6 +95,7 @@ fun ProfileScreen(
     var confirmPassword by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
     var isSaving by remember { mutableStateOf(false) }
+    var isOnline by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var successMessage by remember { mutableStateOf<String?>(null) }
 
@@ -117,14 +133,6 @@ fun ProfileScreen(
     val profileImageUpdateError = stringResource(id = R.string.profile_image_update_error)
 
 
-
-    LaunchedEffect(Unit) {
-        val savedLanguage = PreferencesManager.getLanguage(context)
-        updateAppLanguage(context, savedLanguage)
-        println("Carregando idioma: $savedLanguage")
-
-        selectedLanguage = if (savedLanguage == "pt") portuguese else english
-    }
 
     // Função para lidar com a seleção de imagem e iniciar o upload
     fun handleImageSelection(uri: Uri) {
@@ -240,23 +248,48 @@ fun ProfileScreen(
     // Função para salvar o perfil sem alterar o email
     fun saveProfileWithoutEmailChange() {
         coroutineScope.launch {
+            print("Salvando perfil sem alteração de email...")
             isSaving = true
             errorMessage = null
             successMessage = null
-
             try {
-                val success = UserService.updateUserData(
-                    username = username,
-                    nome = name
-                )
+                if(isOnline()){
+                    print("Usuário online, atualizando perfil no servidor...")
+                    val success = UserService.updateUserData(
+                        username = username,
+                        nome = name
+                    )
+                    if (success) {
+                        successMessage = profileUpdateSuccess
+                    } else {
+                        errorMessage = profileUpdateError
+                    }
 
-                if (success) {
-                    successMessage = "Perfil atualizado com sucesso!"
-                } else {
-                    errorMessage = "Não foi possível atualizar o perfil"
+                } else{
+                    val db = AppDatabase.getInstance(context)
+                    val userDao = db.userDao()
+                    val userId = AuthService.getCurrentUserId()
+
+                    if (userId != null) {
+                        val localUser = LocalUser(
+                            id = userId,
+                            username = username,
+                            nome = name,
+                            email = email,
+                            fotografia = profileImageUrl,
+                            updatedAt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(
+                                Date()
+                            )
+                        )
+                        userDao.insertOrUpdate(localUser)
+                        successMessage = "Alterações salvas localmente. Serão sincronizadas quando online."
+                    } else {
+                        errorMessage = "Usuário não autenticado. Não foi possível salvar localmente."
+                    }
                 }
+
             } catch (e: Exception) {
-                errorMessage = "Erro ao atualizar: ${e.message}"
+                errorMessage = "${profileUpdateError}: ${e.message}"
             } finally {
                 isSaving = false
             }
@@ -266,12 +299,12 @@ fun ProfileScreen(
     // Função para salvar as alterações do perfil
     fun saveProfileChanges() {
         // Verificar se o email foi alterado
+        print("email: $email, originalEmail: $originalEmail")
         if (email != originalEmail) {
             // Se o email foi alterado, mostrar diálogo para confirmar senha
             showEmailPasswordDialog = true
             return
         }
-
         // Se o email não foi alterado, apenas salvar as outras alterações
         saveProfileWithoutEmailChange()
     }
@@ -316,61 +349,68 @@ fun ProfileScreen(
         }
     }
 
-    // Carregar dados do usuário quando a tela for aberta
+
     LaunchedEffect(Unit) {
         isLoading = true
         try {
-            AuthService.refreshSession()
-            val user = UserService.getCurrentUserData()
-            if (user != null) {
-                name = user.nome
-                username = user.username
-                // Buscar o email do serviço de autenticação em vez do objeto User
-                email = AuthService.getCurrentUserEmail() ?: ""
-                originalEmail = email // Armazena o email original para comparação
+            val db = AppDatabase.getInstance(context)
+            val userDao = db.userDao()
+            val userId = AuthService.getCurrentUserId()
 
-                // Carregar URL da imagem de perfil
-                if (user.fotografia.isNullOrEmpty()) {
-                    // Se não tiver uma imagem no banco de dados, tenta obter do Storage
-                    profileImageUrl = StorageService.getProfileImageUrl()
-                    println("Carregando imagem do storage: $profileImageUrl")
-                } else {
-                    profileImageUrl = user.fotografia
-                    println("Carregando imagem do banco de dados: $profileImageUrl")
+            if (userId != null) {
+                // Carregar dados do banco de dados local primeiro
+                val localUser = userDao.getUserById(userId)
+                if (localUser != null) {
+                    name = localUser.nome
+                    username = localUser.username
+                    email = localUser.email
+                    originalEmail = localUser.email // Armazenar o email original para comparação
                 }
 
-                // Carregar o bitmap da imagem, independente da fonte
-                if (profileImageUrl != null) {
-                    try {
-                        profileImageBitmap = loadImageFromUrl(profileImageUrl!!)
-                        println("Imagem carregada com sucesso")
-                    } catch (e: Exception) {
-                        println("Erro ao carregar imagem: ${e.message}")
-                        // Tentar carregar diretamente do Supabase como fallback
-                        val userId = AuthService.getCurrentUserId()
-                        if (userId != null) {
+                // Verificar conectividade
+                isOnline = isOnline()
+
+                // Se estiver online, sincronizar dados
+                if (isOnline) {
+                    UserSyncManager.syncUserDataWithConflictResolution(context)
+
+                    // Atualizar os dados locais após a sincronização
+                    val updatedUser = userDao.getUserById(userId)
+                    if (updatedUser != null) {
+                        name = updatedUser.nome
+                        username = updatedUser.username
+                        email = updatedUser.email
+                        originalEmail = updatedUser.email // Atualizar o email original
+                    }
+                    // Lógica de carregamento de imagem
+                    val user = UserService.getCurrentUserData()
+                    if (user != null) {
+                        profileImageUrl = user.fotografia ?: StorageService.getProfileImageUrl()
+                        if (profileImageUrl != null) {
                             try {
-                                val newUrl = StorageService.getProfileImageUrl(userId)
-                                if (newUrl != null) {
-                                    profileImageUrl = newUrl
-                                    profileImageBitmap = loadImageFromUrl(newUrl)
-                                    println("Imagem carregada pelo fallback")
+                                profileImageBitmap = loadImageFromUrl(profileImageUrl!!)
+                            } catch (e: Exception) {
+                                println("Erro ao carregar imagem: ${e.message}")
+                                // Fallback para carregar diretamente do Supabase
+                                val fallbackUrl = StorageService.getProfileImageUrl(userId)
+                                if (fallbackUrl != null) {
+                                    profileImageUrl = fallbackUrl
+                                    profileImageBitmap = loadImageFromUrl(fallbackUrl)
                                 }
-                            } catch (e2: Exception) {
-                                println("Fallback também falhou: ${e2.message}")
                             }
                         }
                     }
                 }
+            } else {
+                errorMessage = "Usuário não autenticado."
             }
         } catch (e: Exception) {
             errorMessage = "Erro ao carregar dados: ${e.message}"
-            println("Erro no LaunchedEffect: ${e.message}")
-            e.printStackTrace()
         } finally {
             isLoading = false
         }
     }
+
 
     Scaffold(
         topBar = {
@@ -539,7 +579,7 @@ fun ProfileScreen(
                 value = name,
                 onValueChange = { name = it },
                 label = stringResource(id = R.string.name_label),
-                leadingIcon = Icons.Default.Person
+                leadingIcon = Icons.Default.Person,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -558,8 +598,169 @@ fun ProfileScreen(
                 onValueChange = { email = it },
                 label = stringResource(id = R.string.email_label),
                 leadingIcon = Icons.Default.Email,
-                keyboardType = KeyboardType.Email
-            )
+                keyboardType = KeyboardType.Email,
+                enabled = isOnline && !isLoading
+                )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                color = surfaceVariantLight.copy(alpha = 0.5f),
+                shadowElevation = 0.dp) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(
+                                enabled = !isLoading && isOnline // Verifica se não está carregando e está online
+                            ) {
+                                isPasswordChangeVisible = !isPasswordChangeVisible
+                            },
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = null,
+                                tint = if (!isLoading && isOnline) primaryLight else Color.Gray // Ícone desativado se não disponível
+                            )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Text(
+                                text = "Alterar Senha",
+                                fontWeight = FontWeight.Medium,
+                                color = if (!isLoading && isOnline) onBackgroundLight else Color.Gray // Texto desativado se não disponível
+                            )
+                        }
+
+                        val rotation by animateFloatAsState(
+                            targetValue = if (isPasswordChangeVisible) 180f else 0f,
+                            label = "rotation"
+                        )
+
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = null,
+                            modifier = Modifier.rotate(rotation),
+                            tint = if (!isLoading && isOnline) onBackgroundLight else Color.Gray // Ícone desativado se não disponível
+                        )
+                    }
+
+                    if (isPasswordChangeVisible) {
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Campo de senha atual
+                        ProfileTextField(
+                            value = currentPassword,
+                            onValueChange = { currentPassword = it },
+                            label = "Senha Atual",
+                            leadingIcon = Icons.Default.Lock,
+                            isPassword = true,
+                            showPassword = showCurrentPassword,
+                            onTogglePasswordVisibility = { showCurrentPassword = !showCurrentPassword }
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Campo de nova senha
+                        ProfileTextField(
+                            value = newPassword,
+                            onValueChange = { newPassword = it },
+                            label = "Nova Senha",
+                            leadingIcon = Icons.Default.Lock,
+                            isPassword = true,
+                            showPassword = showNewPassword,
+                            onTogglePasswordVisibility = { showNewPassword = !showNewPassword }
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Campo de confirmação de senha
+                        ProfileTextField(
+                            value = confirmPassword,
+                            onValueChange = { confirmPassword = it },
+                            label = "Confirmar Nova Senha",
+                            leadingIcon = Icons.Default.Lock,
+                            isPassword = true,
+                            showPassword = showConfirmPassword,
+                            onTogglePasswordVisibility = { showConfirmPassword = !showConfirmPassword }
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Botão de atualizar senha
+                        Button(
+                            onClick = {
+                                coroutineScope.launch {
+                                    // Validar as senhas
+                                    if (currentPassword.isBlank()) {
+                                        errorMessage = "A senha atual é obrigatória"
+                                        return@launch
+                                    }
+
+                                    if (newPassword.isBlank()) {
+                                        errorMessage = "A nova senha é obrigatória"
+                                        return@launch
+                                    }
+
+                                    if (newPassword != confirmPassword) {
+                                        errorMessage = "As senhas não coincidem"
+                                        return@launch
+                                    }
+
+                                    if (newPassword.length < 6) {
+                                        errorMessage = "A senha deve ter pelo menos 6 caracteres"
+                                        return@launch
+                                    }
+
+                                    // Limpar mensagens anteriores
+                                    errorMessage = null
+                                    successMessage = null
+
+                                    // Mostrar indicador de loading
+                                    isSaving = true
+
+                                    try {
+                                        // Chamar o serviço para atualizar a senha
+                                        val success = AuthService.updatePassword(currentPassword, newPassword)
+
+                                        if (success) {
+                                            successMessage = "Senha atualizada com sucesso!"
+                                            // Limpar os campos de senha
+                                            currentPassword = ""
+                                            newPassword = ""
+                                            confirmPassword = ""
+                                            // Fechar a seção de alteração de senha
+                                            isPasswordChangeVisible = false
+                                        } else {
+                                            errorMessage = "Não foi possível atualizar a senha. Verifique se a senha atual está correta."
+                                        }
+                                    } catch (e: Exception) {
+                                        errorMessage = "Erro ao atualizar a senha: ${e.message}"
+                                    } finally {
+                                        isSaving = false
+                                    }
+                                }
+                            },
+                            modifier = Modifier.align(Alignment.End),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = primaryLight,
+                                contentColor = onPrimaryLight
+                            )
+                        ) {
+                            Text("Atualizar Senha")
+                        }
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -603,7 +804,78 @@ fun ProfileScreen(
             ) {
                 Text(stringResource(id = R.string.logout_button))
             }
-        }
+        Spacer(modifier = Modifier.height(16.dp))}
+    }
+
+    // Diálogo para confirmar senha ao alterar email
+    if (showEmailPasswordDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showEmailPasswordDialog = false
+                email = originalEmail // Restaurar o email original se o usuário cancelar
+                passwordForEmailChange = "" // Limpar a senha por segurança
+            },
+            title = { Text("Confirmar senha") },
+            text = {
+                Column {
+                    Text("Para alterar seu email, por favor confirme sua senha atual:")
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = passwordForEmailChange,
+                        onValueChange = { passwordForEmailChange = it },
+                        label = { Text("Senha atual") },
+                        visualTransformation = if (showPasswordForEmailChange)
+                            VisualTransformation.None
+                        else
+                            PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done
+                        ),
+                        trailingIcon = {
+                            IconButton(onClick = { showPasswordForEmailChange = !showPasswordForEmailChange }) {
+                                Icon(
+                                    imageVector = if (showPasswordForEmailChange)
+                                        Icons.Rounded.VisibilityOff
+                                    else
+                                        Icons.Rounded.Visibility,
+                                    contentDescription = if (showPasswordForEmailChange)
+                                        "Ocultar senha"
+                                    else
+                                        "Mostrar senha"
+                                )
+                            }
+                        },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (passwordForEmailChange.isNotEmpty()) {
+                            saveProfileWithEmailChange(passwordForEmailChange)
+                        }
+                    },
+                    enabled = passwordForEmailChange.isNotEmpty()
+                ) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showEmailPasswordDialog = false
+                        email = originalEmail // Restaurar o email originalMore actions
+                        passwordForEmailChange = "" // Limpar a senha por segurança
+                    }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 
@@ -618,7 +890,8 @@ fun ProfileTextField(
     isPassword: Boolean = false,
     showPassword: Boolean = false,
     onTogglePasswordVisibility: () -> Unit = {},
-    keyboardType: KeyboardType = KeyboardType.Text
+    keyboardType: KeyboardType = KeyboardType.Text,
+    enabled: Boolean = true // Adicionado aqui
 ) {
     OutlinedTextField(
         value = value,
@@ -649,6 +922,7 @@ fun ProfileTextField(
             }
         },
         singleLine = true,
+        enabled = enabled,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         colors = TextFieldDefaults.colors(

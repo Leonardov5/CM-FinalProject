@@ -1,5 +1,6 @@
 [versions]
 agp = "8.9.2"
+artifactid = "version"
 firebaseBom = "33.14.0"
 gotrueKt = "2.1.1"
 kotlin = "2.0.21"
@@ -18,12 +19,18 @@ firebaseFirestore = "25.1.4"
 firebaseAuth = "23.2.1"
 postgrestKt = "2.1.1"
 postgrestKtVersion = "2.1"
+roomRuntime = "2.7.1"
 storageKt = "2.1.1"
+workRuntimeKtx = "2.10.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
+artifactid = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-database = { module = "com.google.firebase:firebase-database" }
 gotrue-kt = { module = "io.github.jan-tennert.supabase:gotrue-kt", version.ref = "gotrueKt" }

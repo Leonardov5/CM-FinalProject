@@ -15,10 +15,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.finalproject.data.service.AuthService
 import com.example.finalproject.ui.theme.FinalProjectTheme
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.example.finalproject.data.sync.SyncWorker
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        fun scheduleSyncOnNetworkAvailable() {
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED) // Executar apenas com conexão
+                .build()
+
+            val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
+                .setConstraints(constraints)
+                .build()
+
+            WorkManager.getInstance(this).enqueue(syncRequest)
+        }
         enableEdgeToEdge()
         setContent {
             FinalProjectTheme(dynamicColor = false) {
@@ -67,6 +83,8 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+            // Configurar sincronização quando a conexão for restabelecida
+            scheduleSyncOnNetworkAvailable()
         }
     }
 }
