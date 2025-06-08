@@ -14,7 +14,7 @@ data class User(
     val fotografia: String? = null,
     val username: String = "",
     var email: String = "",
-    val tipo: String = "normal",
+    val admin: Boolean = false,
     @SerialName("created_at")
     val createdAt: String = "",
     @SerialName("updated_at")

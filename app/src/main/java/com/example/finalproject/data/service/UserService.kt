@@ -16,7 +16,7 @@ object UserService {
     private val supabase = SupabaseProvider.client
     private const val USERS_TABLE = "utilizador"  // Nome correto da tabela
 
-    suspend fun saveUserData(username: String, nome: String = "", tipo: String = "normal"): Boolean {
+    suspend fun saveUserData(username: String, nome: String = "", admin: Boolean = false): Boolean {
         return try {
             val userId = AuthService.getCurrentUserId() ?: return false
             val now = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
@@ -25,7 +25,7 @@ object UserService {
                 id = userId,
                 username = username,
                 nome = nome,
-                tipo = tipo,
+                admin = admin,
                 createdAt = now,
                 updatedAt = now
             )
@@ -36,7 +36,7 @@ object UserService {
                     put("utilizador_uuid", userId)
                     put("username", username)
                     put("nome", nome)
-                    put("tipo", tipo)  // Garantir que o tipo seja sempre enviado
+                    put("admin", admin)  // Usando o novo campo admin em vez de tipo
                     put("created_at", now)
                     put("updated_at", now)
                 }
