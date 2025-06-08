@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.finalproject.pages.Tasks.TaskManagementScreen
 
 // Rotas para nossa navegação
 sealed class Screen(val route: String) {
@@ -61,7 +62,7 @@ fun AppNavigation(
         // Aqui você pode adicionar mais composables para outras telas do seu aplicativo
         composable(route = Screen.TaskManagement.route) {
             // Usando a tela de gerenciamento de tarefas
-            com.example.finalproject.pages.TaskManagementScreen()
+            TaskManagementScreen()
         }
     }
 }

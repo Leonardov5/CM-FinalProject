@@ -1,4 +1,4 @@
-package com.example.finalproject.pages
+package com.example.finalproject.pages.Tasks
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
