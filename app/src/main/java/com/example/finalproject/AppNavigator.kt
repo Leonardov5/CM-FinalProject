@@ -11,9 +11,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.finalproject.components.BottomNavigation
 import com.example.finalproject.pages.ProfileScreen
+import com.example.finalproject.pages.ProjectDetailScreen
 import com.example.finalproject.pages.ProjectsScreen
-import com.example.finalproject.pages.TaskManagementScreen
-import com.example.finalproject.pages.TaskDetailScreen
+import com.example.finalproject.pages.Tasks.TaskDetailScreen
+import com.example.finalproject.pages.Tasks.TaskManagementScreen
 import com.example.finalproject.pages.UpdatesScreen
 import com.example.finalproject.data.model.Task
 
@@ -40,6 +41,7 @@ fun AppNavigator(
     var currentRoute by remember { mutableStateOf("tasks") }
     var showProfileScreen by remember { mutableStateOf(false) }
     var selectedTask by remember { mutableStateOf<Task?>(null) }
+    var selectedProjectId by remember { mutableStateOf<String?>(null) }
 
     when {
         showProfileScreen -> {
@@ -71,6 +73,17 @@ fun AppNavigator(
                 }
             )
         }
+        selectedProjectId != null -> {
+            // Mostrar a tela de detalhes do projeto
+            ProjectDetailScreen(
+                projetoId = selectedProjectId!!,
+                onBackClick = { selectedProjectId = null },
+                onAddTaskClick = {
+                    // Aqui você pode implementar a lógica para adicionar tarefas ao projeto
+                    // Por exemplo, navegar para uma tela de criação de tarefas
+                }
+            )
+        }
         else -> {
             Scaffold(
                 bottomBar = {
@@ -94,7 +107,10 @@ fun AppNavigator(
                     )
                     "projects" -> ProjectsScreen(
                         modifier = Modifier.padding(paddingValues),
-                        onProfileClick = { showProfileScreen = true }
+                        onProfileClick = { showProfileScreen = true },
+                        onProjectClick = { projectId ->
+                            selectedProjectId = projectId
+                        }
                     )
                     "updates" -> UpdatesScreen(
                         modifier = Modifier.padding(paddingValues),
@@ -105,3 +121,4 @@ fun AppNavigator(
         }
     }
 }
+

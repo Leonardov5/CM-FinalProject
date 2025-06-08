@@ -1,4 +1,4 @@
-package com.example.finalproject.pages
+package com.example.finalproject.pages.Tasks
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -318,7 +318,7 @@ private fun StatusChip(status: TaskStatus) {
 @Composable
 private fun WorkerAvatar(
     initials: String,
-    backgroundColor: androidx.compose.ui.graphics.Color
+    backgroundColor: Color
 ) {
     Box(
         modifier = Modifier

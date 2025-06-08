@@ -209,7 +209,7 @@ fun RegisterScreen(
                                             val userDataSaved = UserService.saveUserData(
                                                 username = username,
                                                 nome = fullName,
-                                                tipo = "normal"
+                                                admin = false
                                             )
 
                                             if (userDataSaved) {
