@@ -24,7 +24,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.finalproject.data.model.Task
@@ -36,7 +35,9 @@ import com.example.finalproject.ui.theme.*
 fun TaskDetailScreen(
     task: Task,
     onBackPressed: () -> Unit,
-    onStatusChange: (TaskStatus) -> Unit = {}
+    onStatusChange: (TaskStatus) -> Unit = {},
+    onDeleteTask: () -> Unit = {},
+    onAddWorker: () -> Unit = {}
 ) {
     var showFabActions by remember { mutableStateOf(false) }
 
@@ -99,7 +100,7 @@ fun TaskDetailScreen(
                             label = "Adicionar Trabalhador",
                             onClick = {
                                 showFabActions = false
-                                // Implementar lógica para adicionar trabalhador
+                                onAddWorker()
                             }
                         )
                         ActionButton(
@@ -107,7 +108,7 @@ fun TaskDetailScreen(
                             label = "Excluir Task",
                             onClick = {
                                 showFabActions = false
-                                // Implementar lógica para excluir task
+                                onDeleteTask()
                             }
                         )
                     }
@@ -126,14 +127,6 @@ fun TaskDetailScreen(
                 }
             }
         },
-        // Incluindo o BottomNavigation diretamente na página
-        bottomBar = {
-            com.example.finalproject.components.BottomNavigation(
-                currentRoute = "tasks",
-                onNavigate = { /* Não fazemos nada aqui, pois estamos na página de detalhes */ }
-            )
-        },
-        // Definindo a posição do FAB para ficar acima da barra de navegação
         floatingActionButtonPosition = FabPosition.End,
         containerColor = backgroundLight
     ) { paddingValues ->
@@ -239,7 +232,7 @@ fun TaskDetailScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Seção de trabalhadores (simulado)
+            // Seção de trabalhadores
             TaskInfoSection(
                 title = "Trabalhadores",
                 content = {
@@ -254,7 +247,8 @@ fun TaskDetailScreen(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(CircleShape)
-                                .background(surfaceVariantLight),
+                                .background(surfaceVariantLight)
+                                .clickable { onAddWorker() },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -267,14 +261,15 @@ fun TaskDetailScreen(
                 }
             )
 
-            // Adicionando espaço suficiente para o FAB
-            Spacer(modifier = Modifier.height(80.dp))
+            // Espaço para o FAB
+            Spacer(modifier = Modifier.height(100.dp))
         }
     }
 }
 
+// Componentes específicos do TaskDetailScreen
 @Composable
-fun TaskInfoSection(
+private fun TaskInfoSection(
     title: String,
     content: @Composable () -> Unit
 ) {
@@ -293,7 +288,7 @@ fun TaskInfoSection(
 }
 
 @Composable
-fun StatusChip(status: TaskStatus) {
+private fun StatusChip(status: TaskStatus) {
     val (backgroundColor, textColor) = when(status) {
         TaskStatus.TO_DO -> Pair(surfaceVariantLight, onSurfaceVariantLight)
         TaskStatus.ON_GOING -> Pair(secondaryLight, onSecondaryLight)
@@ -321,7 +316,10 @@ fun StatusChip(status: TaskStatus) {
 }
 
 @Composable
-fun WorkerAvatar(initials: String, backgroundColor: androidx.compose.ui.graphics.Color) {
+private fun WorkerAvatar(
+    initials: String,
+    backgroundColor: androidx.compose.ui.graphics.Color
+) {
     Box(
         modifier = Modifier
             .size(40.dp)
@@ -338,7 +336,7 @@ fun WorkerAvatar(initials: String, backgroundColor: androidx.compose.ui.graphics
 }
 
 @Composable
-fun ActionButton(
+private fun ActionButton(
     icon: ImageVector,
     label: String,
     onClick: () -> Unit
