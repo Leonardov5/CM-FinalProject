@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -18,7 +17,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,14 +33,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.finalproject.data.PreferencesManager
-import com.example.finalproject.data.RepositoryProvider
 import com.example.finalproject.data.service.AuthService
 import com.example.finalproject.data.service.UserService
-import com.example.finalproject.ui.theme.backgroundLight
-import com.example.finalproject.ui.theme.onBackgroundLight
-import com.example.finalproject.ui.theme.onPrimaryLight
-import com.example.finalproject.ui.theme.outlineLight
-import com.example.finalproject.ui.theme.primaryLight
 import com.example.finalproject.utils.updateAppLanguage
 import kotlinx.coroutines.launch
 
@@ -80,7 +72,7 @@ fun RegisterScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = backgroundLight
+        color = MaterialTheme.colorScheme.background,
     ) {
         Column(
             modifier = Modifier
@@ -92,7 +84,6 @@ fun RegisterScreen(
             Text(
                 text = stringResource(id = R.string.create_account),
                 style = MaterialTheme.typography.headlineMedium,
-                color = primaryLight,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
@@ -102,12 +93,7 @@ fun RegisterScreen(
                 label = { Text(stringResource(id = R.string.full_name_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = primaryLight,
-                    unfocusedIndicatorColor = outlineLight,
-                    cursorColor = primaryLight,
-                    focusedTextColor = onBackgroundLight
-                ),
+
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 )
@@ -121,12 +107,7 @@ fun RegisterScreen(
                 label = { Text(stringResource(id = R.string.username_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = primaryLight,
-                    unfocusedIndicatorColor = outlineLight,
-                    cursorColor = primaryLight,
-                    focusedTextColor = onBackgroundLight
-                ),
+
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 )
@@ -140,12 +121,7 @@ fun RegisterScreen(
                 label = { Text(stringResource(id = R.string.email_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = primaryLight,
-                    unfocusedIndicatorColor = outlineLight,
-                    cursorColor = primaryLight,
-                    focusedTextColor = onBackgroundLight
-                ),
+
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
@@ -161,12 +137,7 @@ fun RegisterScreen(
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = primaryLight,
-                    unfocusedIndicatorColor = outlineLight,
-                    cursorColor = primaryLight,
-                    focusedTextColor = onBackgroundLight
-                ),
+
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Next
@@ -182,12 +153,7 @@ fun RegisterScreen(
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = primaryLight,
-                    unfocusedIndicatorColor = outlineLight,
-                    cursorColor = primaryLight,
-                    focusedTextColor = onBackgroundLight
-                ),
+
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Done
@@ -198,7 +164,6 @@ fun RegisterScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = errorMessage,
-                    color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -261,14 +226,10 @@ fun RegisterScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = primaryLight,
-                    contentColor = onPrimaryLight
-                )
+
             ) {
                 if (isRegistering) {
                     CircularProgressIndicator(
-                        color = onPrimaryLight,
                         modifier = Modifier.height(24.dp)
                     )
                 } else {
@@ -281,9 +242,7 @@ fun RegisterScreen(
             OutlinedButton(
                 onClick = onNavigateToLogin,
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = primaryLight
-                )
+
             ) {
                 Text(stringResource(id = R.string.already_have_account))
             }
