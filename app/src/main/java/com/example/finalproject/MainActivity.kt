@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            FinalProjectTheme {
+            FinalProjectTheme(dynamicColor = false) {
                 // Usar o LaunchedEffect para verificar a autenticação ao iniciar
                 var isLoggedIn by remember { mutableStateOf(AuthService.isAuthenticated()) }
                 var showRegister by remember { mutableStateOf(false) }

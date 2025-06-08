@@ -10,14 +10,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,13 +33,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.data.RepositoryProvider
-import com.example.finalproject.ui.theme.backgroundLight
-import com.example.finalproject.ui.theme.onBackgroundLight
-import com.example.finalproject.ui.theme.onPrimaryContainerLight
-import com.example.finalproject.ui.theme.onPrimaryLight
-import com.example.finalproject.ui.theme.outlineLight
-import com.example.finalproject.ui.theme.primaryContainerLight
-import com.example.finalproject.ui.theme.primaryLight
 import com.example.finalproject.utils.updateAppLanguage
 import kotlinx.coroutines.launch
 
@@ -77,7 +68,6 @@ fun LoginScreen(
     if (isLanguageLoaded) {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = backgroundLight
         ) {
             Column(
                 modifier = Modifier
@@ -89,7 +79,6 @@ fun LoginScreen(
                 Text(
                     text = stringResource(id = R.string.welcome_message),
                     style = MaterialTheme.typography.headlineMedium,
-                    color = primaryLight,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
@@ -99,12 +88,7 @@ fun LoginScreen(
                     label = { Text(stringResource(id = R.string.email_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = primaryLight,
-                        unfocusedIndicatorColor = outlineLight,
-                        cursorColor = primaryLight,
-                        focusedTextColor = onBackgroundLight
-                    ),
+
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
@@ -120,12 +104,7 @@ fun LoginScreen(
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
-                    colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = primaryLight,
-                        unfocusedIndicatorColor = outlineLight,
-                        cursorColor = primaryLight,
-                        focusedTextColor = onBackgroundLight
-                    ),
+
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Done
@@ -136,7 +115,6 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = errorMessage,
-                        color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -168,10 +146,7 @@ fun LoginScreen(
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = primaryLight,
-                        contentColor = onPrimaryLight
-                    )
+
                 ) {
                     Text(stringResource(id = R.string.login_button))
                 }
@@ -181,9 +156,7 @@ fun LoginScreen(
                 OutlinedButton(
                     onClick = onNavigateToRegister,
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = primaryLight
-                    )
+
                 ) {
                     Text(stringResource(id = R.string.create_account_button))
                 }
