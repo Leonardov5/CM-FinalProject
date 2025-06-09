@@ -80,6 +80,9 @@ object AuthService {
                 // Limpa qualquer sessão local, independentemente do resultado do signOut()
                 supabase.auth.clearSession()
             }
+
+            // Log para debug
+            println("DEBUG - Logout realizado. Usuário atual: ${getCurrentUserEmail()}")
             // Sempre retorna true, pois mesmo que o logout no servidor falhe,
             // ainda removemos a sessão localmente
             true

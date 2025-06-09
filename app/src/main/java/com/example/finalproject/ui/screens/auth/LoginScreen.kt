@@ -1,4 +1,4 @@
-package com.example.finalproject
+package com.example.finalproject.ui.screens.auth
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -8,9 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -18,11 +22,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,44 +31,55 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject.data.PreferencesManager
-import com.example.finalproject.data.RepositoryProvider
 import com.example.finalproject.utils.updateAppLanguage
-import kotlinx.coroutines.launch
+import com.example.finalproject.ui.viewmodels.auth.LoginViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.example.finalproject.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    viewModel: LoginViewModel = viewModel()
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf("") }
-    var isLoggingIn by remember { mutableStateOf(false) }
-
     val context = LocalContext.current
     var isLanguageLoaded by remember { mutableStateOf(false) }
+
+    // Observar o estado de login bem-sucedido
+    LaunchedEffect(viewModel.isLoginSuccessful) {
+        if (viewModel.isLoginSuccessful) {
+            viewModel.clearLoginSuccessState()
+            onLoginSuccess()
+        }
+    }
+
+    // Observar mensagens de erro e limpar após Toast
+    LaunchedEffect(viewModel.errorMessage) {
+        viewModel.errorMessage?.let { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            viewModel.clearErrorMessage()
+        }
+    }
 
     LaunchedEffect(Unit) {
         val savedLanguage = PreferencesManager.getLanguage(context)
         updateAppLanguage(context, savedLanguage)
-        isLanguageLoaded = true // Marca que o idioma foi carregado
+        isLanguageLoaded = true
     }
-    val coroutineScope = rememberCoroutineScope()
-
-    // Pré-carregar strings localizadas
-    val invalidCredentialsMessage = stringResource(id = R.string.invalid_credentials)
-    val loginErrorMessage = stringResource(id = R.string.login_error)
-    val fillAllFieldsMessage = stringResource(id = R.string.fill_all_fields)
-
-
 
     if (isLanguageLoaded) {
         Surface(
             modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
         ) {
             Column(
                 modifier = Modifier
@@ -83,72 +95,71 @@ fun LoginScreen(
                 )
 
                 OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
+                    value = viewModel.email,
+                    onValueChange = { viewModel.onEmailChange(it) },
                     label = { Text(stringResource(id = R.string.email_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
-                    )
+                    ),
+                    enabled = !viewModel.isLoading
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
+                    value = viewModel.password,
+                    onValueChange = { viewModel.onPasswordChange(it) },
                     label = { Text(stringResource(id = R.string.password_label)) },
                     singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (viewModel.showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
-
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Done
-                    )
+                    ),
+                    enabled = !viewModel.isLoading,
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { viewModel.togglePasswordVisibility() },
+                            enabled = !viewModel.isLoading
+                        ) {
+                            Icon(
+                                imageVector = if (viewModel.showPassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                contentDescription = if (viewModel.showPassword)
+                                    stringResource(R.string.hide_password) else stringResource(R.string.show_password)
+                            )
+                        }
+                    }
                 )
 
-                if (errorMessage.isNotEmpty()) {
+                // Mostrar erro na UI (caso queira manter, mas agora será limpo após Toast)
+                if (viewModel.errorMessage != null) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = errorMessage,
-                        style = MaterialTheme.typography.bodyMedium
+                        text = viewModel.errorMessage!!,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
                     )
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
-                    onClick = {
-                        if (email.isNotEmpty() && password.isNotEmpty()) {
-                            isLoggingIn = true
-                            coroutineScope.launch {
-                                try {
-                                    val loginSuccess = RepositoryProvider.userRepository.loginUser(email, password)
-                                    isLoggingIn = false
-                                    if (loginSuccess) {
-                                        onLoginSuccess()
-                                    } else {
-                                        errorMessage = invalidCredentialsMessage
-                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                                    }
-                                } catch (e: Exception) {
-                                    isLoggingIn = false
-                                    errorMessage = loginErrorMessage.format(e.message)
-                                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        } else {
-                            errorMessage = fillAllFieldsMessage
-                        }
-                    },
+                    onClick = { viewModel.login() },
                     modifier = Modifier.fillMaxWidth(),
-
+                    enabled = !viewModel.isLoading
                 ) {
-                    Text(stringResource(id = R.string.login_button))
+                    if (viewModel.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text(stringResource(id = R.string.login_button))
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -156,7 +167,7 @@ fun LoginScreen(
                 OutlinedButton(
                     onClick = onNavigateToRegister,
                     modifier = Modifier.fillMaxWidth(),
-
+                    enabled = !viewModel.isLoading
                 ) {
                     Text(stringResource(id = R.string.create_account_button))
                 }

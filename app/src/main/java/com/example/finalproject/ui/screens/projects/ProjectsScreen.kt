@@ -1,11 +1,9 @@
-package com.example.finalproject.pages
+package com.example.finalproject.ui.screens.projects
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -24,81 +22,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.finalproject.components.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject.data.model.Projeto
-import com.example.finalproject.data.model.User
 import com.example.finalproject.data.repository.ProjetoRepository
-import com.example.finalproject.data.service.UserService
 import com.example.finalproject.ui.theme.*
-import kotlinx.coroutines.launch
+import com.example.finalproject.ui.viewmodels.projects.ProjectsViewModel
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectsScreen(
     modifier: Modifier = Modifier,
     onProfileClick: () -> Unit = {},
-    projetoRepository: ProjetoRepository = ProjetoRepository(),
-    currentUser: User? = null, // Parâmetro para receber o usuário atual
-    onProjectClick: (String) -> Unit = {} // Callback para navegação para detalhes do projeto
+    onProjectClick: (String) -> Unit = {}, // Callback para navegação para detalhes do projeto
 ) {
-    var showAddDialog by remember { mutableStateOf(false) }
-    var projectName by remember { mutableStateOf("") }
-    var projectDescription by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
-    var isAdmin by remember { mutableStateOf(false) }
-    var user by remember { mutableStateOf(currentUser) }
+    val viewModel: ProjectsViewModel = viewModel()
 
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-
-    var projects by remember { mutableStateOf<List<Projeto>>(emptyList()) }
-
-    // Carregar o usuário atual se não for fornecido
-    LaunchedEffect(key1 = true) {
-        if (user == null) {
-            // Buscar o usuário atual do UserService
-            user = UserService.getCurrentUserData()
-            println("DEBUG - Usuário carregado: $user")
-        }
-
-        // Verificar se o usuário é admin
-        isAdmin = user?.admin == true
-        println("DEBUG - Usuário é admin: $isAdmin")
-    }
-
-    // Carregar projetos quando a tela for montada
-    LaunchedEffect(key1 = true) {
-        println("DEBUG - Carregando projetos com repositório: $projetoRepository")
-        isLoading = true
-        projects = projetoRepository.listarProjetos()
-        println("DEBUG - Projetos carregados: ${projects.size}")
-        isLoading = false
-    }
 
     Scaffold(
-        modifier = modifier.fillMaxSize(),
-        floatingActionButton = {
-            // Só mostrar o FAB se o usuário for admin
-            if (isAdmin) {
-                FloatingActionButton(
-                    onClick = { showAddDialog = true },
-                    containerColor = primaryLight,
-                    contentColor = onPrimaryLight
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Adicionar Projeto"
-                    )
-                }
-            }
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(backgroundLight)
-                .padding(paddingValues)
-        ) {
+        topBar = {
             TopAppBar(
                 title = {
                     Box(
@@ -143,64 +87,84 @@ fun ProjectsScreen(
                     containerColor = backgroundLight
                 )
             )
-
-            // Projects List
-            if (isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+        },
+        floatingActionButton = {
+            // Só mostrar o FAB se o usuário for admin
+            if (viewModel.isAdmin) {
+                FloatingActionButton(
+                    onClick = { viewModel.showAddProjectDialog() },
+                    containerColor = primaryLight,
+                    contentColor = onPrimaryLight
                 ) {
-                    CircularProgressIndicator(color = primaryLight)
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Adicionar Projeto"
+                    )
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    if (projects.isNotEmpty()) {
-                        items(projects) { projeto ->
-                            ProjectCard(
-                                projectName = projeto.nome,
-                                lastUpdated = projeto.updatedAt.toString(),
-                                projeto = projeto,
-                                onClick = { selectedProjeto ->
-                                    // Navegar para a tela de detalhes do projeto
-                                    selectedProjeto.id?.let { projetoId ->
-                                        onProjectClick(projetoId)
-                                    }
+            }
+        },
+        containerColor = backgroundLight,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+    ) { paddingValues ->
+        // Projects List
+        if (viewModel.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = primaryLight)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                if (viewModel.projects.isNotEmpty()) {
+                    items(viewModel.projects) { projeto ->
+                        ProjectCard(
+                            projectName = projeto.nome,
+                            lastUpdated = projeto.updatedAt.toString(),
+                            projeto = projeto,
+                            onClick = { selectedProjeto ->
+                                // Navegar para a tela de detalhes do projeto
+                                selectedProjeto.id?.let { projetoId ->
+                                    onProjectClick(projetoId)
                                 }
+                            }
+                        )
+                    }
+                } else {
+                    // Exibir mensagem quando não houver projetos
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Nenhum projeto encontrado",
+                                fontSize = 16.sp,
+                                color = onSurfaceVariantLight
                             )
                         }
-                    } else {
-                        // Exibir mensagem quando não houver projetos
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 32.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "Nenhum projeto encontrado",
-                                    fontSize = 16.sp,
-                                    color = onSurfaceVariantLight
-                                )
-                            }
-                        }
                     }
+                }
 
-                    item {
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
 
         // Diálogo para adicionar novo projeto
-        if (showAddDialog) {
-            Dialog(onDismissRequest = { showAddDialog = false }) {
+        if (viewModel.showAddDialog) {
+            Dialog(onDismissRequest = { viewModel.hideAddProjectDialog() }) {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -221,8 +185,8 @@ fun ProjectsScreen(
                         )
 
                         OutlinedTextField(
-                            value = projectName,
-                            onValueChange = { projectName = it },
+                            value = viewModel.projectName,
+                            onValueChange = { viewModel.onProjectNameChange(it) },
                             label = { Text("Nome do projeto") },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -238,8 +202,8 @@ fun ProjectsScreen(
                         )
 
                         OutlinedTextField(
-                            value = projectDescription,
-                            onValueChange = { projectDescription = it },
+                            value = viewModel.projectDescription,
+                            onValueChange = { viewModel.onProjectDescriptionChange(it) },
                             label = { Text("Descrição") },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -260,7 +224,7 @@ fun ProjectsScreen(
                             horizontalArrangement = Arrangement.End
                         ) {
                             TextButton(
-                                onClick = { showAddDialog = false },
+                                onClick = { viewModel.hideAddProjectDialog() },
                                 colors = ButtonDefaults.textButtonColors(
                                     contentColor = primaryLight
                                 )
@@ -272,37 +236,14 @@ fun ProjectsScreen(
 
                             Button(
                                 onClick = {
-                                    if (projectName.isNotBlank()) {
-                                        scope.launch {
-                                            println("DEBUG - Repositório de projetos: $projetoRepository")
-                                            isLoading = true
-
-                                            // Fechar o diálogo imediatamente
-                                            showAddDialog = false
-
-                                            val novoProjeto = projetoRepository.criarProjeto(
-                                                nome = projectName,
-                                                descricao = projectDescription.takeIf { it.isNotBlank() }
-                                            )
-                                            println("DEBUG - Projeto criado: $novoProjeto")
-
-                                            if (novoProjeto != null) {
-                                                // Atualiza a lista de projetos
-                                                projects = projetoRepository.listarProjetos()
-                                                // Exibe um Toast em vez do Snackbar
-                                                Toast.makeText(context, "Projeto criado com sucesso!", Toast.LENGTH_SHORT).show()
-                                            } else {
-                                                // Exibe um Toast de erro
-                                                Toast.makeText(context, "Erro ao criar projeto", Toast.LENGTH_SHORT).show()
-                                            }
-                                            isLoading = false
-                                            projectName = ""
-                                            projectDescription = ""
+                                    viewModel.createProject(
+                                        onSuccess = {
+                                            Toast.makeText(context, "Projeto criado com sucesso!", Toast.LENGTH_SHORT).show()
+                                        },
+                                        onError = { errorMessage ->
+                                            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                                         }
-                                    } else {
-                                        // Exibe um Toast para campo obrigatório
-                                        Toast.makeText(context, "Nome do projeto é obrigatório", Toast.LENGTH_SHORT).show()
-                                    }
+                                    )
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = primaryLight,

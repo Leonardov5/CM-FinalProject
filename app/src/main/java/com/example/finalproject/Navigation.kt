@@ -1,104 +1,214 @@
 package com.example.finalproject
 
+import com.example.finalproject.ui.screens.tasks.TaskDetailScreen
+import android.net.http.SslCertificate.saveState
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.finalproject.pages.Tasks.TaskManagementScreen
+import androidx.navigation.navArgument
+import com.example.finalproject.components.BottomNavigation
+import com.example.finalproject.ui.screens.auth.LoginScreen
+import com.example.finalproject.ui.screens.auth.RegisterScreen
+import com.example.finalproject.ui.screens.tasks.TaskManagementScreen
+import com.example.finalproject.ui.screens.ProfileScreen
+import com.example.finalproject.ui.screens.projects.ProjectDetailScreen
+import com.example.finalproject.ui.screens.projects.ProjectsScreen
+import com.example.finalproject.ui.screens.UpdatesScreen
+import com.example.finalproject.data.service.AuthService
+import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
 
-// Rotas para nossa navegação
 sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Register : Screen("register")
-    object TaskManagement : Screen("task_management") // Tela de gerenciamento de tarefas
+    object TaskManagement : Screen("tasks")
+    object Projects : Screen("projects")
+    object Updates : Screen("updates")
+    object Profile : Screen("profile")
+    object TaskDetail : Screen("task/{taskId}") {
+        fun createRoute(taskId: String) = "task/$taskId"
+    }
+    object ProjectDetail : Screen("project/{projectId}") {
+        fun createRoute(projectId: String) = "project/$projectId"
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController(),
     startDestination: String = Screen.Login.route
 ) {
-    NavHost(
-        navController = navController,
-        startDestination = startDestination
-    ) {
-        composable(route = Screen.Login.route) {
-            LoginScreen(
-                onLoginSuccess = {
-                    // Navegar para a tela principal após o login bem-sucedido
-                    navController.navigate(Screen.TaskManagement.route) {
-                        // Limpar a pilha de navegação para que o usuário não possa voltar para a tela de login
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                },
-                onNavigateToRegister = {
-                    // Navegar para a tela de registro
-                    navController.navigate(Screen.Register.route)
-                }
-            )
-        }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
 
-        composable(route = Screen.Register.route) {
-            RegisterScreen(
-                onRegisterSuccess = {
-                    // Após o registro bem-sucedido, navegar de volta para a tela de login
-                    navController.navigate(Screen.Login.route) {
-                        // Limpar a pilha de navegação ao voltar para o login
-                        popUpTo(Screen.Register.route) { inclusive = true }
-                    }
-                },
-                onNavigateToLogin = {
-                    // Voltar para a tela de login
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        // Aqui você pode adicionar mais composables para outras telas do seu aplicativo
-        composable(route = Screen.TaskManagement.route) {
-            // Usando a tela de gerenciamento de tarefas
-            TaskManagementScreen()
-        }
+    val showBottomBar = when (currentDestination?.route) {
+        Screen.Login.route, Screen.Register.route, Screen.Profile.route,
+        Screen.TaskDetail.route, Screen.ProjectDetail.route -> false
+        else -> true
     }
-}
 
-@Composable
-fun MainPlaceholder(navController: NavHostController) {
-    // Este é apenas um placeholder para a tela principal após o login
-    // Substitua-o pela sua implementação real
-    androidx.compose.material3.Surface(
-        modifier = androidx.compose.ui.Modifier.fillMaxSize(),
-        color = androidx.compose.material3.MaterialTheme.colorScheme.background
-    ) {
-        androidx.compose.foundation.layout.Column(
-            modifier = androidx.compose.ui.Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-            verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
-        ) {
-            androidx.compose.material3.Text(
-                text = "Tela Principal",
-                style = androidx.compose.material3.MaterialTheme.typography.headlineMedium
-            )
-
-            androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.ui.Modifier.height(16.dp))
-
-            androidx.compose.material3.Button(
-                onClick = {
-                    // Voltar para a tela de login
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            if (showBottomBar) {
+                BottomNavigation(
+                    currentRoute = currentDestination?.route ?: startDestination,
+                    onNavigate = { route ->
+                        navController.navigate(route) {
+                            // Configuração para evitar múltiplas instâncias da mesma tela
+                            launchSingleTop = true
+                            // Restaura o estado quando re-selecionado
+                            restoreState = true
+                            // Pop até a tela inicial para evitar pilha grande
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                        }
                     }
-                }
-            ) {
-                androidx.compose.material3.Text("Sair")
+                )
+            }
+        }
+    ) { paddingValues ->
+        NavHost(
+            navController = navController,
+            startDestination = startDestination,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            composable(route = Screen.Login.route) {
+                LoginScreen(
+                    onLoginSuccess = {
+                        navController.navigate(Screen.TaskManagement.route) {
+                            popUpTo(Screen.Login.route) { inclusive = true }
+                        }
+                    },
+                    onNavigateToRegister = {
+                        navController.navigate(Screen.Register.route)
+                    }
+                )
+            }
+
+            composable(route = Screen.Register.route) {
+                RegisterScreen(
+                    onRegisterSuccess = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.Register.route) { inclusive = true }
+                        }
+                    },
+                    onNavigateToLogin = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(route = Screen.TaskManagement.route) {
+                TaskManagementScreen(
+                    modifier = Modifier,
+                    onProfileClick = {
+                        navController.navigate(Screen.Profile.route)
+                    },
+                    onTaskClick = { task ->
+                        navController.navigate(Screen.TaskDetail.createRoute(task.id.toString()))
+                    }
+                )
+            }
+
+            composable(route = Screen.Projects.route) {
+                ProjectsScreen(
+                    modifier = Modifier,
+                    onProfileClick = {
+                        navController.navigate(Screen.Profile.route)
+                    },
+                    onProjectClick = { projectId ->
+                        navController.navigate(Screen.ProjectDetail.createRoute(projectId))
+                    }
+                )
+            }
+
+            composable(route = Screen.Updates.route) {
+                UpdatesScreen(
+                    modifier = Modifier,
+                    onProfileClick = {
+                        navController.navigate(Screen.Profile.route)
+                    }
+                )
+            }
+
+            composable(route = Screen.Profile.route) {
+                val scope = rememberCoroutineScope()
+                ProfileScreen(
+                    onBackPressed = {
+                        navController.popBackStack()
+                    },
+                    onLogout = {
+                        scope.launch {
+                            AuthService.logout()
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    }
+                )
+            }
+
+            composable(
+                route = Screen.TaskDetail.route,
+                arguments = listOf(navArgument("taskId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val taskId = backStackEntry.arguments?.getString("taskId") ?: ""
+                val scope = rememberCoroutineScope()
+
+                TaskDetailScreen(
+                    taskId = taskId,
+                    onBackPressed = {
+                        navController.popBackStack()
+                    },
+                    onStatusChange = { newStatus ->
+                        // Por enquanto não faz nada com o status
+                    },
+                    onDeleteTask = {
+                        navController.popBackStack()
+                    },
+                    onAddWorker = {
+                        // Por enquanto não faz nada
+                    }
+                )
+            }
+
+            composable(
+                route = Screen.ProjectDetail.route,
+                arguments = listOf(navArgument("projectId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val projectId = backStackEntry.arguments?.getString("projectId") ?: ""
+                ProjectDetailScreen(
+                    projetoId = projectId,
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onAddTaskClick = {
+                        // Implemente a adição de task ao projeto
+                    }
+                )
             }
         }
     }
 }
+
+

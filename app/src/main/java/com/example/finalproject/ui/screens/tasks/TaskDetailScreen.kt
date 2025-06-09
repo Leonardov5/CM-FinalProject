@@ -1,4 +1,4 @@
-package com.example.finalproject.pages.Tasks
+package com.example.finalproject.ui.screens.tasks
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -28,18 +28,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.finalproject.data.model.Task
 import com.example.finalproject.data.model.TaskStatus
+import com.example.finalproject.data.model.DemoTasks
 import com.example.finalproject.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskDetailScreen(
-    task: Task,
+    taskId: String,
     onBackPressed: () -> Unit,
     onStatusChange: (TaskStatus) -> Unit = {},
     onDeleteTask: () -> Unit = {},
     onAddWorker: () -> Unit = {}
 ) {
     var showFabActions by remember { mutableStateOf(false) }
+    val task = remember(taskId) { DemoTasks.getTaskById(taskId) }
 
     Scaffold(
         topBar = {
@@ -63,7 +65,42 @@ fun TaskDetailScreen(
                     titleContentColor = onBackgroundLight
                 )
             )
-        },
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            if (task == null) {
+                Text(
+                    text = "Tarefa não encontrada",
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            } else {
+                TaskContent(
+                    task = task,
+                    showFabActions = showFabActions,
+                    onShowFabActionsChange = { showFabActions = it },
+                    onStatusChange = onStatusChange,
+                    onDeleteTask = onDeleteTask,
+                    onAddWorker = onAddWorker
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TaskContent(
+    task: Task,
+    showFabActions: Boolean,
+    onShowFabActionsChange: (Boolean) -> Unit,
+    onStatusChange: (TaskStatus) -> Unit,
+    onDeleteTask: () -> Unit,
+    onAddWorker: () -> Unit
+) {
+    Scaffold(
         floatingActionButton = {
             Column(
                 horizontalAlignment = Alignment.End
@@ -84,7 +121,7 @@ fun TaskDetailScreen(
                             label = "Marcar como Concluída",
                             onClick = {
                                 onStatusChange(TaskStatus.COMPLETED)
-                                showFabActions = false
+                                onShowFabActionsChange(false)
                             }
                         )
                         ActionButton(
@@ -92,14 +129,14 @@ fun TaskDetailScreen(
                             label = "Marcar como Em Andamento",
                             onClick = {
                                 onStatusChange(TaskStatus.ON_GOING)
-                                showFabActions = false
+                                onShowFabActionsChange(false)
                             }
                         )
                         ActionButton(
                             icon = Icons.Default.Add,
                             label = "Adicionar Trabalhador",
                             onClick = {
-                                showFabActions = false
+                                onShowFabActionsChange(false)
                                 onAddWorker()
                             }
                         )
@@ -107,7 +144,7 @@ fun TaskDetailScreen(
                             icon = Icons.Default.Delete,
                             label = "Excluir Task",
                             onClick = {
-                                showFabActions = false
+                                onShowFabActionsChange(false)
                                 onDeleteTask()
                             }
                         )
@@ -116,7 +153,7 @@ fun TaskDetailScreen(
 
                 // Main FAB
                 FloatingActionButton(
-                    onClick = { showFabActions = !showFabActions },
+                    onClick = { onShowFabActionsChange(!showFabActions) },
                     containerColor = primaryLight,
                     contentColor = onPrimaryLight
                 ) {
@@ -201,7 +238,7 @@ fun TaskDetailScreen(
             }
 
             // Seção de data de criação
-            task.created?.let {
+            task.createdAt?.let {
                 TaskInfoSection(
                     title = "Data de Criação",
                     content = {

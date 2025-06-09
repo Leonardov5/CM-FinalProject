@@ -65,4 +65,6 @@
     <string name="upload_image_error">Error uploading image</string>
     <string name="profile_image_update_success">Profile image updated successfully!</string>
     <string name="profile_image_update_error">Failed to update profile image</string>
+    <string name="hide_password">teste password</string>
+    <string name="show_password">teste showpassword</string>
 </resources>

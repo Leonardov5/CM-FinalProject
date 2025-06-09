@@ -1,4 +1,4 @@
-package com.example.finalproject.pages.Tasks
+package com.example.finalproject.ui.screens.tasks
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -17,31 +17,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject.components.TaskCard
 import com.example.finalproject.components.TabRow
 import com.example.finalproject.data.model.Task
-import com.example.finalproject.data.model.TaskStatus
 import com.example.finalproject.ui.theme.*
+import com.example.finalproject.ui.viewmodels.tasks.TaskManagementViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskManagementScreen(
     modifier: Modifier = Modifier,
     onProfileClick: () -> Unit = {},
-    onTaskClick: (Task) -> Unit = {}
+    onTaskClick: (Task) -> Unit = {},
+    viewModel: TaskManagementViewModel = viewModel()
 ) {
-    val tasks = remember {
-        listOf(
-            Task(1, "Task 1 - Completed", TaskStatus.COMPLETED, "20/04/2025", 3, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, quis aliquam nisl nunc eu nisl."),
-            Task(2, "Task 2 - On-Going", TaskStatus.ON_GOING, "15/05/2025", 2, "Implementar a funcionalidade de login com autenticação de dois fatores."),
-            Task(3, "Task 3 - Completed", TaskStatus.COMPLETED, "10/03/2025", 1, "Criar wireframes para a nova interface do usuário."),
-            Task(4, "Task 4 - Completed", TaskStatus.COMPLETED, "05/02/2025", 2, "Realizar testes de usabilidade com usuários."),
-            Task(5, "Task 5 - To-Do", TaskStatus.TO_DO, "30/06/2025", 3, "Desenvolver a API de integração com serviços de terceiros.")
-        )
-    }
-
-    var selectedTab by remember { mutableStateOf(TaskStatus.ON_GOING) }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -59,8 +49,8 @@ fun TaskManagementScreen(
                                 text = "Project X",
                                 modifier = Modifier.padding(vertical = 12.dp),
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
                                 textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Medium,
                                 color = onSurfaceVariantLight
                             )
                         }
@@ -69,58 +59,66 @@ fun TaskManagementScreen(
                 navigationIcon = {
                     IconButton(onClick = { }) {
                         Icon(
-                            Icons.Default.Menu,
-                            contentDescription = "Menu",
-                            tint = primaryLight
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Menu"
                         )
                     }
                 },
                 actions = {
                     IconButton(onClick = onProfileClick) {
                         Icon(
-                            Icons.Default.AccountCircle,
-                            contentDescription = "Profile",
-                            tint = primaryLight
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Perfil"
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = backgroundLight
+                    containerColor = backgroundLight,
+                    titleContentColor = onBackgroundLight,
+                    navigationIconContentColor = onBackgroundLight,
+                    actionIconContentColor = onBackgroundLight
                 )
             )
-        },
-        containerColor = backgroundLight
+        }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(backgroundLight)
-        ) {
-            // Tab Row
-            TabRow(selectedTab) { tab ->
-                selectedTab = tab
+        if (viewModel.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = primaryLight)
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Tasks List
-            LazyColumn(
+        } else {
+            // Tab Row
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(paddingValues)
             ) {
-                items(tasks.filter { it.status == selectedTab }) { task ->
-                    TaskCard(
-                        task = task,
-                        onClick = { onTaskClick(task) }
-                    )
+                TabRow(viewModel.selectedTab) { tab ->
+                    viewModel.selectTab(tab)
                 }
 
-                // Add some bottom padding
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Tasks List
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(viewModel.filteredTasks) { task ->
+                        TaskCard(
+                            task = task,
+                            onClick = { onTaskClick(task) }
+                        )
+                    }
+
+                    // Add some bottom padding
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
         }

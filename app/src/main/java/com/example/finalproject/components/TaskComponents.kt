@@ -102,7 +102,7 @@ fun TaskCard(task: Task, onClick: () -> Unit = {}) {
                 )
 
                 Text(
-                    text = "Criado: ${task.created ?: "Data não disponível"}",
+                    text = "Criado: ${task.createdAt ?: "Data não disponível"}",
                     fontSize = 12.sp,
                     color = onSecondaryContainerLight.copy(alpha = 0.7f)
                 )
