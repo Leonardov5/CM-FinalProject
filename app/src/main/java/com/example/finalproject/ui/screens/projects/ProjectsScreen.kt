@@ -1,6 +1,8 @@
 package com.example.finalproject.ui.screens.projects
 
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,7 +35,9 @@ import androidx.compose.ui.res.stringResource
 import com.example.finalproject.R
 import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.utils.updateAppLanguage
+import com.example.finalproject.ui.components.projects.AddTaskDialog
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectsScreen(
@@ -61,6 +65,10 @@ fun ProjectsScreen(
     }
 
     if(isLanguageLoaded){
+        // Sempre que a tela for recomposicionada, recarrega os projetos
+        LaunchedEffect(Unit) {
+            viewModel.loadProjects()
+        }
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -113,7 +121,16 @@ fun ProjectsScreen(
                 // Só mostrar o FAB se o usuário for admin
                 if (viewModel.isAdmin) {
                     FloatingActionButton(
-                        onClick = { viewModel.showAddProjectDialog() },
+                        onClick = {
+                            if (viewModel.projects.isNotEmpty()) {
+                                // Se tiver projetos, mostra o diálogo para escolher
+                                // entre adicionar projeto ou tarefa
+                                viewModel.showAddProjectDialog()
+                            } else {
+                                // Se não tiver projetos, só pode adicionar projetos
+                                viewModel.showAddProjectDialog()
+                            }
+                        },
                         containerColor = primaryLight,
                         contentColor = onPrimaryLight
                     ) {
@@ -345,6 +362,7 @@ fun ProjectCard(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun ProjectsScreenPreview() {

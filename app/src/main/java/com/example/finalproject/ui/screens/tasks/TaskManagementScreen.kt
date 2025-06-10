@@ -1,6 +1,5 @@
 package com.example.finalproject.ui.screens.tasks
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,8 +18,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.finalproject.components.TaskCard
-import com.example.finalproject.components.TabRow
+import com.example.finalproject.ui.components.TaskCard
+import com.example.finalproject.ui.components.TabRow
 import com.example.finalproject.data.model.Task
 import com.example.finalproject.ui.theme.*
 import com.example.finalproject.ui.viewmodels.tasks.TaskManagementViewModel

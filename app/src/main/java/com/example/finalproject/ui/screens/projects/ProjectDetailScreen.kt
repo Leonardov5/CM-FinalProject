@@ -25,11 +25,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.data.model.User
 import com.example.finalproject.data.repository.ProjetoRepository
+import com.example.finalproject.data.repository.TarefaRepository
 import com.example.finalproject.data.service.UserService
+import com.example.finalproject.ui.components.projects.AddTaskDialog
 import com.example.finalproject.ui.theme.*
+import com.example.finalproject.ui.viewmodels.projects.ProjectDetailViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -39,42 +43,19 @@ import java.util.*
 fun ProjectDetailScreen(
     projetoId: String,
     projetoRepository: ProjetoRepository = ProjetoRepository(),
+    tarefaRepository: TarefaRepository = TarefaRepository(),
     currentUser: User? = null,
     onBackClick: () -> Unit = {},
-    onAddTaskClick: () -> Unit = {}
+    onAddTaskClick: () -> Unit = {},
+    viewModel: ProjectDetailViewModel = viewModel()
 ) {
-    var projeto by remember { mutableStateOf<Projeto?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
-    var isAdmin by remember { mutableStateOf(false) }
-    var user by remember { mutableStateOf(currentUser) }
-    var showFabActions by remember { mutableStateOf(false) }
-    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
-
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    // Carregar o usuário atual se não for fornecido
+    // Carregar o usuário atual e o projeto quando a tela for iniciada
     LaunchedEffect(key1 = true) {
-        if (user == null) {
-            // Buscar o usuário atual do UserService
-            user = UserService.getCurrentUserData()
-        }
-
-        // Verificar se o usuário é admin
-        isAdmin = user?.admin == true
-    }
-
-    // Carregar os detalhes do projeto
-    LaunchedEffect(key1 = projetoId) {
-        isLoading = true
-        try {
-            val uuid = UUID.fromString(projetoId)
-            projeto = projetoRepository.obterProjeto(uuid)
-        } catch (e: Exception) {
-            Toast.makeText(context, "Erro ao carregar projeto", Toast.LENGTH_SHORT).show()
-            e.printStackTrace()
-        }
-        isLoading = false
+        viewModel.loadUser(currentUser)
+        viewModel.loadProject(projetoId)
     }
 
     Scaffold(
@@ -105,13 +86,13 @@ fun ProjectDetailScreen(
         },
         floatingActionButton = {
             // Mostrar FAB apenas para admin
-            if (isAdmin) {
+            if (viewModel.isAdmin) {
                 Column(
                     horizontalAlignment = Alignment.End
                 ) {
                     // FAB menu
                     AnimatedVisibility(
-                        visible = showFabActions,
+                        visible = viewModel.showFabActions,
                         enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }) + expandVertically(),
                         exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }) + shrinkVertically()
                     ) {
@@ -124,8 +105,8 @@ fun ProjectDetailScreen(
                                 icon = Icons.Default.Add,
                                 label = "Adicionar Tarefa",
                                 onClick = {
-                                    showFabActions = false
-                                    onAddTaskClick()
+                                    viewModel.toggleFabActions()
+                                    viewModel.showAddTaskDialog()
                                 }
                             )
 
@@ -133,7 +114,7 @@ fun ProjectDetailScreen(
                                 icon = Icons.Default.Edit,
                                 label = "Editar Projeto",
                                 onClick = {
-                                    showFabActions = false
+                                    viewModel.toggleFabActions()
                                     // Implementar futuramente
                                     Toast.makeText(context, "Funcionalidade ainda não implementada", Toast.LENGTH_SHORT).show()
                                 }
@@ -143,12 +124,12 @@ fun ProjectDetailScreen(
                                 icon = Icons.Default.Delete,
                                 label = "Apagar Projeto",
                                 onClick = {
-                                    showFabActions = false
-                                    showDeleteConfirmDialog = true
+                                    viewModel.toggleFabActions()
+                                    viewModel.showDeleteConfirmDialog()
                                 }
                             )
 
-                            projeto?.let { p ->
+                            viewModel.projeto?.let { p ->
                                 val nextStatus = when(p.status) {
                                     "ativo" -> "concluido"
                                     "concluido" -> "ativo"
@@ -170,20 +151,11 @@ fun ProjectDetailScreen(
                                     icon = statusIcon,
                                     label = statusLabel,
                                     onClick = {
-                                        showFabActions = false
+                                        viewModel.toggleFabActions()
                                         scope.launch {
                                             try {
-                                                val result = projetoRepository.alterarStatusProjeto(
-                                                    UUID.fromString(p.id),
-                                                    nextStatus
-                                                )
-                                                if (result) {
-                                                    // Recarregar o projeto
-                                                    projeto = projetoRepository.obterProjeto(UUID.fromString(p.id))
-                                                    Toast.makeText(context, "Status atualizado com sucesso", Toast.LENGTH_SHORT).show()
-                                                } else {
-                                                    Toast.makeText(context, "Falha ao atualizar status", Toast.LENGTH_SHORT).show()
-                                                }
+                                                viewModel.changeProjectStatus(p.id.toString(), nextStatus)
+                                                Toast.makeText(context, "Status atualizado com sucesso", Toast.LENGTH_SHORT).show()
                                             } catch (e: Exception) {
                                                 Toast.makeText(context, "Erro ao atualizar status", Toast.LENGTH_SHORT).show()
                                                 e.printStackTrace()
@@ -197,13 +169,13 @@ fun ProjectDetailScreen(
 
                     // Main FAB
                     FloatingActionButton(
-                        onClick = { showFabActions = !showFabActions },
+                        onClick = { viewModel.toggleFabActions() },
                         containerColor = primaryLight,
                         contentColor = onPrimaryLight
                     ) {
                         Icon(
-                            imageVector = if (showFabActions) Icons.Default.Close else Icons.Default.Add,
-                            contentDescription = if (showFabActions) "Fechar menu" else "Abrir menu"
+                            imageVector = if (viewModel.showFabActions) Icons.Default.Close else Icons.Default.Add,
+                            contentDescription = if (viewModel.showFabActions) "Fechar menu" else "Abrir menu"
                         )
                     }
                 }
@@ -212,7 +184,7 @@ fun ProjectDetailScreen(
         containerColor = backgroundLight,
         contentWindowInsets = WindowInsets(0)
     ) { paddingValues ->
-        if (isLoading) {
+        if (viewModel.isLoading) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -221,7 +193,7 @@ fun ProjectDetailScreen(
             ) {
                 CircularProgressIndicator(color = primaryLight)
             }
-        } else if (projeto != null) {
+        } else if (viewModel.projeto != null) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -231,7 +203,7 @@ fun ProjectDetailScreen(
             ) {
                 // Título do projeto
                 Text(
-                    text = projeto!!.nome,
+                    text = viewModel.projeto!!.nome,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = onBackgroundLight,
@@ -239,7 +211,7 @@ fun ProjectDetailScreen(
                 )
 
                 // Status indicator
-                StatusChip(status = projeto!!.status)
+                StatusChip(status = viewModel.projeto!!.status)
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -248,7 +220,7 @@ fun ProjectDetailScreen(
                     title = "Progresso",
                     content = {
                         LinearProgressIndicator(
-                            progress = { projeto!!.taxaConclusao.toFloat() / 100f },
+                            progress = { viewModel.projeto!!.taxaConclusao.toFloat() / 100f },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(8.dp)
@@ -258,7 +230,7 @@ fun ProjectDetailScreen(
                         )
 
                         Text(
-                            text = "${projeto!!.taxaConclusao}%",
+                            text = "${viewModel.projeto!!.taxaConclusao}%",
                             fontSize = 14.sp,
                             color = onBackgroundLight,
                             modifier = Modifier.padding(top = 4.dp)
@@ -269,7 +241,7 @@ fun ProjectDetailScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Seção de descrição
-                projeto!!.descricao?.let {
+                viewModel.projeto!!.descricao?.let {
                     ProjectInfoSection(
                         title = "Descrição",
                         content = {
@@ -290,7 +262,7 @@ fun ProjectDetailScreen(
                     content = {
                         val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
-                        val createdDate = projeto!!.createdAt?.let {
+                        val createdDate = viewModel.projeto!!.createdAt?.let {
                             try {
                                 val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
                                 val date = isoFormat.parse(it)
@@ -300,7 +272,7 @@ fun ProjectDetailScreen(
                             }
                         } ?: "Data de criação desconhecida"
 
-                        val updatedDate = projeto!!.updatedAt?.let {
+                        val updatedDate = viewModel.projeto!!.updatedAt?.let {
                             try {
                                 val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
                                 val date = isoFormat.parse(it)
@@ -368,27 +340,22 @@ fun ProjectDetailScreen(
     }
 
     // Diálogo de confirmação para apagar projeto
-    if (showDeleteConfirmDialog) {
+    if (viewModel.showDeleteConfirmDialog) {
         AlertDialog(
-            onDismissRequest = { showDeleteConfirmDialog = false },
+            onDismissRequest = { viewModel.hideDeleteConfirmDialog() },
             title = { Text("Confirmar exclusão") },
             text = {
-                Text("Tem certeza que deseja apagar o projeto \"${projeto?.nome}\"? Esta ação não pode ser desfeita.")
+                Text("Tem certeza que deseja apagar o projeto \"${viewModel.projeto?.nome}\"? Esta ação não pode ser desfeita.")
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        showDeleteConfirmDialog = false
-                        projeto?.id?.let { projetoId ->
+                        viewModel.projeto?.id?.let { projId ->
                             scope.launch {
                                 try {
-                                    val result = projetoRepository.apagarProjeto(UUID.fromString(projetoId))
-                                    if (result) {
-                                        Toast.makeText(context, "Projeto apagado com sucesso", Toast.LENGTH_SHORT).show()
-                                        onBackClick()
-                                    } else {
-                                        Toast.makeText(context, "Falha ao apagar projeto", Toast.LENGTH_SHORT).show()
-                                    }
+                                    viewModel.deleteProject(projId)
+                                    Toast.makeText(context, "Projeto apagado com sucesso", Toast.LENGTH_SHORT).show()
+                                    onBackClick()
                                 } catch (e: Exception) {
                                     Toast.makeText(context, "Erro ao apagar projeto: ${e.message}", Toast.LENGTH_SHORT).show()
                                     e.printStackTrace()
@@ -406,9 +373,37 @@ fun ProjectDetailScreen(
             },
             dismissButton = {
                 TextButton(
-                    onClick = { showDeleteConfirmDialog = false }
+                    onClick = { viewModel.hideDeleteConfirmDialog() }
                 ) {
                     Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    // Diálogo para adicionar tarefa
+    if (viewModel.showAddTaskDialog) {
+        AddTaskDialog(
+            show = true,
+            onDismiss = { viewModel.hideAddTaskDialog() },
+            onAddTask = { nome, descricao, prioridade, status, dataInicio, dataFim ->
+                // Lógica para adicionar tarefa agora delegada ao ViewModel
+                scope.launch {
+                    try {
+                        viewModel.addTask(
+                            projetoId = projetoId,
+                            nome = nome,
+                            descricao = descricao,
+                            prioridade = prioridade,
+                            status = status,
+                            dataInicio = dataInicio,
+                            dataFim = dataFim
+                        )
+                        Toast.makeText(context, "Tarefa adicionada com sucesso", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Erro ao adicionar tarefa: ${e.message}", Toast.LENGTH_SHORT).show()
+                        e.printStackTrace()
+                    }
                 }
             }
         )
