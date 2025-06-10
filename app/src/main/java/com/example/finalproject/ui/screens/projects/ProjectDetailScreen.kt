@@ -68,34 +68,8 @@ fun ProjectDetailScreen(
     var showFabActions by remember { mutableStateOf(false) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
 
-    var isLanguageLoaded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-
-    val addTask = stringResource(id = R.string.add_task)
-    val editProject = stringResource(id = R.string.edit_project)
-    val deleteProject = stringResource(id = R.string.delete_project)
-    val markAsCompleted = stringResource(id = R.string.mark_as_completed)
-    val markAsActive = stringResource(id = R.string.mark_as_active)
-    val statusUpdatedSuccess = stringResource(id = R.string.status_updated_success)
-    val statusUpdateFailed = stringResource(id = R.string.status_update_failed)
-    val statusUpdateError = stringResource(id = R.string.status_update_error)
-    val closeMenu = stringResource(id = R.string.close_menu)
-    val openMenu = stringResource(id = R.string.open_menu)
-    val confirmDeleteTitle = stringResource(id = R.string.confirm_delete_title)
-    val deleteSuccess = stringResource(id = R.string.delete_success)
-    val deleteFailed = stringResource(id = R.string.delete_failed)
-    val back = stringResource(id = R.string.back)
-    val notFound = stringResource(id = R.string.not_found)
-
-
-    LaunchedEffect(Unit) {
-        val savedLanguage = PreferencesManager.getLanguage(context)
-        print("Saved language: $savedLanguage")
-        updateAppLanguage(context, savedLanguage)
-        isLanguageLoaded = true
-        (context as? Activity)?.recreate()
-    }
 
 
 
@@ -113,6 +87,9 @@ fun ProjectDetailScreen(
     // Carregar os detalhes do projeto
     LaunchedEffect(key1 = projetoId) {
         isLoading = true
+        val savedLanguage = PreferencesManager.getLanguage(context)
+        print("Saved language: $savedLanguage")
+        updateAppLanguage(context, savedLanguage)
         try {
             val uuid = UUID.fromString(projetoId)
             projeto = projetoRepository.obterProjeto(uuid)
@@ -122,7 +99,24 @@ fun ProjectDetailScreen(
         }
         isLoading = false
     }
-    if(isLanguageLoaded){
+
+    if(!isLoading){
+        val addTask = stringResource(id = R.string.add_task)
+        val editProject = stringResource(id = R.string.edit_project)
+        val deleteProject = stringResource(id = R.string.delete_project)
+        val markAsCompleted = stringResource(id = R.string.mark_as_completed)
+        val markAsActive = stringResource(id = R.string.mark_as_active)
+        val statusUpdatedSuccess = stringResource(id = R.string.status_updated_success)
+        val statusUpdateFailed = stringResource(id = R.string.status_update_failed)
+        val statusUpdateError = stringResource(id = R.string.status_update_error)
+        val closeMenu = stringResource(id = R.string.close_menu)
+        val openMenu = stringResource(id = R.string.open_menu)
+        val confirmDeleteTitle = stringResource(id = R.string.confirm_delete_title)
+        val deleteSuccess = stringResource(id = R.string.delete_success)
+        val deleteFailed = stringResource(id = R.string.delete_failed)
+        val back = stringResource(id = R.string.back)
+        val notFound = stringResource(id = R.string.not_found)
+
         Scaffold(
             topBar = {
                 TopAppBar(
