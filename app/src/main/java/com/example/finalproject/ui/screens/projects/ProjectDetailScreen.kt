@@ -209,7 +209,8 @@ fun ProjectDetailScreen(
                 }
             }
         },
-        containerColor = backgroundLight
+        containerColor = backgroundLight,
+        contentWindowInsets = WindowInsets(0)
     ) { paddingValues ->
         if (isLoading) {
             Box(
@@ -494,4 +495,3 @@ private fun ActionButton(
         }
     }
 }
-

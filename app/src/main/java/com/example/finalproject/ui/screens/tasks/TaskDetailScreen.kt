@@ -66,42 +66,7 @@ fun TaskDetailScreen(
                 ),
                 windowInsets = WindowInsets(0)
             )
-        }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            if (task == null) {
-                Text(
-                    text = "Tarefa não encontrada",
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
-                TaskContent(
-                    task = task,
-                    showFabActions = showFabActions,
-                    onShowFabActionsChange = { showFabActions = it },
-                    onStatusChange = onStatusChange,
-                    onDeleteTask = onDeleteTask,
-                    onAddWorker = onAddWorker
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun TaskContent(
-    task: Task,
-    showFabActions: Boolean,
-    onShowFabActionsChange: (Boolean) -> Unit,
-    onStatusChange: (TaskStatus) -> Unit,
-    onDeleteTask: () -> Unit,
-    onAddWorker: () -> Unit
-) {
-    Scaffold(
+        },
         floatingActionButton = {
             Column(
                 horizontalAlignment = Alignment.End
@@ -122,7 +87,7 @@ private fun TaskContent(
                             label = "Marcar como Concluída",
                             onClick = {
                                 onStatusChange(TaskStatus.COMPLETED)
-                                onShowFabActionsChange(false)
+                                showFabActions = false
                             }
                         )
                         ActionButton(
@@ -130,14 +95,14 @@ private fun TaskContent(
                             label = "Marcar como Em Andamento",
                             onClick = {
                                 onStatusChange(TaskStatus.ON_GOING)
-                                onShowFabActionsChange(false)
+                                showFabActions = false
                             }
                         )
                         ActionButton(
                             icon = Icons.Default.Add,
                             label = "Adicionar Trabalhador",
                             onClick = {
-                                onShowFabActionsChange(false)
+                                showFabActions = false
                                 onAddWorker()
                             }
                         )
@@ -145,16 +110,14 @@ private fun TaskContent(
                             icon = Icons.Default.Delete,
                             label = "Excluir Task",
                             onClick = {
-                                onShowFabActionsChange(false)
+                                showFabActions = false
                                 onDeleteTask()
                             }
                         )
                     }
                 }
-
-                // Main FAB
                 FloatingActionButton(
-                    onClick = { onShowFabActionsChange(!showFabActions) },
+                    onClick = { showFabActions = !showFabActions },
                     containerColor = primaryLight,
                     contentColor = onPrimaryLight
                 ) {
@@ -165,143 +128,169 @@ private fun TaskContent(
                 }
             }
         },
-        floatingActionButtonPosition = FabPosition.End,
-        containerColor = backgroundLight
+        contentWindowInsets = WindowInsets(0)
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState())
         ) {
-            // Título da task
-            Text(
-                text = task.title,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = onBackgroundLight,
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
+            if (task == null) {
+                Text(
+                    text = "Tarefa não encontrada",
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            } else {
+                TaskContent(
+                    task = task,
+                    onStatusChange = onStatusChange,
+                    onDeleteTask = onDeleteTask,
+                    onAddWorker = onAddWorker
+                )
+            }
+        }
+    }
+}
 
-            // Status indicator
-            StatusChip(status = task.status)
+@Composable
+private fun TaskContent(
+    task: Task,
+    onStatusChange: (TaskStatus) -> Unit,
+    onDeleteTask: () -> Unit,
+    onAddWorker: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        // Título da task
+        Text(
+            text = task.title,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = onBackgroundLight,
+            modifier = Modifier.padding(vertical = 16.dp)
+        )
 
-            Spacer(modifier = Modifier.height(24.dp))
+        // Status indicator
+        StatusChip(status = task.status)
 
-            // Seção de progresso
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Seção de progresso
+        TaskInfoSection(
+            title = "Progresso",
+            content = {
+                LinearProgressIndicator(
+                    progress = when(task.status) {
+                        TaskStatus.TO_DO -> 0f
+                        TaskStatus.ON_GOING -> 0.5f
+                        TaskStatus.COMPLETED -> 1f
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    color = primaryLight,
+                    trackColor = surfaceVariantLight
+                )
+
+                Text(
+                    text = when(task.status) {
+                        TaskStatus.TO_DO -> "0%"
+                        TaskStatus.ON_GOING -> "50%"
+                        TaskStatus.COMPLETED -> "100%"
+                    },
+                    fontSize = 14.sp,
+                    color = onBackgroundLight,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Seção de descrição
+        task.description?.let {
             TaskInfoSection(
-                title = "Progresso",
+                title = "Descrição",
                 content = {
-                    LinearProgressIndicator(
-                        progress = when(task.status) {
-                            TaskStatus.TO_DO -> 0f
-                            TaskStatus.ON_GOING -> 0.5f
-                            TaskStatus.COMPLETED -> 1f
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(8.dp)
-                            .clip(RoundedCornerShape(4.dp)),
-                        color = primaryLight,
-                        trackColor = surfaceVariantLight
-                    )
-
                     Text(
-                        text = when(task.status) {
-                            TaskStatus.TO_DO -> "0%"
-                            TaskStatus.ON_GOING -> "50%"
-                            TaskStatus.COMPLETED -> "100%"
-                        },
-                        fontSize = 14.sp,
-                        color = onBackgroundLight,
-                        modifier = Modifier.padding(top = 4.dp)
+                        text = it,
+                        fontSize = 16.sp,
+                        color = onBackgroundLight
                     )
                 }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+        }
 
-            // Seção de descrição
-            task.description?.let {
-                TaskInfoSection(
-                    title = "Descrição",
-                    content = {
-                        Text(
-                            text = it,
-                            fontSize = 16.sp,
-                            color = onBackgroundLight
-                        )
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            // Seção de data de criação
-            task.createdAt?.let {
-                TaskInfoSection(
-                    title = "Data de Criação",
-                    content = {
-                        Text(
-                            text = it,
-                            fontSize = 16.sp,
-                            color = onBackgroundLight
-                        )
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            // Seção de prioridade
-            task.priority?.let {
-                TaskInfoSection(
-                    title = "Prioridade",
-                    content = {
-                        Text(
-                            text = "$it",
-                            fontSize = 16.sp,
-                            color = onBackgroundLight
-                        )
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            // Seção de trabalhadores
+        // Seção de data de criação
+        task.createdAt?.let {
             TaskInfoSection(
-                title = "Trabalhadores",
+                title = "Data de Criação",
                 content = {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        WorkerAvatar("LV", primaryLight)
-                        WorkerAvatar("MA", secondaryLight)
-                        WorkerAvatar("GG", tertiaryLight)
-
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(surfaceVariantLight)
-                                .clickable { onAddWorker() },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Adicionar trabalhador",
-                                tint = onSurfaceVariantLight
-                            )
-                        }
-                    }
+                    Text(
+                        text = it,
+                        fontSize = 16.sp,
+                        color = onBackgroundLight
+                    )
                 }
             )
 
-            // Espaço para o FAB
-            Spacer(modifier = Modifier.height(100.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
+
+        // Seção de prioridade
+        task.priority?.let {
+            TaskInfoSection(
+                title = "Prioridade",
+                content = {
+                    Text(
+                        text = "$it",
+                        fontSize = 16.sp,
+                        color = onBackgroundLight
+                    )
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Seção de trabalhadores
+        TaskInfoSection(
+            title = "Trabalhadores",
+            content = {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    WorkerAvatar("LV", primaryLight)
+                    WorkerAvatar("MA", secondaryLight)
+                    WorkerAvatar("GG", tertiaryLight)
+
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(surfaceVariantLight)
+                            .clickable { onAddWorker() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Adicionar trabalhador",
+                            tint = onSurfaceVariantLight
+                        )
+                    }
+                }
+            }
+        )
+
+        // Espaço para o FAB
+        Spacer(modifier = Modifier.height(100.dp))
     }
 }
 
