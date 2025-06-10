@@ -65,6 +65,17 @@
     <string name="upload_image_error">Error uploading image</string>
     <string name="profile_image_update_success">Profile image updated successfully!</string>
     <string name="profile_image_update_error">Failed to update profile image</string>
-    <string name="hide_password">teste password</string>
-    <string name="show_password">teste showpassword</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show password</string>
+    <string name="projects_title">My Projects</string>
+    <string name="menu">Menu</string>
+    <string name="profile">Profile</string>
+    <string name="add_project">Add Project</string>
+    <string name="no_projects_found">No projects found</string>
+    <string name="new_project_dialog_title">New Project</string>
+    <string name="project_name_label">Project name</string>
+    <string name="project_description_label">Description</string>
+    <string name="create">Create</string>
+    <string name="project_created_success">Project created successfully!</string>
+    <string name="view_details">View details</string>
 </resources>

@@ -25,6 +25,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -47,6 +51,7 @@ fun RegisterScreen(
     onNavigateToLogin: () -> Unit,
     viewModel: RegisterViewModel = viewModel()
 ) {
+    var isLanguageLoaded by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     // Observar o estado de registro bem-sucedido
@@ -85,162 +90,165 @@ fun RegisterScreen(
     LaunchedEffect(Unit) {
         val savedLanguage = PreferencesManager.getLanguage(context)
         updateAppLanguage(context, savedLanguage)
+        isLanguageLoaded = true
     }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+
+    if( isLanguageLoaded ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background,
         ) {
-            Text(
-                text = stringResource(id = R.string.create_account),
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
-
-            OutlinedTextField(
-                value = viewModel.name,
-                onValueChange = { viewModel.onNameChange(it) },
-                label = { Text(stringResource(id = R.string.full_name_label)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next
-                ),
-                enabled = !viewModel.isLoading
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = viewModel.username,
-                onValueChange = { viewModel.onUsernameChange(it) },
-                label = { Text(stringResource(id = R.string.username_label)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next
-                ),
-                enabled = !viewModel.isLoading
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = viewModel.email,
-                onValueChange = { viewModel.onEmailChange(it) },
-                label = { Text(stringResource(id = R.string.email_label)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Next
-                ),
-                enabled = !viewModel.isLoading
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = viewModel.password,
-                onValueChange = { viewModel.onPasswordChange(it) },
-                label = { Text(stringResource(id = R.string.password_label)) },
-                singleLine = true,
-                visualTransformation = if (viewModel.showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Next
-                ),
-                enabled = !viewModel.isLoading,
-                trailingIcon = {
-                    IconButton(
-                        onClick = { viewModel.togglePasswordVisibility() },
-                        enabled = !viewModel.isLoading
-                    ) {
-                        Icon(
-                            imageVector = if (viewModel.showPassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                            contentDescription = if (viewModel.showPassword)
-                                stringResource(R.string.hide_password) else stringResource(R.string.show_password)
-                        )
-                    }
-                }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = viewModel.confirmPassword,
-                onValueChange = { viewModel.onConfirmPasswordChange(it) },
-                label = { Text(stringResource(id = R.string.confirm_password_label)) },
-                singleLine = true,
-                visualTransformation = if (viewModel.showConfirmPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
-                ),
-                enabled = !viewModel.isLoading,
-                trailingIcon = {
-                    IconButton(
-                        onClick = { viewModel.toggleConfirmPasswordVisibility() },
-                        enabled = !viewModel.isLoading
-                    ) {
-                        Icon(
-                            imageVector = if (viewModel.showConfirmPassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                            contentDescription = if (viewModel.showConfirmPassword)
-                                stringResource(R.string.hide_password) else stringResource(R.string.show_password)
-                        )
-                    }
-                }
-            )
-
-            // Mostrar mensagem de erro na UI (além do Toast)
-            if (viewModel.errorMessage != null) {
-                Spacer(modifier = Modifier.height(8.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(
-                    text = viewModel.errorMessage!!,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error
+                    text = stringResource(id = R.string.create_account),
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(bottom = 24.dp)
                 )
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                OutlinedTextField(
+                    value = viewModel.name,
+                    onValueChange = { viewModel.onNameChange(it) },
+                    label = { Text(stringResource(id = R.string.full_name_label)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next
+                    ),
+                    enabled = !viewModel.isLoading
+                )
 
-            Button(
-                onClick = { viewModel.register() },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !viewModel.isLoading
-            ) {
-                if (viewModel.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = viewModel.username,
+                    onValueChange = { viewModel.onUsernameChange(it) },
+                    label = { Text(stringResource(id = R.string.username_label)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next
+                    ),
+                    enabled = !viewModel.isLoading
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = viewModel.email,
+                    onValueChange = { viewModel.onEmailChange(it) },
+                    label = { Text(stringResource(id = R.string.email_label)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    enabled = !viewModel.isLoading
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = viewModel.password,
+                    onValueChange = { viewModel.onPasswordChange(it) },
+                    label = { Text(stringResource(id = R.string.password_label)) },
+                    singleLine = true,
+                    visualTransformation = if (viewModel.showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Next
+                    ),
+                    enabled = !viewModel.isLoading,
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { viewModel.togglePasswordVisibility() },
+                            enabled = !viewModel.isLoading
+                        ) {
+                            Icon(
+                                imageVector = if (viewModel.showPassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                contentDescription = if (viewModel.showPassword)
+                                    stringResource(R.string.hide_password) else stringResource(R.string.show_password)
+                            )
+                        }
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = viewModel.confirmPassword,
+                    onValueChange = { viewModel.onConfirmPasswordChange(it) },
+                    label = { Text(stringResource(id = R.string.confirm_password_label)) },
+                    singleLine = true,
+                    visualTransformation = if (viewModel.showConfirmPassword) VisualTransformation.None else PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    enabled = !viewModel.isLoading,
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { viewModel.toggleConfirmPasswordVisibility() },
+                            enabled = !viewModel.isLoading
+                        ) {
+                            Icon(
+                                imageVector = if (viewModel.showConfirmPassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                contentDescription = if (viewModel.showConfirmPassword)
+                                    stringResource(R.string.hide_password) else stringResource(R.string.show_password)
+                            )
+                        }
+                    }
+                )
+
+                // Mostrar mensagem de erro na UI (além do Toast)
+                if (viewModel.errorMessage != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = viewModel.errorMessage!!,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
                     )
-                } else {
-                    Text(stringResource(id = R.string.register_button))
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            OutlinedButton(
-                onClick = {
-                    viewModel.clearFields() // Limpar campos ao voltar para login
-                    onNavigateToLogin()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !viewModel.isLoading
-            ) {
-                Text(stringResource(id = R.string.already_have_account))
+                Button(
+                    onClick = { viewModel.register() },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !viewModel.isLoading
+                ) {
+                    if (viewModel.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text(stringResource(id = R.string.register_button))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        viewModel.clearFields() // Limpar campos ao voltar para login
+                        onNavigateToLogin()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !viewModel.isLoading
+                ) {
+                    Text(stringResource(id = R.string.already_have_account))
+                }
             }
         }
     }
 }
-

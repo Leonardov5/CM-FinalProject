@@ -29,6 +29,10 @@ import com.example.finalproject.ui.theme.*
 import com.example.finalproject.ui.viewmodels.projects.ProjectsViewModel
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.res.stringResource
+import com.example.finalproject.R
+import com.example.finalproject.data.PreferencesManager
+import com.example.finalproject.utils.updateAppLanguage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,219 +42,236 @@ fun ProjectsScreen(
     onProjectClick: (String) -> Unit = {}, // Callback para navegação para detalhes do projeto
 ) {
     val viewModel: ProjectsViewModel = viewModel()
-
+    var isLanguageLoaded by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(0.7f),
-                            shape = RoundedCornerShape(25.dp),
-                            color = surfaceVariantLight
-                        ) {
-                            Text(
-                                text = "My Projects",
-                                modifier = Modifier.padding(vertical = 12.dp),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                                textAlign = TextAlign.Center,
-                                color = onSurfaceVariantLight
-                            )
-                        }
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = { }) {
-                        Icon(
-                            Icons.Default.Menu,
-                            contentDescription = "Menu",
-                            tint = primaryLight
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onProfileClick) {
-                        Icon(
-                            Icons.Default.AccountCircle,
-                            contentDescription = "Profile",
-                            tint = primaryLight
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = backgroundLight
-                )
-            )
-        },
-        floatingActionButton = {
-            // Só mostrar o FAB se o usuário for admin
-            if (viewModel.isAdmin) {
-                FloatingActionButton(
-                    onClick = { viewModel.showAddProjectDialog() },
-                    containerColor = primaryLight,
-                    contentColor = onPrimaryLight
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Adicionar Projeto"
-                    )
-                }
-            }
-        },
-        containerColor = backgroundLight,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0)
-    ) { paddingValues ->
-        // Projects List
-        if (viewModel.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = primaryLight)
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                if (viewModel.projects.isNotEmpty()) {
-                    items(viewModel.projects) { projeto ->
-                        ProjectCard(
-                            projectName = projeto.nome,
-                            lastUpdated = projeto.updatedAt.toString(),
-                            projeto = projeto,
-                            onClick = { selectedProjeto ->
-                                // Navegar para a tela de detalhes do projeto
-                                selectedProjeto.id?.let { projetoId ->
-                                    onProjectClick(projetoId)
-                                }
-                            }
-                        )
-                    }
-                } else {
-                    // Exibir mensagem quando não houver projetos
-                    item {
+    val noProjectsFound = stringResource(id = R.string.no_projects_found)
+    val newProjectDialogTitle = stringResource(id = R.string.new_project_dialog_title)
+    val projectNameLabel = stringResource(id = R.string.project_name_label)
+    val projectDescriptionLabel = stringResource(id = R.string.project_description_label)
+    val cancel = stringResource(id = R.string.cancel)
+    val create = stringResource(id = R.string.create)
+    val projectCreatedSuccess = stringResource(id = R.string.project_created_success)
+
+
+    LaunchedEffect(Unit) {
+        val savedLanguage = PreferencesManager.getLanguage(context)
+        updateAppLanguage(context, savedLanguage)
+        isLanguageLoaded = true
+    }
+
+    if(isLanguageLoaded){
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
                         Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 32.dp),
+                            modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = "Nenhum projeto encontrado",
-                                fontSize = 16.sp,
-                                color = onSurfaceVariantLight
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(0.7f),
+                                shape = RoundedCornerShape(25.dp),
+                                color = surfaceVariantLight
+                            ) {
+                                Text(
+                                    text = stringResource(id = R.string.projects_title),
+                                    modifier = Modifier.padding(vertical = 12.dp),
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    textAlign = TextAlign.Center,
+                                    color = onSurfaceVariantLight
+                                )
+                            }
+                        }
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { }) {
+                            Icon(
+                                Icons.Default.Menu,
+                                contentDescription = stringResource(id = R.string.menu),
+                                tint = primaryLight
                             )
                         }
+                    },
+                    actions = {
+                        IconButton(onClick = onProfileClick) {
+                            Icon(
+                                Icons.Default.AccountCircle,
+                                contentDescription = stringResource(id = R.string.profile),
+                                tint = primaryLight
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = backgroundLight
+                    )
+                )
+            },
+            floatingActionButton = {
+                // Só mostrar o FAB se o usuário for admin
+                if (viewModel.isAdmin) {
+                    FloatingActionButton(
+                        onClick = { viewModel.showAddProjectDialog() },
+                        containerColor = primaryLight,
+                        contentColor = onPrimaryLight
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = stringResource(id = R.string.add_project)
+                        )
                     }
                 }
+            },
+            containerColor = backgroundLight,
+            contentWindowInsets = WindowInsets(0, 0, 0, 0)
+        ) { paddingValues ->
+            // Projects List
+            if (viewModel.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = primaryLight)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    if (viewModel.projects.isNotEmpty()) {
+                        items(viewModel.projects) { projeto ->
+                            ProjectCard(
+                                projectName = projeto.nome,
+                                lastUpdated = projeto.updatedAt.toString(),
+                                projeto = projeto,
+                                onClick = { selectedProjeto ->
+                                    // Navegar para a tela de detalhes do projeto
+                                    selectedProjeto.id?.let { projetoId ->
+                                        onProjectClick(projetoId)
+                                    }
+                                }
+                            )
+                        }
+                    } else {
+                        // Exibir mensagem quando não houver projetos
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 32.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = noProjectsFound,
+                                    fontSize = 16.sp,
+                                    color = onSurfaceVariantLight
+                                )
+                            }
+                        }
+                    }
 
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
-        }
 
-        // Diálogo para adicionar novo projeto
-        if (viewModel.showAddDialog) {
-            Dialog(onDismissRequest = { viewModel.hideAddProjectDialog() }) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    shape = RoundedCornerShape(16.dp),
-                ) {
-                    Column(
+            // Diálogo para adicionar novo projeto
+            if (viewModel.showAddDialog) {
+                Dialog(onDismissRequest = { viewModel.hideAddProjectDialog() }) {
+                    Surface(
                         modifier = Modifier
-                            .padding(16.dp)
                             .fillMaxWidth()
+                            .padding(16.dp),
+                        shape = RoundedCornerShape(16.dp),
                     ) {
-                        Text(
-                            text = "Novo Projeto",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = onPrimaryContainerLight,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-
-                        OutlinedTextField(
-                            value = viewModel.projectName,
-                            onValueChange = { viewModel.onProjectNameChange(it) },
-                            label = { Text("Nome do projeto") },
+                        Column(
                             modifier = Modifier
+                                .padding(16.dp)
                                 .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            singleLine = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = primaryLight,
-                                unfocusedBorderColor = primaryLight.copy(alpha = 0.7f),
-                                focusedLabelColor = primaryLight,
-                                unfocusedLabelColor = primaryLight.copy(alpha = 0.7f),
-                                cursorColor = primaryLight
-                            )
-                        )
-
-                        OutlinedTextField(
-                            value = viewModel.projectDescription,
-                            onValueChange = { viewModel.onProjectDescriptionChange(it) },
-                            label = { Text("Descrição") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(120.dp)
-                                .padding(bottom = 16.dp),
-                            singleLine = false,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = primaryLight,
-                                unfocusedBorderColor = primaryLight.copy(alpha = 0.7f),
-                                focusedLabelColor = primaryLight,
-                                unfocusedLabelColor = primaryLight.copy(alpha = 0.7f),
-                                cursorColor = primaryLight
-                            )
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
                         ) {
-                            TextButton(
-                                onClick = { viewModel.hideAddProjectDialog() },
-                                colors = ButtonDefaults.textButtonColors(
-                                    contentColor = primaryLight
+                            Text(
+                                text = newProjectDialogTitle,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = onPrimaryContainerLight,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+
+                            OutlinedTextField(
+                                value = viewModel.projectName,
+                                onValueChange = { viewModel.onProjectNameChange(it) },
+                                label = { Text(projectNameLabel) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                singleLine = true,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = primaryLight,
+                                    unfocusedBorderColor = primaryLight.copy(alpha = 0.7f),
+                                    focusedLabelColor = primaryLight,
+                                    unfocusedLabelColor = primaryLight.copy(alpha = 0.7f),
+                                    cursorColor = primaryLight
                                 )
+                            )
+
+                            OutlinedTextField(
+                                value = viewModel.projectDescription,
+                                onValueChange = { viewModel.onProjectDescriptionChange(it) },
+                                label = { Text(projectDescriptionLabel) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(120.dp)
+                                    .padding(bottom = 16.dp),
+                                singleLine = false,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = primaryLight,
+                                    unfocusedBorderColor = primaryLight.copy(alpha = 0.7f),
+                                    focusedLabelColor = primaryLight,
+                                    unfocusedLabelColor = primaryLight.copy(alpha = 0.7f),
+                                    cursorColor = primaryLight
+                                )
+                            )
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End
                             ) {
-                                Text("Cancelar")
-                            }
-
-                            Spacer(modifier = Modifier.width(8.dp))
-
-                            Button(
-                                onClick = {
-                                    viewModel.createProject(
-                                        onSuccess = {
-                                            Toast.makeText(context, "Projeto criado com sucesso!", Toast.LENGTH_SHORT).show()
-                                        },
-                                        onError = { errorMessage ->
-                                            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                                        }
+                                TextButton(
+                                    onClick = { viewModel.hideAddProjectDialog() },
+                                    colors = ButtonDefaults.textButtonColors(
+                                        contentColor = primaryLight
                                     )
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = primaryLight,
-                                    contentColor = onPrimaryLight
-                                )
-                            ) {
-                                Text("Criar")
+                                ) {
+                                    Text(cancel)
+                                }
+
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                Button(
+                                    onClick = {
+                                        viewModel.createProject(
+                                            onSuccess = {
+                                                Toast.makeText(context, projectCreatedSuccess, Toast.LENGTH_SHORT).show()
+                                            },
+                                            onError = { errorMessage ->
+                                                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                            }
+                                        )
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = primaryLight,
+                                        contentColor = onPrimaryLight
+                                    )
+                                ) {
+                                    Text(create)
+                                }
                             }
                         }
                     }
@@ -314,7 +335,7 @@ fun ProjectCard(
             IconButton(onClick = { }) {
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowUp,
-                    contentDescription = "View details",
+                    contentDescription = stringResource(id = R.string.view_details),
                     modifier = Modifier.rotate(90f),
                     tint = onSecondaryContainerLight
                 )

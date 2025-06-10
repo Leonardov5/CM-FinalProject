@@ -80,12 +80,20 @@ fun ProfileScreen(
     var isLanguageMenuExpanded by remember { mutableStateOf(false) }
     var selectedLanguage by remember { mutableStateOf("Português") }
 
-    // Pré-carregar strings localizadas
+// Carregue as strings no início do Composable
     val profileTitle = stringResource(id = R.string.profile_title)
     val changeLanguage = stringResource(id = R.string.change_language)
     val portuguese = stringResource(id = R.string.portuguese)
     val english = stringResource(id = R.string.english)
     val back = stringResource(id = R.string.back)
+    val updatePasswordSection = stringResource(id = R.string.update_password_section)
+    val currentPasswordLabel = stringResource(id = R.string.current_password_label)
+    val newPasswordLabel = stringResource(id = R.string.new_password_label)
+    val confirmNewPasswordLabel = stringResource(id = R.string.confirm_new_password_label)
+    val updatePasswordButton = stringResource(id = R.string.update_password_button)
+    val confirmPasswordDialogTitle = stringResource(id = R.string.confirm_password_dialog_title)
+    val confirmPasswordDialogMessage = stringResource(id = R.string.confirm_password_dialog_message)
+
 
     // Launcher para seleção de imagem da galeria
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -320,7 +328,7 @@ fun ProfileScreen(
                             Spacer(modifier = Modifier.width(12.dp))
 
                             Text(
-                                text = "Alterar Senha",
+                                text = updatePasswordSection,
                                 fontWeight = FontWeight.Medium,
                                 color = if (!viewModel.isLoading && viewModel.isOnline) MaterialTheme.colorScheme.onBackground else Color.Gray
                             )
@@ -347,7 +355,7 @@ fun ProfileScreen(
                             ProfileTextField(
                                 value = viewModel.currentPassword,
                                 onValueChange = { viewModel.onCurrentPasswordChange(it) },
-                                label = "Senha Atual",
+                                label = currentPasswordLabel,
                                 leadingIcon = Icons.Default.Lock,
                                 isPassword = true,
                                 showPassword = viewModel.showCurrentPassword,
@@ -360,7 +368,7 @@ fun ProfileScreen(
                             ProfileTextField(
                                 value = viewModel.newPassword,
                                 onValueChange = { viewModel.onNewPasswordChange(it) },
-                                label = "Nova Senha",
+                                label = newPasswordLabel,
                                 leadingIcon = Icons.Default.Lock,
                                 isPassword = true,
                                 showPassword = viewModel.showNewPassword,
@@ -373,7 +381,7 @@ fun ProfileScreen(
                             ProfileTextField(
                                 value = viewModel.confirmPassword,
                                 onValueChange = { viewModel.onConfirmPasswordChange(it) },
-                                label = "Confirmar Nova Senha",
+                                label = confirmNewPasswordLabel,
                                 leadingIcon = Icons.Default.Lock,
                                 isPassword = true,
                                 showPassword = viewModel.showConfirmPassword,
@@ -391,7 +399,7 @@ fun ProfileScreen(
                                     contentColor = MaterialTheme.colorScheme.onPrimary
                                 )
                             ) {
-                                Text("Atualizar Senha")
+                                Text(text = updatePasswordButton)
                             }
                         }
                     }
@@ -460,16 +468,16 @@ fun ProfileScreen(
             onDismissRequest = {
                 viewModel.hideEmailPasswordDialog()
             },
-            title = { Text("Confirmar senha") },
+            title = { Text(confirmPasswordDialogTitle) },
             text = {
                 Column {
-                    Text("Para alterar seu email, por favor confirme sua senha atual:")
+                    Text(confirmPasswordDialogMessage)
                     Spacer(modifier = Modifier.height(16.dp))
 
                     OutlinedTextField(
                         value = viewModel.passwordForEmailChange,
                         onValueChange = { viewModel.onPasswordForEmailChangeChange(it) },
-                        label = { Text("Senha atual") },
+                        label = { Text(currentPasswordLabel) },
                         visualTransformation = if (viewModel.showPasswordForEmailChange)
                             VisualTransformation.None
                         else
@@ -486,9 +494,9 @@ fun ProfileScreen(
                                     else
                                         Icons.Rounded.Visibility,
                                     contentDescription = if (viewModel.showPasswordForEmailChange)
-                                        "Ocultar senha"
+                                        stringResource(id = R.string.hide_password)
                                     else
-                                        "Mostrar senha"
+                                        stringResource(id = R.string.show_password)
                                 )
                             }
                         },
@@ -506,8 +514,7 @@ fun ProfileScreen(
                     },
                     enabled = viewModel.passwordForEmailChange.isNotEmpty()
                 ) {
-                    Text("Confirmar")
-                }
+                    Text(stringResource(id = R.string.confirm_password_dialog_confirm))                }
             },
             dismissButton = {
                 TextButton(
@@ -515,8 +522,7 @@ fun ProfileScreen(
                         viewModel.hideEmailPasswordDialog()
                     }
                 ) {
-                    Text("Cancelar")
-                }
+                    Text(stringResource(id = R.string.confirm_password_dialog_cancel))                }
             }
         )
     }
@@ -555,9 +561,9 @@ fun ProfileTextField(
                         else
                             Icons.Rounded.Visibility,
                         contentDescription = if (showPassword)
-                            "Ocultar senha"
+                            stringResource(id = R.string.hide_password)
                         else
-                            "Mostrar senha",
+                            stringResource(id = R.string.show_password),
                         tint = MaterialTheme.colorScheme.outline
                     )
                 }
