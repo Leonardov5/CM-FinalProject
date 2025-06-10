@@ -44,7 +44,7 @@ fun TaskManagementScreen(
                         Surface(
                             modifier = Modifier.fillMaxWidth(0.7f),
                             shape = RoundedCornerShape(25.dp),
-                            color = surfaceVariantLight
+                            color = MaterialTheme.colorScheme.surfaceVariant
                         ) {
                             Text(
                                 text = "Project X",
@@ -52,7 +52,6 @@ fun TaskManagementScreen(
                                 fontSize = 16.sp,
                                 textAlign = TextAlign.Center,
                                 fontWeight = FontWeight.Medium,
-                                color = onSurfaceVariantLight
                             )
                         }
                     }
@@ -73,12 +72,7 @@ fun TaskManagementScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = backgroundLight,
-                    titleContentColor = onBackgroundLight,
-                    navigationIconContentColor = onBackgroundLight,
-                    actionIconContentColor = onBackgroundLight
-                ),
+
                 windowInsets = WindowInsets(0)
             )
         }

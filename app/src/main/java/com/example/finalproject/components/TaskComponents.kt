@@ -32,13 +32,10 @@ fun TabRow(
 ) {
     androidx.compose.material3.TabRow(
         selectedTabIndex = selectedTab.ordinal,
-        containerColor = backgroundLight,
-        contentColor = primaryLight,
         indicator = { tabPositions ->
             TabRowDefaults.Indicator(
                 modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab.ordinal]),
                 height = 2.dp,
-                color = primaryLight
             )
         }
     ) {
@@ -46,22 +43,16 @@ fun TabRow(
             selected = selectedTab == TaskStatus.TO_DO,
             onClick = { onTabSelected(TaskStatus.TO_DO) },
             text = { Text("To-Do") },
-            selectedContentColor = primaryLight,
-            unselectedContentColor = outlineLight
         )
         Tab(
             selected = selectedTab == TaskStatus.ON_GOING,
             onClick = { onTabSelected(TaskStatus.ON_GOING) },
             text = { Text("On-Going") },
-            selectedContentColor = primaryLight,
-            unselectedContentColor = outlineLight
         )
         Tab(
             selected = selectedTab == TaskStatus.COMPLETED,
             onClick = { onTabSelected(TaskStatus.COMPLETED) },
             text = { Text("Done") },
-            selectedContentColor = primaryLight,
-            unselectedContentColor = outlineLight
         )
     }
 }
@@ -73,7 +64,7 @@ fun TaskCard(task: Task, onClick: () -> Unit = {}) {
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
-        color = secondaryContainerLight,
+        color = MaterialTheme.colorScheme.tertiaryContainer,
         shadowElevation = 2.dp
     ) {
         Row(
@@ -85,7 +76,7 @@ fun TaskCard(task: Task, onClick: () -> Unit = {}) {
             Icon(
                 imageVector = Icons.Default.List,
                 contentDescription = null,
-                tint = onSecondaryContainerLight,
+                tint = MaterialTheme.colorScheme.onTertiaryContainer,
                 modifier = Modifier.size(24.dp)
             )
 
@@ -98,13 +89,11 @@ fun TaskCard(task: Task, onClick: () -> Unit = {}) {
                     text = task.title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
-                    color = onSecondaryContainerLight
                 )
 
                 Text(
                     text = "Criado: ${task.createdAt ?: "Data não disponível"}",
                     fontSize = 12.sp,
-                    color = onSecondaryContainerLight.copy(alpha = 0.7f)
                 )
             }
 
@@ -113,7 +102,6 @@ fun TaskCard(task: Task, onClick: () -> Unit = {}) {
                     imageVector = Icons.Default.KeyboardArrowUp,
                     contentDescription = "Ver detalhes",
                     modifier = Modifier.rotate(90f),
-                    tint = onSecondaryContainerLight
                 )
             }
         }
