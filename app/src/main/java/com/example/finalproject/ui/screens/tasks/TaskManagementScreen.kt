@@ -68,7 +68,8 @@ fun TaskManagementScreen(
                     IconButton(onClick = onProfileClick) {
                         Icon(
                             imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Perfil"
+                            contentDescription = "Perfil",
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },

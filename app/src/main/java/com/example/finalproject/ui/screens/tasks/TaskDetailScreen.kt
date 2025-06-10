@@ -60,10 +60,7 @@ fun TaskDetailScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = backgroundLight,
-                    titleContentColor = onBackgroundLight
-                ),
+
                 windowInsets = WindowInsets(0)
             )
         },
@@ -118,8 +115,7 @@ fun TaskDetailScreen(
                 }
                 FloatingActionButton(
                     onClick = { showFabActions = !showFabActions },
-                    containerColor = primaryLight,
-                    contentColor = onPrimaryLight
+
                 ) {
                     Icon(
                         imageVector = if (showFabActions) Icons.Default.Close else Icons.Default.Add,
@@ -170,7 +166,6 @@ private fun TaskContent(
             text = task.title,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = onBackgroundLight,
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
@@ -193,8 +188,7 @@ private fun TaskContent(
                         .fillMaxWidth()
                         .height(8.dp)
                         .clip(RoundedCornerShape(4.dp)),
-                    color = primaryLight,
-                    trackColor = surfaceVariantLight
+
                 )
 
                 Text(
@@ -204,7 +198,6 @@ private fun TaskContent(
                         TaskStatus.COMPLETED -> "100%"
                     },
                     fontSize = 14.sp,
-                    color = onBackgroundLight,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
@@ -220,7 +213,6 @@ private fun TaskContent(
                     Text(
                         text = it,
                         fontSize = 16.sp,
-                        color = onBackgroundLight
                     )
                 }
             )
@@ -236,7 +228,6 @@ private fun TaskContent(
                     Text(
                         text = it,
                         fontSize = 16.sp,
-                        color = onBackgroundLight
                     )
                 }
             )
@@ -252,7 +243,6 @@ private fun TaskContent(
                     Text(
                         text = "$it",
                         fontSize = 16.sp,
-                        color = onBackgroundLight
                     )
                 }
             )
@@ -275,7 +265,6 @@ private fun TaskContent(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(CircleShape)
-                            .background(surfaceVariantLight)
                             .clickable { onAddWorker() },
                         contentAlignment = Alignment.Center
                     ) {
@@ -305,7 +294,6 @@ private fun TaskInfoSection(
             text = title,
             fontSize = 18.sp,
             fontWeight = FontWeight.Medium,
-            color = primaryLight
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -317,9 +305,9 @@ private fun TaskInfoSection(
 @Composable
 private fun StatusChip(status: TaskStatus) {
     val (backgroundColor, textColor) = when(status) {
-        TaskStatus.TO_DO -> Pair(surfaceVariantLight, onSurfaceVariantLight)
-        TaskStatus.ON_GOING -> Pair(secondaryLight, onSecondaryLight)
-        TaskStatus.COMPLETED -> Pair(primaryLight, onPrimaryLight)
+        TaskStatus.TO_DO -> Pair(MaterialTheme.colorScheme.surfaceContainerHighest, MaterialTheme.colorScheme.onSurface)
+        TaskStatus.ON_GOING -> Pair(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer)
+        TaskStatus.COMPLETED -> Pair(MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
     }
 
     val statusText = when(status) {
@@ -371,8 +359,8 @@ private fun ActionButton(
     Surface(
         modifier = Modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(24.dp),
-        color = surfaceVariantLight,
-        shadowElevation = 2.dp
+        shadowElevation = 2.dp,
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -382,11 +370,9 @@ private fun ActionButton(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = primaryLight
             )
             Text(
                 text = label,
-                color = onSurfaceVariantLight
             )
         }
     }
