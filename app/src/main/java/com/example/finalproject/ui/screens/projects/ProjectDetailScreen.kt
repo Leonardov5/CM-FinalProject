@@ -29,11 +29,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.res.stringResource
 import com.example.finalproject.R
 import com.example.finalproject.data.PreferencesManager
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.data.model.User
 import com.example.finalproject.data.repository.ProjetoRepository
+import com.example.finalproject.data.repository.TarefaRepository
 import com.example.finalproject.data.service.UserService
+import com.example.finalproject.ui.components.projects.AddTaskDialog
 import com.example.finalproject.ui.theme.*
+import com.example.finalproject.ui.viewmodels.projects.ProjectDetailViewModel
 import com.example.finalproject.utils.updateAppLanguage
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -55,263 +59,227 @@ fun formatDate(iso: String?): String? {
 fun ProjectDetailScreen(
     projetoId: String,
     projetoRepository: ProjetoRepository = ProjetoRepository(),
+    tarefaRepository: TarefaRepository = TarefaRepository(),
     currentUser: User? = null,
     onBackClick: () -> Unit = {},
-    onAddTaskClick: () -> Unit = {}
-
+    onAddTaskClick: () -> Unit = {},
+    viewModel: ProjectDetailViewModel = viewModel()
 ) {
-    println("ProjectsDetailScreen: Composable chamado")
-    var projeto by remember { mutableStateOf<Projeto?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
-    var isAdmin by remember { mutableStateOf(false) }
-    var user by remember { mutableStateOf(currentUser) }
-    var showFabActions by remember { mutableStateOf(false) }
-    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
-
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-
-
     // Carregar o usuário atual se não for fornecido
     LaunchedEffect(key1 = true) {
-        if (user == null) {
-            // Buscar o usuário atual do UserService
-            user = UserService.getCurrentUserData()
-        }
+        viewModel.loadUser(currentUser)
+        viewModel.loadProject(projetoId)
 
-        // Verificar se o usuário é admin
-        isAdmin = user?.admin == true
-    }
-
-    // Carregar os detalhes do projeto
-    LaunchedEffect(key1 = projetoId) {
-        isLoading = true
         val savedLanguage = PreferencesManager.getLanguage(context)
         print("Saved language: $savedLanguage")
         updateAppLanguage(context, savedLanguage)
-        try {
-            val uuid = UUID.fromString(projetoId)
-            projeto = projetoRepository.obterProjeto(uuid)
-        } catch (e: Exception) {
-            Toast.makeText(context, "Erro ao carregar projeto", Toast.LENGTH_SHORT).show()
-            e.printStackTrace()
-        }
-        isLoading = false
     }
 
-    if(!isLoading){
-        val addTask = stringResource(id = R.string.add_task)
-        val editProject = stringResource(id = R.string.edit_project)
-        val deleteProject = stringResource(id = R.string.delete_project)
-        val markAsCompleted = stringResource(id = R.string.mark_as_completed)
-        val markAsActive = stringResource(id = R.string.mark_as_active)
-        val statusUpdatedSuccess = stringResource(id = R.string.status_updated_success)
-        val statusUpdateFailed = stringResource(id = R.string.status_update_failed)
-        val statusUpdateError = stringResource(id = R.string.status_update_error)
-        val closeMenu = stringResource(id = R.string.close_menu)
-        val openMenu = stringResource(id = R.string.open_menu)
-        val confirmDeleteTitle = stringResource(id = R.string.confirm_delete_title)
-        val deleteSuccess = stringResource(id = R.string.delete_success)
-        val deleteFailed = stringResource(id = R.string.delete_failed)
-        val back = stringResource(id = R.string.back)
-        val notFound = stringResource(id = R.string.not_found)
+    val addTask = stringResource(id = R.string.add_task)
+    val editProject = stringResource(id = R.string.edit_project)
+    val deleteProject = stringResource(id = R.string.delete_project)
+    val markAsCompleted = stringResource(id = R.string.mark_as_completed)
+    val markAsActive = stringResource(id = R.string.mark_as_active)
+    val statusUpdatedSuccess = stringResource(id = R.string.status_updated_success)
+    val statusUpdateFailed = stringResource(id = R.string.status_update_failed)
+    val statusUpdateError = stringResource(id = R.string.status_update_error)
+    val closeMenu = stringResource(id = R.string.close_menu)
+    val openMenu = stringResource(id = R.string.open_menu)
+    val confirmDeleteTitle = stringResource(id = R.string.confirm_delete_title)
+    val deleteSuccess = stringResource(id = R.string.delete_success)
+    val deleteFailed = stringResource(id = R.string.delete_failed)
+    val back = stringResource(id = R.string.back)
+    val notFound = stringResource(id = R.string.not_found)
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = stringResource(id = R.string.project_details_title),
-                            fontWeight = FontWeight.Medium,
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.project_details_title),
+                        fontWeight = FontWeight.Medium,
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = back,
+                            tint = primaryLight
                         )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = back,
-                                tint = primaryLight
-                            )
-                        }
-                    },
-                    windowInsets = WindowInsets(0)
-                )
-            },
-            floatingActionButton = {
-                // Mostrar FAB apenas para admin
-                if (isAdmin) {
-                    Column(
-                        horizontalAlignment = Alignment.End
+                    }
+                },
+                windowInsets = WindowInsets(0)
+            )
+        },
+        floatingActionButton = {
+            // Mostrar FAB apenas para admin
+            if (viewModel.isAdmin) {
+                Column(
+                    horizontalAlignment = Alignment.End
+                ) {
+                    // FAB menu
+                    AnimatedVisibility(
+                        visible = viewModel.showFabActions,
+                        enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }) + expandVertically(),
+                        exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }) + shrinkVertically()
                     ) {
-                        // FAB menu
-                        AnimatedVisibility(
-                            visible = showFabActions,
-                            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }) + expandVertically(),
-                            exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }) + shrinkVertically()
+                        Column(
+                            horizontalAlignment = Alignment.End,
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.padding(bottom = 16.dp)
                         ) {
-                            Column(
-                                horizontalAlignment = Alignment.End,
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.padding(bottom = 16.dp)
-                            ) {
-                                ActionButton(
-                                    icon = Icons.Default.Add,
-                                    label = addTask,
-                                    onClick = {
-                                        showFabActions = false
-                                        onAddTaskClick()
-                                    }
-                                )
+                            ActionButton(
+                                icon = Icons.Default.Add,
+                                label = addTask,
+                                onClick = {
+                                    viewModel.toggleFabActions()
+                                    viewModel.showAddTaskDialog()
+                                }
+                            )
+
+                            ActionButton(
+                                icon = Icons.Default.Edit,
+                                label = editProject,
+                                onClick = {
+                                    viewModel.toggleFabActions()
+                                    // Implementar futuramente
+                                    Toast.makeText(context, "Funcionalidade ainda não implementada", Toast.LENGTH_SHORT).show()
+                                }
+                            )
+
+                            ActionButton(
+                                icon = Icons.Default.Delete,
+                                label = deleteProject,
+                                onClick = {
+                                    viewModel.toggleFabActions()
+                                    viewModel.showDeleteConfirmDialog()
+                                }
+                            )
+
+                            viewModel.projeto?.let { p ->
+                                val nextStatus = when(p.status) {
+                                    "ativo" -> "concluido"
+                                    "concluido" -> "ativo"
+                                    else -> "ativo"
+                                }
+
+                                val statusLabel = when(nextStatus) {
+                                    "concluido" -> markAsActive
+                                    "ativo" -> markAsCompleted
+                                    else -> "Alterar Status"
+                                }
+
+                                val statusIcon = when(nextStatus) {
+                                    "concluido" -> Icons.Default.Done
+                                    else -> Icons.Default.Refresh
+                                }
 
                                 ActionButton(
-                                    icon = Icons.Default.Edit,
-                                    label = editProject,
+                                    icon = statusIcon,
+                                    label = statusLabel,
                                     onClick = {
-                                        showFabActions = false
-                                        // Implementar futuramente
-                                        Toast.makeText(context, "Funcionalidade ainda não implementada", Toast.LENGTH_SHORT).show()
-                                    }
-                                )
-
-                                ActionButton(
-                                    icon = Icons.Default.Delete,
-                                    label = deleteProject,
-                                    onClick = {
-                                        showFabActions = false
-                                        showDeleteConfirmDialog = true
-                                    }
-                                )
-
-                                projeto?.let { p ->
-                                    val nextStatus = when(p.status) {
-                                        "ativo" -> "concluido"
-                                        "concluido" -> "ativo"
-                                        else -> "ativo"
-                                    }
-
-                                    val statusLabel = when(nextStatus) {
-                                        "concluido" -> markAsActive
-                                        "ativo" -> markAsCompleted
-                                        else -> "Alterar Status"
-                                    }
-
-                                    val statusIcon = when(nextStatus) {
-                                        "concluido" -> Icons.Default.Done
-                                        else -> Icons.Default.Refresh
-                                    }
-
-                                    ActionButton(
-                                        icon = statusIcon,
-                                        label = statusLabel,
-                                        onClick = {
-                                            showFabActions = false
-                                            scope.launch {
-                                                try {
-                                                    val result = projetoRepository.alterarStatusProjeto(
-                                                        UUID.fromString(p.id),
-                                                        nextStatus
-                                                    )
-                                                    if (result) {
-                                                        // Recarregar o projeto
-                                                        projeto = projetoRepository.obterProjeto(UUID.fromString(p.id))
-                                                        Toast.makeText(context, statusUpdatedSuccess, Toast.LENGTH_SHORT).show()
-                                                    } else {
-                                                        Toast.makeText(context, statusUpdateFailed, Toast.LENGTH_SHORT).show()
-                                                    }
-                                                } catch (e: Exception) {
-                                                    Toast.makeText(context, statusUpdateError, Toast.LENGTH_SHORT).show()
-                                                    e.printStackTrace()
-                                                }
+                                        viewModel.toggleFabActions()
+                                        scope.launch {
+                                            try {
+                                                viewModel.changeProjectStatus(p.id.toString(), nextStatus)
+                                                Toast.makeText(context, statusUpdatedSuccess, Toast.LENGTH_SHORT).show()
+                                            } catch (e: Exception) {
+                                                Toast.makeText(context, statusUpdateError, Toast.LENGTH_SHORT).show()
+                                                e.printStackTrace()
                                             }
                                         }
-                                    )
-                                }
+                                    }
+                                )
                             }
                         }
+                    }
 
-                        // Main FAB
-                        FloatingActionButton(
-                            onClick = { showFabActions = !showFabActions },
-                        ) {
-                            Icon(
-                                imageVector = if (showFabActions) Icons.Default.Close else Icons.Default.Add,
-                                contentDescription = if (showFabActions) closeMenu else openMenu
-                            )
-                        }
+                    // Main FAB
+                    FloatingActionButton(
+                        onClick = { viewModel.toggleFabActions() },
+                    ) {
+                        Icon(
+                            imageVector = if (viewModel.showFabActions) Icons.Default.Close else Icons.Default.Add,
+                            contentDescription = if (viewModel.showFabActions) closeMenu else openMenu
+                        )
                     }
                 }
-            },
-            contentWindowInsets = WindowInsets(0)
-        ) { paddingValues ->
-            if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = primaryLight)
-                }
-            } else if (projeto != null) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(horizontal = 16.dp)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    // Título do projeto
-                    Text(
-                        text = projeto!!.nome,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(vertical = 16.dp)
-                    )
+            }
+        },
+        contentWindowInsets = WindowInsets(0)
+    ) { paddingValues ->
+        if (viewModel.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = primaryLight)
+            }
+        } else if (viewModel.projeto != null) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // Título do projeto
+                Text(
+                    text = viewModel.projeto!!.nome,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
 
-                    // Status indicator
-                    StatusChip(status = projeto!!.status)
+                // Status indicator
+                StatusChip(status = viewModel.projeto!!.status)
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                    // Seção de progresso
+                // Seção de progresso
+                ProjectInfoSection(
+                    title = stringResource(id = R.string.progress),
+                    content = {
+                        LinearProgressIndicator(
+                            progress = { viewModel.projeto!!.taxaConclusao.toFloat() / 100f },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(4.dp)),
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+
+                        Text(
+                            text = "${viewModel.projeto!!.taxaConclusao}%",
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Seção de descrição
+                viewModel.projeto!!.descricao?.let {
                     ProjectInfoSection(
-                        title = stringResource(id = R.string.progress),
+                        title = stringResource(id = R.string.description),
                         content = {
-                            LinearProgressIndicator(
-                                progress = { projeto!!.taxaConclusao.toFloat() / 100f },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(8.dp)
-                                    .clip(RoundedCornerShape(4.dp)),
-                                color = MaterialTheme.colorScheme.primary,
-                                trackColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-
                             Text(
-                                text = "${projeto!!.taxaConclusao}%",
-                                fontSize = 14.sp,
-                                modifier = Modifier.padding(top = 4.dp)
+                                text = it,
+                                fontSize = 16.sp,
                             )
                         }
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
-
-                    // Seção de descrição
-                    projeto!!.descricao?.let {
-                        ProjectInfoSection(
-                            title = stringResource(id = R.string.description),
-                            content = {
-                                Text(
-                                    text = it,
-                                    fontSize = 16.sp,
-                                )
-                            }
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
+                }
 
                     // Seção de datas
                     ProjectInfoSection(
@@ -319,13 +287,14 @@ fun ProjectDetailScreen(
                         content = {
                             val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
-                            val createdDate = projeto!!.createdAt?.let {
+                            val createdDate = viewModel.projeto!!.createdAt?.let {
                                 stringResource(id = R.string.created_at, formatDate(it) ?: it)
                             } ?: stringResource(id = R.string.unknown_creation_date)
 
-                            val updatedDate = projeto!!.updatedAt?.let {
+                            val updatedDate = viewModel.projeto!!.updatedAt?.let {
                                 stringResource(id = R.string.updated_at, formatDate(it) ?: it)
                             } ?: stringResource(id = R.string.unknown_update_date)
+
 
                             Column {
                                 Text(
@@ -343,7 +312,7 @@ fun ProjectDetailScreen(
                         }
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                     // Seção de trabalhadores (Placeholder)
                     ProjectInfoSection(
@@ -380,48 +349,70 @@ fun ProjectDetailScreen(
             }
         }
 
-        // Diálogo de confirmação para apagar projeto
-        if (showDeleteConfirmDialog) {
-            AlertDialog(
-                onDismissRequest = { showDeleteConfirmDialog = false },
-                title = { Text(confirmDeleteTitle) },
-                text = {
-                    Text(stringResource(id = R.string.confirm_delete_text, projeto?.nome ?: ""))
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            showDeleteConfirmDialog = false
-                            projeto?.id?.let { projetoId ->
-                                scope.launch {
-                                    try {
-                                        val result = projetoRepository.apagarProjeto(UUID.fromString(projetoId))
-                                        if (result) {
-                                            Toast.makeText(context, deleteSuccess, Toast.LENGTH_SHORT).show()
-                                            onBackClick()
-                                        } else {
-                                            Toast.makeText(context, deleteFailed, Toast.LENGTH_SHORT).show()
-                                        }
-                                    } catch (e: Exception) {
-                                        Toast.makeText(context, context.getString(R.string.delete_error, e.message ?: ""), Toast.LENGTH_SHORT).show()
-                                        e.printStackTrace()
-                                    }
+    // Diálogo de confirmação para apagar projeto
+    if (viewModel.showDeleteConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.hideDeleteConfirmDialog() },
+            title = { Text(confirmDeleteTitle) },
+            text = {
+                Text(stringResource(id = R.string.confirm_delete_text, viewModel.projeto?.nome ?: ""))
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.projeto?.id?.let { projId ->
+                            scope.launch {
+                                try {
+                                    viewModel.deleteProject(projId)
+                                    Toast.makeText(context, deleteSuccess, Toast.LENGTH_SHORT).show()
+                                    onBackClick()
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, context.getString(R.string.delete_error, e.message ?: ""), Toast.LENGTH_SHORT).show()
+                                    e.printStackTrace()
                                 }
                             }
-                        },
-                    ) {
-                        Text("Apagar")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = { showDeleteConfirmDialog = false }
-                    ) {
-                        Text("Cancelar")
+                        }
+                    },
+                ) {
+                    Text("Apagar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { viewModel.hideDeleteConfirmDialog() }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    // Diálogo para adicionar tarefa
+    if (viewModel.showAddTaskDialog) {
+        AddTaskDialog(
+            show = true,
+            onDismiss = { viewModel.hideAddTaskDialog() },
+            onAddTask = { nome, descricao, prioridade, status, dataInicio, dataFim ->
+                // Lógica para adicionar tarefa agora delegada ao ViewModel
+                scope.launch {
+                    try {
+                        viewModel.addTask(
+                            projetoId = projetoId,
+                            nome = nome,
+                            descricao = descricao,
+                            prioridade = prioridade,
+                            status = status,
+                            dataInicio = dataInicio,
+                            dataFim = dataFim
+                        )
+                        Toast.makeText(context, "Tarefa adicionada com sucesso", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Erro ao adicionar tarefa: ${e.message}", Toast.LENGTH_SHORT).show()
+                        e.printStackTrace()
                     }
                 }
-            )
-        }
+            }
+        )
     }
 }
 

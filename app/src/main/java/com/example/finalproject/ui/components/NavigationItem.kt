@@ -1,4 +1,4 @@
-package com.example.finalproject.components
+package com.example.finalproject.ui.components
 
 import androidx.compose.ui.graphics.vector.ImageVector
 
