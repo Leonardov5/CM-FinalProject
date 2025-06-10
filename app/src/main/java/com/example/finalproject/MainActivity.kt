@@ -5,20 +5,33 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import com.example.finalproject.ui.theme.FinalProjectTheme
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.data.sync.SyncWorker
 import com.example.finalproject.data.service.AuthService
 import com.example.finalproject.ui.screens.auth.LoginScreen
+import com.example.finalproject.utils.updateAppLanguage
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        lifecycleScope.launch {
+            AuthService.refreshSession()
+        }
         super.onCreate(savedInstanceState)
+
 
         fun scheduleSyncOnNetworkAvailable() {
             val constraints = Constraints.Builder()
@@ -34,10 +47,21 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
+
+            var isSessionChecked by remember { mutableStateOf(false) }
+            var isAuthenticated by remember { mutableStateOf(false) }
+
+            LaunchedEffect(Unit) {
+                AuthService.refreshSession()
+                isAuthenticated = AuthService.isAuthenticated()
+                isSessionChecked = true
+            }
+
+
             FinalProjectTheme(dynamicColor = false) {
                 // Usar o Navigation Component
                 AppNavigation(
-                    startDestination = if (AuthService.isAuthenticated()) {
+                    startDestination = if (isAuthenticated) {
                         Screen.TaskManagement.route
                     } else {
                         Screen.Login.route

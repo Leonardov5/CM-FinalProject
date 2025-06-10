@@ -41,26 +41,26 @@ fun ProjectsScreen(
     onProfileClick: () -> Unit = {},
     onProjectClick: (String) -> Unit = {}, // Callback para navegação para detalhes do projeto
 ) {
+    println("ProjectsScreen: Composable chamado")
     val viewModel: ProjectsViewModel = viewModel()
     var isLanguageLoaded by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    val noProjectsFound = stringResource(id = R.string.no_projects_found)
-    val newProjectDialogTitle = stringResource(id = R.string.new_project_dialog_title)
-    val projectNameLabel = stringResource(id = R.string.project_name_label)
-    val projectDescriptionLabel = stringResource(id = R.string.project_description_label)
-    val cancel = stringResource(id = R.string.cancel)
-    val create = stringResource(id = R.string.create)
-    val projectCreatedSuccess = stringResource(id = R.string.project_created_success)
-
-
     LaunchedEffect(Unit) {
         val savedLanguage = PreferencesManager.getLanguage(context)
         updateAppLanguage(context, savedLanguage)
+        println("Current language: $savedLanguage")
         isLanguageLoaded = true
     }
 
     if(isLanguageLoaded){
+        val noProjectsFound = stringResource(id = R.string.no_projects_found)
+        val newProjectDialogTitle = stringResource(id = R.string.new_project_dialog_title)
+        val projectNameLabel = stringResource(id = R.string.project_name_label)
+        val projectDescriptionLabel = stringResource(id = R.string.project_description_label)
+        val cancel = stringResource(id = R.string.cancel)
+        val create = stringResource(id = R.string.create)
+        val projectCreatedSuccess = stringResource(id = R.string.project_created_success)
         Scaffold(
             topBar = {
                 TopAppBar(

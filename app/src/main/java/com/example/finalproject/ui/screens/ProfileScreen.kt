@@ -68,6 +68,8 @@ fun ProfileScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val savedLanguage = PreferencesManager.getLanguage(context)
+    var selectedLanguage by remember { mutableStateOf("") }
     val viewModel: ProfileViewModel = viewModel()
 
     // Carregar dados do perfil
@@ -78,9 +80,8 @@ fun ProfileScreen(
 
     // Estados para controle de UI do menu de idioma
     var isLanguageMenuExpanded by remember { mutableStateOf(false) }
-    var selectedLanguage by remember { mutableStateOf("Português") }
 
-// Carregue as strings no início do Composable
+    // Carregue as strings no início do Composable
     val profileTitle = stringResource(id = R.string.profile_title)
     val changeLanguage = stringResource(id = R.string.change_language)
     val portuguese = stringResource(id = R.string.portuguese)
@@ -93,6 +94,10 @@ fun ProfileScreen(
     val updatePasswordButton = stringResource(id = R.string.update_password_button)
     val confirmPasswordDialogTitle = stringResource(id = R.string.confirm_password_dialog_title)
     val confirmPasswordDialogMessage = stringResource(id = R.string.confirm_password_dialog_message)
+
+    LaunchedEffect(savedLanguage, portuguese, english) {
+        selectedLanguage = if (savedLanguage == "en") english else portuguese
+    }
 
 
     // Launcher para seleção de imagem da galeria

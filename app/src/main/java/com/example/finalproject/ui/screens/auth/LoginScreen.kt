@@ -72,6 +72,7 @@ fun LoginScreen(
 
     LaunchedEffect(Unit) {
         val savedLanguage = PreferencesManager.getLanguage(context)
+        println("savedLanguage: $savedLanguage")
         updateAppLanguage(context, savedLanguage)
         isLanguageLoaded = true
     }
