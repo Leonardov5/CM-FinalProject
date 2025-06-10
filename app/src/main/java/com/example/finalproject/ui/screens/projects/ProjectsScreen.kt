@@ -1,6 +1,8 @@
 package com.example.finalproject.ui.screens.projects
 
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,7 +35,9 @@ import androidx.compose.ui.res.stringResource
 import com.example.finalproject.R
 import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.utils.updateAppLanguage
+import com.example.finalproject.ui.components.projects.AddTaskDialog
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectsScreen(
@@ -41,26 +45,30 @@ fun ProjectsScreen(
     onProfileClick: () -> Unit = {},
     onProjectClick: (String) -> Unit = {}, // Callback para navegação para detalhes do projeto
 ) {
-    println("ProjectsScreen: Composable chamado")
     val viewModel: ProjectsViewModel = viewModel()
     var isLanguageLoaded by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
+    val noProjectsFound = stringResource(id = R.string.no_projects_found)
+    val newProjectDialogTitle = stringResource(id = R.string.new_project_dialog_title)
+    val projectNameLabel = stringResource(id = R.string.project_name_label)
+    val projectDescriptionLabel = stringResource(id = R.string.project_description_label)
+    val cancel = stringResource(id = R.string.cancel)
+    val create = stringResource(id = R.string.create)
+    val projectCreatedSuccess = stringResource(id = R.string.project_created_success)
+
+
     LaunchedEffect(Unit) {
         val savedLanguage = PreferencesManager.getLanguage(context)
         updateAppLanguage(context, savedLanguage)
-        println("Current language: $savedLanguage")
         isLanguageLoaded = true
     }
 
     if(isLanguageLoaded){
-        val noProjectsFound = stringResource(id = R.string.no_projects_found)
-        val newProjectDialogTitle = stringResource(id = R.string.new_project_dialog_title)
-        val projectNameLabel = stringResource(id = R.string.project_name_label)
-        val projectDescriptionLabel = stringResource(id = R.string.project_description_label)
-        val cancel = stringResource(id = R.string.cancel)
-        val create = stringResource(id = R.string.create)
-        val projectCreatedSuccess = stringResource(id = R.string.project_created_success)
+        // Sempre que a tela for recomposicionada, recarrega os projetos
+        LaunchedEffect(Unit) {
+            viewModel.loadProjects()
+        }
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -98,7 +106,7 @@ fun ProjectsScreen(
                             Icon(
                                 Icons.Default.AccountCircle,
                                 contentDescription = stringResource(id = R.string.profile),
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = primaryLight
                             )
                         }
                     },
@@ -112,7 +120,16 @@ fun ProjectsScreen(
                 // Só mostrar o FAB se o usuário for admin
                 if (viewModel.isAdmin) {
                     FloatingActionButton(
-                        onClick = { viewModel.showAddProjectDialog() },
+                        onClick = {
+                            if (viewModel.projects.isNotEmpty()) {
+                                // Se tiver projetos, mostra o diálogo para escolher
+                                // entre adicionar projeto ou tarefa
+                                viewModel.showAddProjectDialog()
+                            } else {
+                                // Se não tiver projetos, só pode adicionar projetos
+                                viewModel.showAddProjectDialog()
+                            }
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
@@ -321,6 +338,7 @@ fun ProjectCard(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun ProjectsScreenPreview() {

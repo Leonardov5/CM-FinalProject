@@ -8,11 +8,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.data.model.User
 import com.example.finalproject.data.repository.ProjetoRepository
+import com.example.finalproject.data.repository.TarefaRepository
 import com.example.finalproject.data.service.UserService
 import kotlinx.coroutines.launch
 
 class ProjectsViewModel(
-    private val projetoRepository: ProjetoRepository = ProjetoRepository()
+    private val projetoRepository: ProjetoRepository = ProjetoRepository(),
+    private val tarefaRepository: TarefaRepository = TarefaRepository()
 ) : ViewModel() {
 
     // Estados UI
@@ -29,6 +31,10 @@ class ProjectsViewModel(
         private set
 
     var showAddDialog by mutableStateOf(false)
+        private set
+
+
+    var selectedProjectUuid by mutableStateOf<String?>(null)
         private set
 
     var projectName by mutableStateOf("")
