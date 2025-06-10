@@ -124,7 +124,6 @@ fun ProjectDetailScreen(
                         Text(
                             text = stringResource(id = R.string.project_details_title),
                             fontWeight = FontWeight.Medium,
-                            color = onBackgroundLight
                         )
                     },
                     navigationIcon = {
@@ -136,10 +135,6 @@ fun ProjectDetailScreen(
                             )
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = backgroundLight,
-                        titleContentColor = onBackgroundLight
-                    ),
                     windowInsets = WindowInsets(0)
                 )
             },
@@ -238,8 +233,6 @@ fun ProjectDetailScreen(
                         // Main FAB
                         FloatingActionButton(
                             onClick = { showFabActions = !showFabActions },
-                            containerColor = primaryLight,
-                            contentColor = onPrimaryLight
                         ) {
                             Icon(
                                 imageVector = if (showFabActions) Icons.Default.Close else Icons.Default.Add,
@@ -249,7 +242,6 @@ fun ProjectDetailScreen(
                     }
                 }
             },
-            containerColor = backgroundLight,
             contentWindowInsets = WindowInsets(0)
         ) { paddingValues ->
             if (isLoading) {
@@ -274,7 +266,6 @@ fun ProjectDetailScreen(
                         text = projeto!!.nome,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        color = onBackgroundLight,
                         modifier = Modifier.padding(vertical = 16.dp)
                     )
 
@@ -293,14 +284,13 @@ fun ProjectDetailScreen(
                                     .fillMaxWidth()
                                     .height(8.dp)
                                     .clip(RoundedCornerShape(4.dp)),
-                                color = primaryLight,
-                                trackColor = surfaceVariantLight
+                                color = MaterialTheme.colorScheme.primary,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant
                             )
 
                             Text(
                                 text = "${projeto!!.taxaConclusao}%",
                                 fontSize = 14.sp,
-                                color = onBackgroundLight,
                                 modifier = Modifier.padding(top = 4.dp)
                             )
                         }
@@ -316,7 +306,6 @@ fun ProjectDetailScreen(
                                 Text(
                                     text = it,
                                     fontSize = 16.sp,
-                                    color = onBackgroundLight
                                 )
                             }
                         )
@@ -342,7 +331,6 @@ fun ProjectDetailScreen(
                                 Text(
                                     text = createdDate,
                                     fontSize = 16.sp,
-                                    color = onBackgroundLight
                                 )
 
                                 Spacer(modifier = Modifier.height(4.dp))
@@ -350,7 +338,6 @@ fun ProjectDetailScreen(
                                 Text(
                                     text = updatedDate,
                                     fontSize = 16.sp,
-                                    color = onBackgroundLight
                                 )
                             }
                         }
@@ -369,7 +356,6 @@ fun ProjectDetailScreen(
                                 Text(
                                     text = stringResource(id = R.string.no_workers),
                                     fontSize = 16.sp,
-                                    color = onBackgroundLight
                                 )
                             }
                         }
@@ -389,7 +375,6 @@ fun ProjectDetailScreen(
                     Text(
                         text = notFound,
                         fontSize = 16.sp,
-                        color = onSurfaceVariantLight
                     )
                 }
             }
@@ -424,10 +409,6 @@ fun ProjectDetailScreen(
                                 }
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = errorLight,
-                            contentColor = onErrorLight
-                        )
                     ) {
                         Text("Apagar")
                     }
@@ -455,7 +436,6 @@ private fun ProjectInfoSection(
             text = title,
             fontSize = 18.sp,
             fontWeight = FontWeight.Medium,
-            color = primaryLight
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -467,11 +447,11 @@ private fun ProjectInfoSection(
 @Composable
 private fun StatusChip(status: String) {
     val (backgroundColor, textColor, statusText) = when(status) {
-        "ativo" -> Triple(secondaryLight, onSecondaryLight, stringResource(id = R.string.active))
-        "concluido" -> Triple(primaryLight, onPrimaryLight, stringResource(id = R.string.completed))
-        "inativo" -> Triple(surfaceVariantLight, onSurfaceVariantLight, stringResource(id = R.string.inactive))
-        "cancelado" -> Triple(errorLight, onErrorLight, stringResource(id = R.string.cancelled))
-        else -> Triple(surfaceVariantLight, onSurfaceVariantLight, status.replaceFirstChar { it.uppercase() })
+        "ativo" -> Triple(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer, stringResource(id = R.string.active))
+        "concluido" -> Triple(MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer, stringResource(id = R.string.completed))
+        "inativo" -> Triple(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.onSurfaceVariant, stringResource(id = R.string.inactive))
+        "cancelado" -> Triple(MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.onErrorContainer, stringResource(id = R.string.cancelled))
+        else -> Triple(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.onSurfaceVariant, status.replaceFirstChar { it.uppercase() })
     }
 
     Surface(

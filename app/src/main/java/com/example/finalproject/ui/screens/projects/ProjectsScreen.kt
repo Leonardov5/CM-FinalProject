@@ -72,7 +72,7 @@ fun ProjectsScreen(
                             Surface(
                                 modifier = Modifier.fillMaxWidth(0.7f),
                                 shape = RoundedCornerShape(25.dp),
-                                color = surfaceVariantLight
+                                color = MaterialTheme.colorScheme.surfaceVariant
                             ) {
                                 Text(
                                     text = stringResource(id = R.string.projects_title),
@@ -80,7 +80,6 @@ fun ProjectsScreen(
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Medium,
                                     textAlign = TextAlign.Center,
-                                    color = onSurfaceVariantLight
                                 )
                             }
                         }
@@ -90,7 +89,7 @@ fun ProjectsScreen(
                             Icon(
                                 Icons.Default.Menu,
                                 contentDescription = stringResource(id = R.string.menu),
-                                tint = primaryLight
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     },
@@ -99,12 +98,12 @@ fun ProjectsScreen(
                             Icon(
                                 Icons.Default.AccountCircle,
                                 contentDescription = stringResource(id = R.string.profile),
-                                tint = primaryLight
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = backgroundLight
+                        containerColor = MaterialTheme.colorScheme.background
                     ),
                     windowInsets = WindowInsets(0)
                 )
@@ -114,8 +113,6 @@ fun ProjectsScreen(
                 if (viewModel.isAdmin) {
                     FloatingActionButton(
                         onClick = { viewModel.showAddProjectDialog() },
-                        containerColor = primaryLight,
-                        contentColor = onPrimaryLight
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
@@ -124,7 +121,7 @@ fun ProjectsScreen(
                     }
                 }
             },
-            containerColor = backgroundLight,
+            containerColor = MaterialTheme.colorScheme.background,
             contentWindowInsets = WindowInsets(0, 0, 0, 0)
         ) { paddingValues ->
             // Projects List
@@ -135,7 +132,7 @@ fun ProjectsScreen(
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = primaryLight)
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             } else {
                 LazyColumn(
@@ -171,7 +168,6 @@ fun ProjectsScreen(
                                 Text(
                                     text = noProjectsFound,
                                     fontSize = 16.sp,
-                                    color = onSurfaceVariantLight
                                 )
                             }
                         }
@@ -201,7 +197,6 @@ fun ProjectsScreen(
                                 text = newProjectDialogTitle,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = onPrimaryContainerLight,
                                 modifier = Modifier.padding(bottom = 16.dp)
                             )
 
@@ -213,13 +208,7 @@ fun ProjectsScreen(
                                     .fillMaxWidth()
                                     .padding(bottom = 16.dp),
                                 singleLine = true,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = primaryLight,
-                                    unfocusedBorderColor = primaryLight.copy(alpha = 0.7f),
-                                    focusedLabelColor = primaryLight,
-                                    unfocusedLabelColor = primaryLight.copy(alpha = 0.7f),
-                                    cursorColor = primaryLight
-                                )
+
                             )
 
                             OutlinedTextField(
@@ -231,13 +220,7 @@ fun ProjectsScreen(
                                     .height(120.dp)
                                     .padding(bottom = 16.dp),
                                 singleLine = false,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = primaryLight,
-                                    unfocusedBorderColor = primaryLight.copy(alpha = 0.7f),
-                                    focusedLabelColor = primaryLight,
-                                    unfocusedLabelColor = primaryLight.copy(alpha = 0.7f),
-                                    cursorColor = primaryLight
-                                )
+
                             )
 
                             Row(
@@ -246,9 +229,7 @@ fun ProjectsScreen(
                             ) {
                                 TextButton(
                                     onClick = { viewModel.hideAddProjectDialog() },
-                                    colors = ButtonDefaults.textButtonColors(
-                                        contentColor = primaryLight
-                                    )
+
                                 ) {
                                     Text(cancel)
                                 }
@@ -266,10 +247,7 @@ fun ProjectsScreen(
                                             }
                                         )
                                     },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = primaryLight,
-                                        contentColor = onPrimaryLight
-                                    )
+
                                 ) {
                                     Text(create)
                                 }
@@ -298,8 +276,8 @@ fun ProjectCard(
                 }
             },
         shape = RoundedCornerShape(12.dp),
-        color = secondaryContainerLight,
-        shadowElevation = 2.dp
+        shadowElevation = 2.dp,
+        color = MaterialTheme.colorScheme.tertiaryContainer
     ) {
         Row(
             modifier = Modifier
@@ -310,7 +288,7 @@ fun ProjectCard(
             Icon(
                 imageVector = Icons.Default.Menu,
                 contentDescription = null,
-                tint = onSecondaryContainerLight,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
                 modifier = Modifier.size(24.dp)
             )
 
@@ -323,13 +301,11 @@ fun ProjectCard(
                     text = projectName,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
-                    color = onSecondaryContainerLight
                 )
 
                 Text(
                     text = lastUpdated,
                     fontSize = 12.sp,
-                    color = onSecondaryContainerLight.copy(alpha = 0.7f)
                 )
             }
 
@@ -338,7 +314,7 @@ fun ProjectCard(
                     imageVector = Icons.Default.KeyboardArrowUp,
                     contentDescription = stringResource(id = R.string.view_details),
                     modifier = Modifier.rotate(90f),
-                    tint = onSecondaryContainerLight
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
         }

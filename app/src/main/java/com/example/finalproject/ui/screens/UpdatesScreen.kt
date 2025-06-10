@@ -50,7 +50,7 @@ fun UpdatesScreen(
                         Surface(
                             modifier = Modifier.fillMaxWidth(0.7f),
                             shape = RoundedCornerShape(25.dp),
-                            color = surfaceVariantLight
+                            color = MaterialTheme.colorScheme.surfaceVariant
                         ) {
                             Text(
                                 text = "Updates",
@@ -58,7 +58,7 @@ fun UpdatesScreen(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium,
                                 textAlign = TextAlign.Center,
-                                color = onSurfaceVariantLight
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -68,7 +68,7 @@ fun UpdatesScreen(
                         Icon(
                             Icons.Default.Menu,
                             contentDescription = "Menu",
-                            tint = primaryLight
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
@@ -77,18 +77,18 @@ fun UpdatesScreen(
                         Icon(
                             Icons.Default.AccountCircle,
                             contentDescription = "Profile",
-                            tint = primaryLight
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = backgroundLight
+                    containerColor = MaterialTheme.colorScheme.background
                 ),
                 windowInsets = WindowInsets(0)
             )
         },
         modifier = modifier.fillMaxSize(),
-        containerColor = backgroundLight,
+        containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         if (viewModel.isLoading) {
@@ -98,7 +98,7 @@ fun UpdatesScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = primaryLight)
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else {
             // Updates List
@@ -131,11 +131,11 @@ fun UpdateCard(
 ) {
     Surface(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
+            .fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = if (update.isNew) secondaryContainerLight else surfaceLight,
-        shadowElevation = 2.dp
+        color = if (update.isNew) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceContainer,
+        shadowElevation = 2.dp,
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier
@@ -148,13 +148,13 @@ fun UpdateCard(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(if (update.isNew) tertiaryLight.copy(alpha = 0.2f) else surfaceVariantLight),
+                    .background(if (update.isNew) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = null,
-                    tint = if (update.isNew) tertiaryLight else outlineLight,
+                    tint = if (update.isNew) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -168,7 +168,7 @@ fun UpdateCard(
                     text = update.title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
-                    color = if (update.isNew) onTertiaryContainerLight else onSurfaceLight
+                    color = if (update.isNew) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -176,7 +176,7 @@ fun UpdateCard(
                 Text(
                     text = update.message,
                     fontSize = 14.sp,
-                    color = if (update.isNew) onTertiaryContainerLight else onSurfaceLight
+                    color = if (update.isNew) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -184,7 +184,7 @@ fun UpdateCard(
                 Text(
                     text = update.date,
                     fontSize = 12.sp,
-                    color = if (update.isNew) onTertiaryContainerLight.copy(alpha = 0.7f) else onSurfaceLight.copy(alpha = 0.7f)
+                    color = if (update.isNew) MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
             }
 
@@ -193,7 +193,7 @@ fun UpdateCard(
                     modifier = Modifier
                         .size(8.dp)
                         .clip(CircleShape)
-                        .background(tertiaryLight)
+                        .background(MaterialTheme.colorScheme.tertiary)
                 )
             }
         }
