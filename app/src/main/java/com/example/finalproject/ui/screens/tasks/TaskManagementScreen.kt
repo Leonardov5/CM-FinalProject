@@ -2,6 +2,7 @@ package com.example.finalproject.ui.screens.tasks
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -77,7 +78,8 @@ fun TaskManagementScreen(
                     titleContentColor = onBackgroundLight,
                     navigationIconContentColor = onBackgroundLight,
                     actionIconContentColor = onBackgroundLight
-                )
+                ),
+                windowInsets = WindowInsets(0)
             )
         }
     ) { paddingValues ->

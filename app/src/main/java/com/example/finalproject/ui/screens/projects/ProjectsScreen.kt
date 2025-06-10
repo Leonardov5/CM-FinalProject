@@ -105,7 +105,8 @@ fun ProjectsScreen(
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = backgroundLight
-                    )
+                    ),
+                    windowInsets = WindowInsets(0)
                 )
             },
             floatingActionButton = {

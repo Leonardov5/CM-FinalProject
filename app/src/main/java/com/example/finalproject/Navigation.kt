@@ -3,6 +3,7 @@ package com.example.finalproject
 import com.example.finalproject.ui.screens.tasks.TaskDetailScreen
 import android.net.http.SslCertificate.saveState
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -64,7 +65,6 @@ fun AppNavigation(
     }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
         bottomBar = {
             if (showBottomBar) {
                 BottomNavigation(
@@ -210,5 +210,3 @@ fun AppNavigation(
         }
     }
 }
-
-

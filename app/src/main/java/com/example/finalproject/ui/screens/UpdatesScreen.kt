@@ -83,7 +83,8 @@ fun UpdatesScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backgroundLight
-                )
+                ),
+                windowInsets = WindowInsets(0)
             )
         },
         modifier = modifier.fillMaxSize(),
