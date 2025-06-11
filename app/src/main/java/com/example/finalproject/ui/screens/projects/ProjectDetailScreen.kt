@@ -432,14 +432,14 @@ fun ProjectDetailScreen(
                         }
                     },
                 ) {
-                    Text("Apagar")
+                    Text(stringResource(id = R.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = { viewModel.hideDeleteConfirmDialog() }
                 ) {
-                    Text("Cancelar")
+                    Text(stringResource(id = R.string.cancel))
                 }
             }
         )
@@ -463,10 +463,17 @@ fun ProjectDetailScreen(
                             dataInicio = dataInicio,
                             dataFim = dataFim
                         )
-                        Toast.makeText(context, "Tarefa adicionada com sucesso", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.task_added_success),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     } catch (e: Exception) {
-                        Toast.makeText(context, "Erro ao adicionar tarefa: ${e.message}", Toast.LENGTH_SHORT).show()
-                        e.printStackTrace()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.task_add_error, e.message ?: ""),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
@@ -478,9 +485,12 @@ fun ProjectDetailScreen(
         LaunchedEffect(Unit) {
             viewModel.loadAllUsers()
         }
+        val usersNotInProject = viewModel.allUsers.filter { user ->
+            viewModel.membrosProjeto.none { membro -> membro.id == user.id }
+        }
         AddMemberDialog(
             isAdmin = viewModel.isAdmin,
-            users = viewModel.allUsers,
+            users = usersNotInProject,
             onDismiss = { viewModel.hideAddMemberDialog() },
             onAdd = { userId, isManager ->
                 scope.launch {

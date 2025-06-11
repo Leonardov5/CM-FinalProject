@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import com.example.finalproject.data.model.User
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.ui.res.stringResource
+import com.example.finalproject.R
 
 @Composable
 fun AddMemberDialog(
@@ -35,7 +37,7 @@ fun AddMemberDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Adicionar membro ao projeto") },
+        title = { Text(stringResource(id = R.string.add_member_dialog_title)) },
         text = {
             Column {
                 OutlinedTextField(
@@ -45,7 +47,7 @@ fun AddMemberDialog(
                         expanded = it.isNotBlank() && filteredUsers.isNotEmpty()
                         selectedUser = null
                     },
-                    label = { Text("Pesquisar utilizador") },
+                    label = { Text(stringResource(id = R.string.search_user)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -74,7 +76,7 @@ fun AddMemberDialog(
                             checked = isManager,
                             onCheckedChange = { isManager = it }
                         )
-                        Text("Gestor")
+                        Text(stringResource(id = R.string.manager))
                     }
                 }
             }
@@ -83,10 +85,10 @@ fun AddMemberDialog(
             Button(
                 onClick = { selectedUser?.let { onAdd(it.id, isManager) } },
                 enabled = selectedUser != null
-            ) { Text("Adicionar") }
+            ) { Text(stringResource(id = R.string.add)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            TextButton(onClick = onDismiss) { Text(stringResource(id = R.string.cancel)) }
         }
     )
 }

@@ -116,4 +116,11 @@
     <string name="bottom_nav_updates">Updates</string>
     <string name="view_tasks">See Tasks</string>
     <string name="add_member">Add Member</string>
+    <string name="add_member_dialog_title">Add member to project</string>
+    <string name="search_user">Search user</string>
+    <string name="manager">Manager</string>
+    <string name="add">Add</string>
+    <string name="task_added_success">Task added successfully</string>
+    <string name="task_add_error">Error adding task: %1$s</string>
+    <string name="member_added_success">Member added successfully</string>
 </resources>

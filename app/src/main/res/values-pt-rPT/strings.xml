@@ -116,4 +116,11 @@
     <string name="bottom_nav_updates">Atualizações</string>
     <string name="view_tasks">Ver Tarefas</string>
     <string name="add_member">Adicionar Membro</string>
+    <string name="add_member_dialog_title">Adicionar membro ao projeto</string>
+    <string name="search_user">Pesquisar utilizador</string>
+    <string name="manager">Gestor</string>
+    <string name="add">Adicionar</string>
+    <string name="task_added_success">Tarefa adicionada com sucesso</string>
+    <string name="task_add_error">Erro ao adicionar tarefa: %1$s</string>
+    <string name="member_added_success">Membro adicionado com sucesso</string>
 </resources>
