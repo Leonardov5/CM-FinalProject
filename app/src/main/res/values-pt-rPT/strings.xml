@@ -114,5 +114,13 @@
     <string name="bottom_nav_tasks">Tarefas</string>
     <string name="bottom_nav_projects">Projetos</string>
     <string name="bottom_nav_updates">Atualizações</string>
+    <string name="project_name">Nome do Projeto</string>
+    <string name="status">Estado</string>
+    <string name="completion_rate">Taxa de conclusão</string>
+    <string name="completion_rate_error">O valor deve estar entre 0 e 100</string>
+    <string name="unknown_error">Erro desconhecido</string>
+    <string name="save">Guardar</string>
+    <string name="project_updated_success">Projeto atualizado com sucesso</string>
+    <string name="project_update_error">Erro ao atualizar projeto</string>
     <string name="view_tasks">Ver Tarefas</string>
 </resources>
