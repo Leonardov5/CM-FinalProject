@@ -1,5 +1,6 @@
 package com.example.finalproject.ui.screens.projects
 
+import AddMemberDialog
 import android.app.Activity
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
+import androidx.compose.material3.ScaffoldDefaults.contentWindowInsets
 import androidx.compose.ui.res.stringResource
 import com.example.finalproject.R
 import com.example.finalproject.data.PreferencesManager
@@ -78,6 +80,8 @@ fun ProjectDetailScreen(
     LaunchedEffect(key1 = true) {
         viewModel.loadUser(currentUser)
         viewModel.loadProject(projetoId)
+        viewModel.checkIfManager(projetoId)
+        viewModel.loadMembrosProjeto(projetoId)
 
         val savedLanguage = PreferencesManager.getLanguage(context)
         print("Saved language: $savedLanguage")
@@ -134,21 +138,22 @@ fun ProjectDetailScreen(
         },
         floatingActionButton = {
             // Mostrar FAB apenas para admin
-            if (viewModel.isAdmin) {
-                Column(
-                    horizontalAlignment = Alignment.End
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
+                // FAB menu
+                AnimatedVisibility(
+                    visible = viewModel.showFabActions,
+                    enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }) + expandVertically(),
+                    exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }) + shrinkVertically()
                 ) {
-                    // FAB menu
-                    AnimatedVisibility(
-                        visible = viewModel.showFabActions,
-                        enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }) + expandVertically(),
-                        exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }) + shrinkVertically()
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(bottom = 16.dp)
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.End,
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        ) {
+
+                        if( viewModel.isAdmin  || viewModel.isManager) {
                             ActionButton(
                                 icon = Icons.Default.Add,
                                 label = addTask,
@@ -157,16 +162,27 @@ fun ProjectDetailScreen(
                                     viewModel.showAddTaskDialog()
                                 }
                             )
+                        }
 
+                        ActionButton(
+                            icon = Icons.Default.List,
+                            label = viewTasks,
+                            onClick = {
+                                viewModel.toggleFabActions()
+                                viewModel.onViewTasksClick()
+                            }
+                        )
+                        if( viewModel.isAdmin || viewModel.isManager) {
                             ActionButton(
-                                icon = Icons.Default.List,
-                                label = viewTasks,
+                                icon = Icons.Default.PersonAdd,
+                                label = stringResource(id = R.string.add_member),
                                 onClick = {
                                     viewModel.toggleFabActions()
-                                    viewModel.onViewTasksClick()
+                                    viewModel.showAddMemberDialog()
                                 }
                             )
-
+                        }
+                        if( viewModel.isAdmin) {
                             ActionButton(
                                 icon = Icons.Default.Edit,
                                 label = editProject,
@@ -176,6 +192,9 @@ fun ProjectDetailScreen(
                                 }
                             )
 
+
+
+                       if( viewModel.isAdmin) {
 
                             ActionButton(
                                 icon = Icons.Default.Delete,
@@ -187,16 +206,16 @@ fun ProjectDetailScreen(
                             )
                         }
                     }
+                }
 
-                    // Main FAB
-                    FloatingActionButton(
-                        onClick = { viewModel.toggleFabActions() },
-                    ) {
-                        Icon(
-                            imageVector = if (viewModel.showFabActions) Icons.Default.Close else Icons.Default.Add,
-                            contentDescription = if (viewModel.showFabActions) closeMenu else openMenu
-                        )
-                    }
+                // Main FAB
+                FloatingActionButton(
+                    onClick = { viewModel.toggleFabActions() },
+                ) {
+                    Icon(
+                        imageVector = if (viewModel.showFabActions) Icons.Default.Close else Icons.Default.Add,
+                        contentDescription = if (viewModel.showFabActions) closeMenu else openMenu
+                    )
                 }
             }
         },
@@ -304,21 +323,26 @@ fun ProjectDetailScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                    // Seção de trabalhadores (Placeholder)
-                    ProjectInfoSection(
-                        title = stringResource(id = R.string.workers),
-                        content = {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                // Placeholder para futura implementação
-                                Text(
-                                    text = stringResource(id = R.string.no_workers),
-                                    fontSize = 16.sp,
-                                )
+                ProjectInfoSection(
+                    title = stringResource(id = R.string.workers),
+                    content = {
+                        if (viewModel.membrosProjeto.isEmpty()) {
+                            Text(
+                                text = stringResource(id = R.string.no_workers),
+                                fontSize = 16.sp,
+                            )
+                        } else {
+                            Column {
+                                viewModel.membrosProjeto.forEach { user ->
+                                    Text(
+                                        text = user.nome,
+                                        fontSize = 16.sp,
+                                    )
+                                }
                             }
                         }
-                    )
+                    }
+                )
 
                     // Espaço para o FAB
                     Spacer(modifier = Modifier.height(100.dp))
@@ -364,14 +388,14 @@ fun ProjectDetailScreen(
                         }
                     },
                 ) {
-                    Text("Apagar")
+                    Text(stringResource(id = R.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = { viewModel.hideDeleteConfirmDialog() }
                 ) {
-                    Text("Cancelar")
+                    Text(stringResource(id = R.string.cancel))
                 }
             }
         )
@@ -395,16 +419,43 @@ fun ProjectDetailScreen(
                             dataInicio = dataInicio,
                             dataFim = dataFim
                         )
-                        Toast.makeText(context, "Tarefa adicionada com sucesso", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.task_added_success),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     } catch (e: Exception) {
-                        Toast.makeText(context, "Erro ao adicionar tarefa: ${e.message}", Toast.LENGTH_SHORT).show()
-                        e.printStackTrace()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.task_add_error, e.message ?: ""),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
         )
     }
 
+// No ProjectDetailScreen.kt
+    if (viewModel.showAddMemberDialog) {
+        LaunchedEffect(Unit) {
+            viewModel.loadAllUsers()
+        }
+        val usersNotInProject = viewModel.allUsers.filter { user ->
+            viewModel.membrosProjeto.none { membro -> membro.id == user.id }
+        }
+        AddMemberDialog(
+            isAdmin = viewModel.isAdmin,
+            users = usersNotInProject,
+            onDismiss = { viewModel.hideAddMemberDialog() },
+            onAdd = { userId, isManager ->
+                scope.launch {
+                    viewModel.addMemberToProject(userId, isManager)
+                    Toast.makeText(context, "Membro adicionado com sucesso", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
+    }
     // Diálogo para editar projeto
     if (viewModel.showEditProjectDialog) {
         EditProjectDialog(

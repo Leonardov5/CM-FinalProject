@@ -1,6 +1,7 @@
 package com.example.finalproject.data.repository
 
 import com.example.finalproject.data.model.Projeto
+import com.example.finalproject.data.model.UserProject
 import com.example.finalproject.data.service.SupabaseProvider
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
@@ -172,6 +173,46 @@ class ProjetoRepository {
         } catch (e: Exception) {
             e.printStackTrace()
             false
+        }
+    }
+
+    // Adiciona ou atualiza um usuário em um projeto
+    suspend fun adicionarUsuarioAoProjeto(
+        userId: String,
+        projectId: String,
+        isManager: Boolean
+    ): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                val data = buildJsonObject {
+                    put("utilizador_uuid", userId)
+                    put("projeto_uuid", projectId)
+                    put("e_gestor", isManager)
+                    put("ativo", true)
+                }
+                supabase.from("utilizador_projeto")
+                    .upsert(data) { select() }
+                true
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    // Lista todos os membros de um projeto
+    suspend fun listarMembrosDoProjeto(projectId: String): List<UserProject> {
+        return try {
+            withContext(Dispatchers.IO) {
+                supabase.from("utilizador_projeto")
+                    .select() {
+                        filter { eq("projeto_uuid", projectId) }
+                    }
+                    .decodeList<UserProject>()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
         }
     }
 }
