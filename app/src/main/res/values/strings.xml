@@ -114,4 +114,12 @@
     <string name="bottom_nav_tasks">Tasks</string>
     <string name="bottom_nav_projects">Projects</string>
     <string name="bottom_nav_updates">Updates</string>
+    <string name="project_name">Project name</string>
+    <string name="status">Status</string>
+    <string name="completion_rate">Completion rate</string>
+    <string name="completion_rate_error">The value must be between 0 and 100</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="save">Save\n</string>
+    <string name="project_updated_success">Project updated successfully</string>
+    <string name="project_update_error">Error updating project</string>
 </resources>
