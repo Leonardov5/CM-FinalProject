@@ -119,7 +119,7 @@
     <string name="completion_rate">Completion rate</string>
     <string name="completion_rate_error">The value must be between 0 and 100</string>
     <string name="unknown_error">Unknown error</string>
-    <string name="save">Save\n</string>
+    <string name="save">Save</string>
     <string name="project_updated_success">Project updated successfully</string>
     <string name="project_update_error">Error updating project</string>
     <string name="view_tasks">See Tasks</string>
