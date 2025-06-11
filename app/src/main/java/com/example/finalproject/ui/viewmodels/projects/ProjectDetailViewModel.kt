@@ -41,20 +41,39 @@ class ProjectDetailViewModel(
     var showAddTaskDialog by mutableStateOf(false)
         private set
 
-    // No ProjectDetailViewModel.kt
-    var allUsers by mutableStateOf<List<User>>(emptyList())
-        private set
-
-    fun loadAllUsers() {
-        viewModelScope.launch {
-            allUsers = UserRepository().listarTodosUsuarios()
-        }
-
     var showEditProjectDialog by mutableStateOf(false)
         private set
 
     var navigateToTasksForProject by mutableStateOf<String?>(null)
         private set
+
+    // No ProjectDetailViewModel.kt
+    var membrosProjeto by mutableStateOf<List<User>>(emptyList())
+        private set
+
+    // No ProjectDetailViewModel
+    var showAddMemberDialog by mutableStateOf(false)
+        private set
+
+    // No ProjectDetailViewModel.kt
+    var allUsers by mutableStateOf<List<User>>(emptyList())
+        private set
+
+
+    var isManager by mutableStateOf(false)
+        private set
+
+
+
+    fun showAddMemberDialog() { showAddMemberDialog = true }
+    fun hideAddMemberDialog() { showAddMemberDialog = false }
+
+
+    fun loadAllUsers() {
+        viewModelScope.launch {
+            allUsers = UserRepository().listarTodosUsuarios()
+        }
+    }
 
     fun onViewTasksClick() {
         println("DEBUG - onViewTasksClick chamado com projeto: $projeto")
@@ -188,25 +207,6 @@ class ProjectDetailViewModel(
             e.printStackTrace()
         }
     }
-    
-    var navigateToTasksForProject by mutableStateOf<String?>(null)
-        private set
-
-    fun onViewTasksClick() {
-        println("DEBUG - onViewTasksClick chamado com projeto: $projeto")
-        navigateToTasksForProject = projeto?.id?.toString()
-    }
-
-    fun onTasksNavigationHandled() {
-        navigateToTasksForProject = null
-    }
-
-    // No ProjectDetailViewModel
-    var showAddMemberDialog by mutableStateOf(false)
-        private set
-
-    fun showAddMemberDialog() { showAddMemberDialog = true }
-    fun hideAddMemberDialog() { showAddMemberDialog = false }
 
     fun addMemberToProject(userId: String, isManager: Boolean) = viewModelScope.launch {
         val result = projetoRepository.adicionarUsuarioAoProjeto(userId, projeto?.id.toString(), isManager)
@@ -216,9 +216,6 @@ class ProjectDetailViewModel(
         }
     }
 
-    var isManager by mutableStateOf(false)
-        private set
-
     fun checkIfManager(projectId: String) {
         viewModelScope.launch {
             val membros = projetoRepository.listarMembrosDoProjeto(projectId)
@@ -226,10 +223,6 @@ class ProjectDetailViewModel(
             isManager = membros.any { it.userId == userId && it.isManager }
         }
     }
-
-    // No ProjectDetailViewModel.kt
-    var membrosProjeto by mutableStateOf<List<User>>(emptyList())
-        private set
 
     fun loadMembrosProjeto(projectId: String) {
         viewModelScope.launch {

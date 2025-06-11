@@ -152,8 +152,7 @@ fun ProjectDetailScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.padding(bottom = 16.dp)
                     ) {
-
-                        if( viewModel.isAdmin  || viewModel.isManager) {
+                        if(viewModel.isAdmin  || viewModel.isManager) {
                             ActionButton(
                                 icon = Icons.Default.Add,
                                 label = addTask,
@@ -172,6 +171,7 @@ fun ProjectDetailScreen(
                                 viewModel.onViewTasksClick()
                             }
                         )
+
                         if( viewModel.isAdmin || viewModel.isManager) {
                             ActionButton(
                                 icon = Icons.Default.PersonAdd,
@@ -191,11 +191,8 @@ fun ProjectDetailScreen(
                                     viewModel.showEditProjectDialog()
                                 }
                             )
-
-
-
+                        }
                        if( viewModel.isAdmin) {
-
                             ActionButton(
                                 icon = Icons.Default.Delete,
                                 label = deleteProject,
@@ -207,7 +204,6 @@ fun ProjectDetailScreen(
                         }
                     }
                 }
-
                 // Main FAB
                 FloatingActionButton(
                     onClick = { viewModel.toggleFabActions() },
