@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+
         lifecycleScope.launch {
             AuthService.refreshSession()
         }
@@ -83,5 +84,3 @@ fun GreetingPreview() {
         )
     }
 }
-
-
