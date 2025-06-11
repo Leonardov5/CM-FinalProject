@@ -31,7 +31,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Register : Screen("register")
-    object TaskManagement : Screen("tasks")
+    object TaskManagement : Screen("tasks?projetoId={projetoId}") {
+        fun createRoute(projetoId: String?) =
+            if (projetoId != null) "tasks?projetoId=$projetoId" else "tasks"
+    }
     object Projects : Screen("projects")
     object Updates : Screen("updates")
     object Profile : Screen("profile")
@@ -124,6 +127,29 @@ fun AppNavigation(
                 )
             }
 
+            composable(
+                route = "tasks?projetoId={projetoId}",
+                arguments = listOf(
+                    navArgument("projetoId") {
+                        type = NavType.StringType
+                        defaultValue = null
+                        nullable = true
+                    }
+                )
+            ) { backStackEntry ->
+                val projetoId = backStackEntry.arguments?.getString("projetoId")
+                TaskManagementScreen(
+                    projetoId = projetoId,
+                    modifier = Modifier,
+                    onProfileClick = {
+                        navController.navigate(Screen.Profile.route)
+                    },
+                    onTaskClick = { task ->
+                        navController.navigate(Screen.TaskDetail.createRoute(task.id.toString()))
+                    }
+                )
+            }
+
             composable(route = Screen.Projects.route) {
                 ProjectsScreen(
                     modifier = Modifier,
@@ -193,6 +219,7 @@ fun AppNavigation(
                 val projectId = backStackEntry.arguments?.getString("projectId") ?: ""
                 ProjectDetailScreen(
                     projetoId = projectId,
+                    navController = navController, // Adicione esta linha
                     onBackClick = {
                         navController.popBackStack()
                     },

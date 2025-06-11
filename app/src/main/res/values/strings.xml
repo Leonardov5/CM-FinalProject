@@ -114,4 +114,5 @@
     <string name="bottom_nav_tasks">Tasks</string>
     <string name="bottom_nav_projects">Projects</string>
     <string name="bottom_nav_updates">Updates</string>
+    <string name="view_tasks">See Tasks</string>
 </resources>

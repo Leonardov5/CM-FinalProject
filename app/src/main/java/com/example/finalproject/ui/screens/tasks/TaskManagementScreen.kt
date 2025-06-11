@@ -29,11 +29,22 @@ import com.example.finalproject.ui.viewmodels.tasks.TaskManagementViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskManagementScreen(
+    projetoId: String? = null,
     modifier: Modifier = Modifier,
     onProfileClick: () -> Unit = {},
     onTaskClick: (Tarefa) -> Unit = {},
     viewModel: TaskManagementViewModel = viewModel()
 ) {
+    LaunchedEffect(projetoId, viewModel.projects) {
+        println("DEBUG - LaunchedEffect chamado com projetoId: $projetoId")
+        projetoId?.let { id ->
+            val projeto = viewModel.projects.find { it.id.toString() == id }
+            if (projeto != null) {
+                viewModel.selectProject(projeto)
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(

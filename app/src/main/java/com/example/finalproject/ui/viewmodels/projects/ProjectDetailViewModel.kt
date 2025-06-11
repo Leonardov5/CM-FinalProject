@@ -144,4 +144,16 @@ class ProjectDetailViewModel(
             e.printStackTrace()
         }
     }
+
+    var navigateToTasksForProject by mutableStateOf<String?>(null)
+        private set
+
+    fun onViewTasksClick() {
+        println("DEBUG - onViewTasksClick chamado com projeto: $projeto")
+        navigateToTasksForProject = projeto?.id?.toString()
+    }
+
+    fun onTasksNavigationHandled() {
+        navigateToTasksForProject = null
+    }
 }

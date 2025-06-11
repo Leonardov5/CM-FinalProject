@@ -30,6 +30,8 @@ import androidx.compose.ui.res.stringResource
 import com.example.finalproject.R
 import com.example.finalproject.data.PreferencesManager
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.finalproject.Screen
 import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.data.model.User
 import com.example.finalproject.data.repository.ProjetoRepository
@@ -58,13 +60,13 @@ fun formatDate(iso: String?): String? {
 @Composable
 fun ProjectDetailScreen(
     projetoId: String,
-    projetoRepository: ProjetoRepository = ProjetoRepository(),
-    tarefaRepository: TarefaRepository = TarefaRepository(),
+    navController: NavController,
     currentUser: User? = null,
     onBackClick: () -> Unit = {},
     onAddTaskClick: () -> Unit = {},
     viewModel: ProjectDetailViewModel = viewModel()
 ) {
+
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -78,6 +80,15 @@ fun ProjectDetailScreen(
         updateAppLanguage(context, savedLanguage)
     }
 
+    LaunchedEffect(viewModel.navigateToTasksForProject) {
+        viewModel.navigateToTasksForProject?.let { projectId ->
+            println("Navigating to tasks for project: $projectId")
+            navController.navigate(Screen.TaskManagement.createRoute(projectId))
+            viewModel.onTasksNavigationHandled()
+        }
+    }
+
+    val viewTasks = stringResource(id = R.string.view_tasks)
     val addTask = stringResource(id = R.string.add_task)
     val editProject = stringResource(id = R.string.edit_project)
     val deleteProject = stringResource(id = R.string.delete_project)
@@ -138,6 +149,15 @@ fun ProjectDetailScreen(
                                 onClick = {
                                     viewModel.toggleFabActions()
                                     viewModel.showAddTaskDialog()
+                                }
+                            )
+
+                            ActionButton(
+                                icon = Icons.Default.List,
+                                label = viewTasks,
+                                onClick = {
+                                    viewModel.toggleFabActions()
+                                    viewModel.onViewTasksClick()
                                 }
                             )
 
