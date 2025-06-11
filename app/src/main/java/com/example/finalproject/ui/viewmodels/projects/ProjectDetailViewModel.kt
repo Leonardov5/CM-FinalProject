@@ -9,6 +9,7 @@ import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.data.model.User
 import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
+import com.example.finalproject.data.repository.UserRepository
 import com.example.finalproject.data.service.UserService
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -39,6 +40,16 @@ class ProjectDetailViewModel(
 
     var showAddTaskDialog by mutableStateOf(false)
         private set
+
+    // No ProjectDetailViewModel.kt
+    var allUsers by mutableStateOf<List<User>>(emptyList())
+        private set
+
+    fun loadAllUsers() {
+        viewModelScope.launch {
+            allUsers = UserRepository().listarTodosUsuarios()
+        }
+    }
 
     // Funções para manipular diálogos
     fun showAddTaskDialog() {
@@ -155,5 +166,46 @@ class ProjectDetailViewModel(
 
     fun onTasksNavigationHandled() {
         navigateToTasksForProject = null
+    }
+
+    // No ProjectDetailViewModel
+    var showAddMemberDialog by mutableStateOf(false)
+        private set
+
+    fun showAddMemberDialog() { showAddMemberDialog = true }
+    fun hideAddMemberDialog() { showAddMemberDialog = false }
+
+    fun addMemberToProject(userId: String, isManager: Boolean) = viewModelScope.launch {
+        val result = projetoRepository.adicionarUsuarioAoProjeto(userId, projeto?.id.toString(), isManager)
+        if (result) {
+            hideAddMemberDialog()
+            // Atualize a lista de membros se necessário
+        }
+    }
+
+    var isManager by mutableStateOf(false)
+        private set
+
+    fun checkIfManager(projectId: String) {
+        viewModelScope.launch {
+            val membros = projetoRepository.listarMembrosDoProjeto(projectId)
+            val userId = user?.id
+            isManager = membros.any { it.userId == userId && it.isManager }
+        }
+    }
+
+    // No ProjectDetailViewModel.kt
+    var membrosProjeto by mutableStateOf<List<User>>(emptyList())
+        private set
+
+    fun loadMembrosProjeto(projectId: String) {
+        viewModelScope.launch {
+            val membros = projetoRepository.listarMembrosDoProjeto(projectId)
+            // Supondo que UserProject tem userId, busque os dados completos dos usuários:
+            val allUsers = UserRepository().listarTodosUsuarios()
+            membrosProjeto = membros.mapNotNull { membro ->
+                allUsers.find { it.id == membro.userId }
+            }
+        }
     }
 }

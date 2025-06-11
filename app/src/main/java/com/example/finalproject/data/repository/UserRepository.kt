@@ -2,6 +2,8 @@ package com.example.finalproject.data.repository
 
 import com.example.finalproject.data.model.User
 import com.example.finalproject.data.service.AuthService
+import com.example.finalproject.data.service.SupabaseProvider
+import io.github.jan.supabase.postgrest.from
 
 /**
  * Repositório para gerenciar operações relacionadas a usuários
@@ -55,5 +57,17 @@ class UserRepository {
             id = userId,
             email = userEmail
         )
+    }
+
+    suspend fun listarTodosUsuarios(): List<User> {
+        // Supondo que exista uma tabela "utilizador" no Supabase
+        return try {
+            SupabaseProvider.client.from("utilizador")
+                .select()
+                .decodeList<User>()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
     }
 }
