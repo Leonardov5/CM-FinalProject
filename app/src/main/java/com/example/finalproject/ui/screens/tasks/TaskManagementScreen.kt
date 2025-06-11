@@ -36,7 +36,8 @@ fun TaskManagementScreen(
     viewModel: TaskManagementViewModel = viewModel()
 ) {
     LaunchedEffect(projetoId, viewModel.projects) {
-        println("DEBUG - LaunchedEffect chamado com projetoId: $projetoId")
+        viewModel.loadTasks()
+        viewModel.loadProjects()
         projetoId?.let { id ->
             val projeto = viewModel.projects.find { it.id.toString() == id }
             if (projeto != null) {
