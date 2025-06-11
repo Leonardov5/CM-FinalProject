@@ -5,7 +5,6 @@ import com.example.finalproject.data.model.UserProject
 import com.example.finalproject.data.service.SupabaseProvider
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
-import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.buildJsonObject
@@ -23,9 +22,16 @@ class ProjetoRepository {
      * Cria um novo projeto
      * @param nome Nome do projeto
      * @param descricao Descrição do projeto
+     * @param status Status inicial do projeto
+     * @param taxaConclusao Taxa de conclusão inicial do projeto
      * @return O projeto criado ou null em caso de falha
      */
-    suspend fun criarProjeto(nome: String, descricao: String?): Projeto? {
+    suspend fun criarProjeto(
+        nome: String,
+        descricao: String?,
+        status: String = "ativo",
+        taxaConclusao: Float = 0f
+    ): Projeto? {
         return try {
             withContext(Dispatchers.IO) {
                 val now = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
@@ -33,7 +39,8 @@ class ProjetoRepository {
                 val novoProjeto = buildJsonObject {
                     put("nome", nome)
                     if (descricao != null) put("descricao", descricao)
-                    put("status", "ativo")
+                    put("status", status)
+                    put("taxa_conclusao", taxaConclusao)
                     put("created_at", now)
                     put("updated_at", now)
                 }
@@ -105,44 +112,30 @@ class ProjetoRepository {
 
     /**
      * Atualiza um projeto existente
-     * @param projeto Projeto com os dados atualizados
-     * @return true se a atualização foi bem-sucedida, false caso contrário
-     */
-    suspend fun atualizarProjeto(projeto: Projeto): Boolean {
-        return try {
-            withContext(Dispatchers.IO) {
-                val updates = buildJsonObject {
-                    put("nome", projeto.nome)
-                    if (projeto.descricao != null) put("descricao", projeto.descricao)
-                    put("status", projeto.status)
-                }
-
-                supabase.from(PROJETO_TABLE)
-                    .update(updates) {
-                        filter {
-                            eq("projeto_uuid", projeto.id.toString())
-                        }
-                    }
-
-                true
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
-    }
-
-    /**
-     * Altera o status de um projeto
      * @param uuid UUID do projeto
+     * @param nome Novo nome do projeto
+     * @param descricao Nova descrição do projeto
      * @param status Novo status do projeto
+     * @param taxaConclusao Nova taxa de conclusão do projeto
      * @return true se a atualização foi bem-sucedida, false caso contrário
      */
-    suspend fun alterarStatusProjeto(uuid: UUID, status: String): Boolean {
+    suspend fun atualizarProjeto(
+        uuid: UUID,
+        nome: String,
+        descricao: String?,
+        status: String,
+        taxaConclusao: Float
+    ): Boolean {
         return try {
             withContext(Dispatchers.IO) {
+                val now = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
+
                 val updates = buildJsonObject {
+                    put("nome", nome)
+                    if (descricao != null) put("descricao", descricao) else put("descricao", null)
                     put("status", status)
+                    put("taxa_conclusao", taxaConclusao)
+                    put("updated_at", now)
                 }
 
                 supabase.from(PROJETO_TABLE)

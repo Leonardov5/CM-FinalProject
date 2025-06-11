@@ -49,6 +49,20 @@ class ProjectDetailViewModel(
         viewModelScope.launch {
             allUsers = UserRepository().listarTodosUsuarios()
         }
+
+    var showEditProjectDialog by mutableStateOf(false)
+        private set
+
+    var navigateToTasksForProject by mutableStateOf<String?>(null)
+        private set
+
+    fun onViewTasksClick() {
+        println("DEBUG - onViewTasksClick chamado com projeto: $projeto")
+        navigateToTasksForProject = projeto?.id?.toString()
+    }
+
+    fun onTasksNavigationHandled() {
+        navigateToTasksForProject = null
     }
 
     // Funções para manipular diálogos
@@ -58,6 +72,14 @@ class ProjectDetailViewModel(
 
     fun hideAddTaskDialog() {
         showAddTaskDialog = false
+    }
+
+    fun showEditProjectDialog() {
+        showEditProjectDialog = true
+    }
+
+    fun hideEditProjectDialog() {
+        showEditProjectDialog = false
     }
 
     fun toggleFabActions() {
@@ -96,6 +118,32 @@ class ProjectDetailViewModel(
             } finally {
                 isLoading = false
             }
+        }
+    }
+
+    // Editar projeto
+    fun updateProject(
+        projetoId: String,
+        nome: String,
+        descricao: String,
+        status: String,
+        taxaConclusao: Float
+    ) = viewModelScope.launch {
+        try {
+            val success = projetoRepository.atualizarProjeto(
+                UUID.fromString(projetoId),
+                nome,
+                descricao.takeIf { it.isNotBlank() },
+                status,
+                taxaConclusao
+            )
+
+            if (success) {
+                loadProject(projetoId)
+                hideEditProjectDialog()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -140,22 +188,7 @@ class ProjectDetailViewModel(
             e.printStackTrace()
         }
     }
-
-    // Alterar status do projeto
-    fun changeProjectStatus(projetoId: String, novoStatus: String) = viewModelScope.launch {
-        try {
-            val result = projetoRepository.alterarStatusProjeto(
-                UUID.fromString(projetoId),
-                novoStatus
-            )
-            if (result) {
-                loadProject(projetoId)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
+    
     var navigateToTasksForProject by mutableStateOf<String?>(null)
         private set
 
@@ -208,4 +241,5 @@ class ProjectDetailViewModel(
             }
         }
     }
+
 }

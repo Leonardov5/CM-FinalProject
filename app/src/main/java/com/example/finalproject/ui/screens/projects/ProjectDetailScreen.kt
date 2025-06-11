@@ -2,6 +2,7 @@ package com.example.finalproject.ui.screens.projects
 
 import AddMemberDialog
 import android.app.Activity
+import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.ScaffoldDefaults.contentWindowInsets
 import androidx.compose.ui.res.stringResource
@@ -40,6 +42,7 @@ import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
 import com.example.finalproject.data.service.UserService
 import com.example.finalproject.ui.components.projects.AddTaskDialog
+import com.example.finalproject.ui.components.projects.EditProjectDialog
 import com.example.finalproject.ui.theme.*
 import com.example.finalproject.ui.viewmodels.projects.ProjectDetailViewModel
 import com.example.finalproject.utils.updateAppLanguage
@@ -58,6 +61,7 @@ fun formatDate(iso: String?): String? {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectDetailScreen(
@@ -108,6 +112,8 @@ fun ProjectDetailScreen(
     val deleteFailed = stringResource(id = R.string.delete_failed)
     val back = stringResource(id = R.string.back)
     val notFound = stringResource(id = R.string.not_found)
+    val projectUpdatedSuccess = stringResource(id = R.string.project_updated_success)
+    val projectUpdateError = stringResource(id = R.string.project_update_error)
 
     Scaffold(
         topBar = {
@@ -182,16 +188,14 @@ fun ProjectDetailScreen(
                                 label = editProject,
                                 onClick = {
                                     viewModel.toggleFabActions()
-                                    // Implementar futuramente
-                                    Toast.makeText(
-                                        context,
-                                        "Funcionalidade ainda não implementada",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    viewModel.showEditProjectDialog()
                                 }
                             )
-                        }
-                        if( viewModel.isAdmin) {
+
+
+
+                       if( viewModel.isAdmin) {
+
                             ActionButton(
                                 icon = Icons.Default.Delete,
                                 label = deleteProject,
@@ -200,54 +204,6 @@ fun ProjectDetailScreen(
                                     viewModel.showDeleteConfirmDialog()
                                 }
                             )
-                        }
-                        if( viewModel.isAdmin || viewModel.isManager) {
-                            viewModel.projeto?.let { p ->
-                                val nextStatus = when (p.status) {
-                                    "ativo" -> "concluido"
-                                    "concluido" -> "ativo"
-                                    else -> "ativo"
-                                }
-
-                                val statusLabel = when (nextStatus) {
-                                    "concluido" -> markAsActive
-                                    "ativo" -> markAsCompleted
-                                    else -> "Alterar Status"
-                                }
-
-                                val statusIcon = when (nextStatus) {
-                                    "concluido" -> Icons.Default.Done
-                                    else -> Icons.Default.Refresh
-                                }
-
-                                ActionButton(
-                                    icon = statusIcon,
-                                    label = statusLabel,
-                                    onClick = {
-                                        viewModel.toggleFabActions()
-                                        scope.launch {
-                                            try {
-                                                viewModel.changeProjectStatus(
-                                                    p.id.toString(),
-                                                    nextStatus
-                                                )
-                                                Toast.makeText(
-                                                    context,
-                                                    statusUpdatedSuccess,
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                            } catch (e: Exception) {
-                                                Toast.makeText(
-                                                    context,
-                                                    statusUpdateError,
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                                e.printStackTrace()
-                                            }
-                                        }
-                                    }
-                                )
-                            }
                         }
                     }
                 }
@@ -496,6 +452,33 @@ fun ProjectDetailScreen(
                 scope.launch {
                     viewModel.addMemberToProject(userId, isManager)
                     Toast.makeText(context, "Membro adicionado com sucesso", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
+    }
+    // Diálogo para editar projeto
+    if (viewModel.showEditProjectDialog) {
+        EditProjectDialog(
+            show = true,
+            projeto = viewModel.projeto,
+            onDismiss = { viewModel.hideEditProjectDialog() },
+            onSaveProject = { nome, descricao, status, taxaConclusao ->
+                viewModel.projeto?.id?.let { projectId ->
+                    scope.launch {
+                        try {
+                            viewModel.updateProject(
+                                projetoId = projectId.toString(),
+                                nome = nome,
+                                descricao = descricao,
+                                status = status,
+                                taxaConclusao = taxaConclusao
+                            )
+                            Toast.makeText(context, projectUpdatedSuccess, Toast.LENGTH_SHORT).show()
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "$projectUpdateError: ${e.message}", Toast.LENGTH_SHORT).show()
+                            e.printStackTrace()
+                        }
+                    }
                 }
             }
         )
