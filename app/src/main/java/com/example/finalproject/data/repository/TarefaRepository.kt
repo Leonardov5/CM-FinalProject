@@ -66,4 +66,17 @@ class TarefaRepository {
             emptyList()
         }
     }
+    suspend fun listarTarefas(): List<Tarefa> {
+        return try {
+            val tarefas = supabase.from("tarefa")
+                .select()
+                .decodeList<Tarefa>()
+
+            println("DEBUG - Tarefas carregadas: ${tarefas.size}")
+            tarefas
+        } catch (e: Exception) {
+            println("DEBUG - Erro ao listar tarefas: ${e.message}")
+            emptyList()
+        }
+    }
 }

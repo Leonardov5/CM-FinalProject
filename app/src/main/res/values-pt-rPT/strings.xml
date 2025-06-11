@@ -114,4 +114,5 @@
     <string name="bottom_nav_tasks">Tarefas</string>
     <string name="bottom_nav_projects">Projetos</string>
     <string name="bottom_nav_updates">Atualizações</string>
+    <string name="view_tasks">Ver Tarefas</string>
 </resources>

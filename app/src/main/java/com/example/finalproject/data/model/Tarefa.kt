@@ -44,3 +44,7 @@ data class Tarefa(
     @SerialName("updated_at")
     val updatedAt: String? = null
 )
+
+enum class TarefaStatus {
+    pendente, em_andamento, concluida, cancelada
+}

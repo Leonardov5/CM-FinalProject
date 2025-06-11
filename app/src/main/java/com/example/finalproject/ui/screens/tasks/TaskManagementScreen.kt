@@ -1,5 +1,6 @@
 package com.example.finalproject.ui.screens.tasks
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.ui.components.TaskCard
 import com.example.finalproject.ui.components.TabRow
 import com.example.finalproject.data.model.Task
@@ -27,17 +29,30 @@ import com.example.finalproject.ui.viewmodels.tasks.TaskManagementViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskManagementScreen(
+    projetoId: String? = null,
     modifier: Modifier = Modifier,
     onProfileClick: () -> Unit = {},
-    onTaskClick: (Task) -> Unit = {},
+    onTaskClick: (Tarefa) -> Unit = {},
     viewModel: TaskManagementViewModel = viewModel()
 ) {
+    LaunchedEffect(projetoId, viewModel.projects) {
+        println("DEBUG - LaunchedEffect chamado com projetoId: $projetoId")
+        projetoId?.let { id ->
+            val projeto = viewModel.projects.find { it.id.toString() == id }
+            if (projeto != null) {
+                viewModel.selectProject(projeto)
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Box(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { viewModel.showProjectDialog = true },
                         contentAlignment = Alignment.Center
                     ) {
                         Surface(
@@ -46,7 +61,7 @@ fun TaskManagementScreen(
                             color = MaterialTheme.colorScheme.surfaceVariant
                         ) {
                             Text(
-                                text = "Project X",
+                                text = viewModel.selectedProject?.nome ?: "Selecione um projeto",
                                 modifier = Modifier.padding(vertical = 12.dp),
                                 fontSize = 16.sp,
                                 textAlign = TextAlign.Center,
@@ -118,6 +133,42 @@ fun TaskManagementScreen(
                 }
             }
         }
+    }
+    if (viewModel.showProjectDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.showProjectDialog = false },
+            title = { Text("Selecione um projeto") },
+            text = {
+                Column {
+                    // Opção para mostrar todas as tarefas
+                    Text(
+                        text = "Todos os projetos",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                viewModel.selectProject(null)
+                                viewModel.showProjectDialog = false
+                            }
+                            .padding(8.dp)
+                    )
+                    // Lista de projetos reais
+                    viewModel.projects.forEach { projeto ->
+                        Text(
+                            text = projeto.nome,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.selectProject(projeto)
+                                    viewModel.showProjectDialog = false
+                                }
+                                .padding(8.dp)
+                        )
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {}
+        )
     }
 }
 

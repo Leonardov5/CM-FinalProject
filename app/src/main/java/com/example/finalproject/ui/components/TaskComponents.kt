@@ -15,14 +15,16 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.finalproject.data.model.Tarefa
+import com.example.finalproject.data.model.TarefaStatus
 import com.example.finalproject.data.model.Task
 import com.example.finalproject.data.model.TaskStatus
 import com.example.finalproject.ui.theme.*
 
 @Composable
 fun TabRow(
-    selectedTab: TaskStatus,
-    onTabSelected: (TaskStatus) -> Unit
+    selectedTab: TarefaStatus,
+    onTabSelected: (TarefaStatus) -> Unit
 ) {
     TabRow(
         selectedTabIndex = selectedTab.ordinal,
@@ -34,25 +36,25 @@ fun TabRow(
         }
     ) {
         Tab(
-            selected = selectedTab == TaskStatus.TO_DO,
-            onClick = { onTabSelected(TaskStatus.TO_DO) },
+            selected = selectedTab == TarefaStatus.pendente,
+            onClick = { onTabSelected(TarefaStatus.pendente) },
             text = { Text("To-Do") },
         )
         Tab(
-            selected = selectedTab == TaskStatus.ON_GOING,
-            onClick = { onTabSelected(TaskStatus.ON_GOING) },
+            selected = selectedTab == TarefaStatus.em_andamento,
+            onClick = { onTabSelected(TarefaStatus.em_andamento) },
             text = { Text("On-Going") },
         )
         Tab(
-            selected = selectedTab == TaskStatus.COMPLETED,
-            onClick = { onTabSelected(TaskStatus.COMPLETED) },
+            selected = selectedTab == TarefaStatus.concluida,
+            onClick = { onTabSelected(TarefaStatus.concluida) },
             text = { Text("Done") },
         )
     }
 }
 
 @Composable
-fun TaskCard(task: Task, onClick: () -> Unit = {}) {
+fun TaskCard(task: Tarefa, onClick: () -> Unit = {}) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -80,7 +82,7 @@ fun TaskCard(task: Task, onClick: () -> Unit = {}) {
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = task.title,
+                    text = task.nome,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                 )
