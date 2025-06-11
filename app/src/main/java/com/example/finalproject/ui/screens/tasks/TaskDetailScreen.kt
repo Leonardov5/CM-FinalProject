@@ -26,23 +26,60 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject.data.model.Task
 import com.example.finalproject.data.model.TaskStatus
 import com.example.finalproject.data.model.DemoTasks
+import com.example.finalproject.data.model.Tarefa
+import com.example.finalproject.data.model.TarefaStatus
+import com.example.finalproject.ui.components.tasks.AddWorkerDialog
 import com.example.finalproject.ui.theme.*
+import com.example.finalproject.ui.viewmodels.tasks.TaskDetailViewModel
+import com.example.finalproject.ui.viewmodels.tasks.TaskManagementViewModel
+
+fun formatDate(iso: String?): String? {
+    return try {
+        val isoFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault())
+        val dateFormat = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
+        iso?.let { dateFormat.format(isoFormat.parse(it)) }
+    } catch (e: Exception) {
+        iso
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskDetailScreen(
     taskId: String,
     onBackPressed: () -> Unit,
-    onStatusChange: (TaskStatus) -> Unit = {},
+    onStatusChange: (TarefaStatus) -> Unit = {},
     onDeleteTask: () -> Unit = {},
-    onAddWorker: () -> Unit = {}
+    onAddWorker: () -> Unit = {},
+    viewModel: TaskDetailViewModel = viewModel()
 ) {
-    var showFabActions by remember { mutableStateOf(false) }
-    val task = remember(taskId) { DemoTasks.getTaskById(taskId) }
+    LaunchedEffect(key1 = true) {
+        viewModel.loadTask(taskId)
+    }
 
+    LaunchedEffect(viewModel.task?.projetoId) {
+        viewModel.task?.projetoId?.let { projetoId ->
+            if (projetoId.isNotBlank()) {
+                viewModel.loadMembrosProjeto(projetoId)
+                viewModel.filterMembros()
+            }
+        }
+    }
+
+    LaunchedEffect(viewModel.membrosProjeto) {
+        viewModel.membrosProjeto.let { membros ->
+            if (membros.isNotEmpty()) {
+                viewModel.filterMembros()
+            }
+        }
+    }
+
+
+    var showFabActions by remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -83,7 +120,7 @@ fun TaskDetailScreen(
                             icon = Icons.Default.Done,
                             label = "Marcar como Concluída",
                             onClick = {
-                                onStatusChange(TaskStatus.COMPLETED)
+                                onStatusChange(TarefaStatus.concluida)
                                 showFabActions = false
                             }
                         )
@@ -91,7 +128,7 @@ fun TaskDetailScreen(
                             icon = Icons.Default.PlayArrow,
                             label = "Marcar como Em Andamento",
                             onClick = {
-                                onStatusChange(TaskStatus.ON_GOING)
+                                onStatusChange(TarefaStatus.em_andamento)
                                 showFabActions = false
                             }
                         )
@@ -100,7 +137,7 @@ fun TaskDetailScreen(
                             label = "Adicionar Trabalhador",
                             onClick = {
                                 showFabActions = false
-                                onAddWorker()
+                                viewModel.toggleAddWorkerDialog()
                             }
                         )
                         ActionButton(
@@ -129,32 +166,57 @@ fun TaskDetailScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
+            contentAlignment = Alignment.Center
         ) {
-            if (task == null) {
-                Text(
-                    text = "Tarefa não encontrada",
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
-                TaskContent(
-                    task = task,
-                    onStatusChange = onStatusChange,
-                    onDeleteTask = onDeleteTask,
-                    onAddWorker = onAddWorker
-                )
+            when {
+                viewModel.isLoading -> {
+                    CircularProgressIndicator()
+                }
+                viewModel.task == null -> {
+                    Text(
+                        text = "Tarefa não encontrada"
+                    )
+                }
+                else -> {
+                    TaskContent(
+                        task = viewModel.task!!,
+                        onStatusChange = onStatusChange,
+                        onDeleteTask = onDeleteTask,
+                        onAddWorker = onAddWorker,
+                        viewModel = viewModel
+                    )
+                }
             }
         }
+    }
+
+    if (viewModel.showAddWorkerDialog) {
+        AddWorkerDialog(
+            users = viewModel.filtredMembros,
+            onDismiss = { viewModel.toggleAddWorkerDialog() },
+            onAdd = { userIds ->
+                userIds.forEach { userId ->
+                    viewModel.addWorkerToTask(userId, taskId) { /* feedback opcional */ }
+                }
+                viewModel.toggleAddWorkerDialog()
+            }
+        )
     }
 }
 
 @Composable
 private fun TaskContent(
-    task: Task,
-    onStatusChange: (TaskStatus) -> Unit,
+    task: Tarefa,
+    onStatusChange: (TarefaStatus) -> Unit,
     onDeleteTask: () -> Unit,
-    onAddWorker: () -> Unit
+    onAddWorker: () -> Unit,
+    viewModel: TaskDetailViewModel = viewModel()
 ) {
+    val statusEnum = viewModel.statusToEnum(task.status)
+
+    StatusChip(status = statusEnum)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -163,14 +225,14 @@ private fun TaskContent(
     ) {
         // Título da task
         Text(
-            text = task.title,
+            text = task.nome,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
         // Status indicator
-        StatusChip(status = task.status)
+        StatusChip(status = statusEnum)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -179,24 +241,15 @@ private fun TaskContent(
             title = "Progresso",
             content = {
                 LinearProgressIndicator(
-                    progress = when(task.status) {
-                        TaskStatus.TO_DO -> 0f
-                        TaskStatus.ON_GOING -> 0.5f
-                        TaskStatus.COMPLETED -> 1f
-                    },
+                    progress = task.taxaConclusao.toFloat().coerceIn(0f, 1f),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp)
                         .clip(RoundedCornerShape(4.dp)),
-
                 )
 
                 Text(
-                    text = when(task.status) {
-                        TaskStatus.TO_DO -> "0%"
-                        TaskStatus.ON_GOING -> "50%"
-                        TaskStatus.COMPLETED -> "100%"
-                    },
+                    text = "${(task.taxaConclusao * 100).toInt()}%",
                     fontSize = 14.sp,
                     modifier = Modifier.padding(top = 4.dp)
                 )
@@ -206,7 +259,7 @@ private fun TaskContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Seção de descrição
-        task.description?.let {
+        task.descricao?.let {
             TaskInfoSection(
                 title = "Descrição",
                 content = {
@@ -226,7 +279,7 @@ private fun TaskContent(
                 title = "Data de Criação",
                 content = {
                     Text(
-                        text = it,
+                        text = formatDate(it) ?: "",
                         fontSize = 16.sp,
                     )
                 }
@@ -236,7 +289,7 @@ private fun TaskContent(
         }
 
         // Seção de prioridade
-        task.priority?.let {
+        task.prioridade?.let {
             TaskInfoSection(
                 title = "Prioridade",
                 content = {
@@ -303,17 +356,19 @@ private fun TaskInfoSection(
 }
 
 @Composable
-private fun StatusChip(status: TaskStatus) {
+private fun StatusChip(status: TarefaStatus) {
     val (backgroundColor, textColor) = when(status) {
-        TaskStatus.TO_DO -> Pair(MaterialTheme.colorScheme.surfaceContainerHighest, MaterialTheme.colorScheme.onSurface)
-        TaskStatus.ON_GOING -> Pair(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer)
-        TaskStatus.COMPLETED -> Pair(MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
+        TarefaStatus.pendente -> Pair(MaterialTheme.colorScheme.surfaceContainerHighest, MaterialTheme.colorScheme.onSurface)
+        TarefaStatus.em_andamento -> Pair(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer)
+        TarefaStatus.concluida -> Pair(MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
+        TarefaStatus.cancelada -> Pair(MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.onErrorContainer)
     }
 
     val statusText = when(status) {
-        TaskStatus.TO_DO -> "A Fazer"
-        TaskStatus.ON_GOING -> "Em Andamento"
-        TaskStatus.COMPLETED -> "Concluído"
+        TarefaStatus.pendente -> "A Fazer"
+        TarefaStatus.em_andamento -> "Em Andamento"
+        TarefaStatus.concluida -> "Concluído"
+        TarefaStatus.cancelada -> "Cancelada"
     }
 
     Surface(
