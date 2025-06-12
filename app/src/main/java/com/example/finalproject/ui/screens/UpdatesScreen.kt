@@ -133,7 +133,7 @@ fun UpdateCard(
         modifier = Modifier
             .fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = if (update.isNew) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceContainer,
+        color = if (update.isNew) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainer,
         shadowElevation = 2.dp,
         onClick = onClick
     ) {

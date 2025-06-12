@@ -294,7 +294,7 @@ fun ProjectCard(
             },
         shape = RoundedCornerShape(12.dp),
         shadowElevation = 2.dp,
-        color = MaterialTheme.colorScheme.tertiaryContainer
+        color = MaterialTheme.colorScheme.secondaryContainer
     ) {
         Row(
             modifier = Modifier

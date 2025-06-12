@@ -1,25 +1,15 @@
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.example.finalproject.data.model.User
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.example.finalproject.R
+import com.example.finalproject.data.model.User
 
 @Composable
 fun AddMemberDialog(
@@ -29,7 +19,6 @@ fun AddMemberDialog(
     onAdd: (String, Boolean) -> Unit
 ) {
     var search by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
     var selectedUser by remember { mutableStateOf<User?>(null) }
     var isManager by remember { mutableStateOf(false) }
 
@@ -44,31 +33,44 @@ fun AddMemberDialog(
                     value = search,
                     onValueChange = {
                         search = it
-                        expanded = it.isNotBlank() && filteredUsers.isNotEmpty()
                         selectedUser = null
                     },
                     label = { Text(stringResource(id = R.string.search_user)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 200.dp)
-                ) {
-                    filteredUsers.take(5).forEach { user ->
-                        DropdownMenuItem(
-                            text = { Text(user.nome) },
-                            onClick = {
-                                search = user.nome
-                                selectedUser = user
-                                expanded = false
+                Spacer(Modifier.height(8.dp))
+
+                // Lista de usuários filtrados
+                if (filteredUsers.isNotEmpty() && search.isNotBlank()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 200.dp)
+                    ) {
+                        items(filteredUsers.take(5)) { user ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        search = user.nome
+                                        selectedUser = user
+                                    }
+                                    .padding(vertical = 8.dp, horizontal = 4.dp)
+                            ) {
+                                Text(user.nome)
+                                if (user.username.isNotBlank()) {
+                                    Text(
+                                        "@${user.username}",
+                                        style = androidx.compose.material3.MaterialTheme.typography.bodySmall
+                                    )
+                                }
                             }
-                        )
+                            Divider()
+                        }
                     }
                 }
+
                 Spacer(Modifier.height(16.dp))
                 if (isAdmin) {
                     Row(verticalAlignment = Alignment.CenterVertically) {

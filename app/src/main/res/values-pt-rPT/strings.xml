@@ -152,4 +152,8 @@
     <string name="description_section">Descrição</string>
     <string name="add_workers_dialog_title">Adicionar Trabalhadores</string>
     <string name="no_members_available">Nenhum membro disponível.</string>
+    <string name="project_manager">Gestor do projeto</string>
+    <string name="team_member">Membro de equipa</string>
+    <string name="close">Fechar</string>
+    <string name="joined_project_at">Juntou-se ao projeto a</string>
 </resources>

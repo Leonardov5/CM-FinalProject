@@ -152,5 +152,8 @@
     <string name="description_section">Description</string>
     <string name="add_workers_dialog_title">Add Workers</string>
     <string name="no_members_available">No members available.</string>
-
+    <string name="project_manager">Project manager</string>
+    <string name="team_member">Team member</string>
+    <string name="close">Close</string>
+    <string name="joined_project_at">Joined project at</string>
 </resources>

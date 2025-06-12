@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 
 class UpdatesViewModel : ViewModel() {
 
-    // Estados UI
     var updates by mutableStateOf<List<Update>>(emptyList())
         private set
 

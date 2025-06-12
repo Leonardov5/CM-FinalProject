@@ -56,6 +56,9 @@ dependencies {
     implementation(libs.storage.kt)
     implementation(libs.ktor.client.android)
 
+    // Coil para carregamento de imagens
+    implementation(libs.coil.compose)
+
     //icons
     implementation(libs.androidx.material.icons.extended)
 

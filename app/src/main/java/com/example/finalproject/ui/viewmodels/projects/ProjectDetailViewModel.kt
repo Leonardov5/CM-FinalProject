@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.UserProject
 import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
 import com.example.finalproject.data.repository.UserRepository
@@ -49,6 +50,9 @@ class ProjectDetailViewModel(
 
     var membrosProjeto by mutableStateOf<List<User>>(emptyList())
         private set
+    // Lista de membros do projeto com informações completas
+    var membrosProjetoCompleto by mutableStateOf<List<UserProject>>(emptyList())
+        private set
 
     var showAddMemberDialog by mutableStateOf(false)
         private set
@@ -59,11 +63,15 @@ class ProjectDetailViewModel(
     var isManager by mutableStateOf(false)
         private set
 
+    // Variáveis para o diálogo de detalhes do worker
+    var showWorkerDetailDialog by mutableStateOf(false)
+        private set
 
+    var selectedWorker by mutableStateOf<UserProject?>(null)
+        private set
 
     fun showAddMemberDialog() { showAddMemberDialog = true }
     fun hideAddMemberDialog() { showAddMemberDialog = false }
-
 
     fun loadAllUsers() {
         viewModelScope.launch {
@@ -208,7 +216,8 @@ class ProjectDetailViewModel(
         val result = projetoRepository.adicionarUsuarioAoProjeto(userId, projeto?.id.toString(), isManager)
         if (result) {
             hideAddMemberDialog()
-            // Atualize a lista de membros se necessário
+            // Recarregar a lista de membros
+            projeto?.id?.toString()?.let { loadMembrosProjetoCompleto(it) }
         }
     }
 
@@ -220,15 +229,61 @@ class ProjectDetailViewModel(
         }
     }
 
-    fun loadMembrosProjeto(projectId: String) {
+    // Carregar membros do projeto com informações completas (usando JOIN)
+    fun loadMembrosProjetoCompleto(projectId: String) {
         viewModelScope.launch {
-            val membros = projetoRepository.listarMembrosDoProjeto(projectId)
-            // Supondo que UserProject tem userId, busque os dados completos dos usuários:
-            val allUsers = UserRepository().listarTodosUsuarios()
-            membrosProjeto = membros.mapNotNull { membro ->
-                allUsers.find { it.id == membro.userId }
+            try {
+                // Obter membros do projeto com informações completas usando JOIN
+                membrosProjetoCompleto = projetoRepository.listarMembrosProjetoCompleto(projectId)
+
+                // imprimir a lista de membros para depuração
+                membrosProjetoCompleto.forEach {
+                    println("Membro: ${it}, Gestor: ${it.isManager}")
+                }
+
+                // Verifica se o usuário atual é gestor
+                isManager = membrosProjetoCompleto.any {
+                    it.userId == user?.id && it.isManager
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
 
+    // Verifica se um usuário específico é gestor do projeto
+    fun isUserManager(userId: String): Boolean {
+        return membrosProjetoCompleto.any { it.userId == userId && it.isManager }
+    }
+
+    // Funções para manipular o diálogo de detalhes do worker
+    fun showWorkerDetailDialog(worker: UserProject) {
+        selectedWorker = worker
+        showWorkerDetailDialog = true
+    }
+
+    fun hideWorkerDetailDialog() {
+        showWorkerDetailDialog = false
+        selectedWorker = null
+    }
+
+    // Função para atualizar o papel e o estado do worker (gestor ou não, ativo ou não)
+    fun updateWorkerRole(userId: String, isManager: Boolean, isActive: Boolean) = viewModelScope.launch {
+        try {
+            val success = projetoRepository.atualizarMembrosDoProjetoStatus(
+                userId = userId,
+                projectId = projeto?.id.toString(),
+                isManager = isManager,
+                isActive = isActive
+            )
+
+            if (success) {
+                // Recarregar a lista de membros após a atualização
+                loadMembrosProjetoCompleto(projeto?.id.toString())
+                hideWorkerDetailDialog()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }
