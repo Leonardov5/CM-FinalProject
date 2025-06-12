@@ -30,10 +30,10 @@ fun AddWorkerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Adicionar Trabalhadores") },
+        title = { Text(stringResource(id = R.string.add_worker)) },
         text = {
             if (users.isEmpty()) {
-                Text("Nenhum membro disponível.")
+                Text(stringResource(id = R.string.no_members_available))
             } else {
                 LazyColumn {
                     items(users) { user ->

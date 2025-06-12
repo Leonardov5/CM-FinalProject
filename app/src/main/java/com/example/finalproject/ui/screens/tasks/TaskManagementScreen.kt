@@ -13,12 +13,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.finalproject.R
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.ui.components.TaskCard
 import com.example.finalproject.ui.components.TabRow
@@ -61,7 +63,7 @@ fun TaskManagementScreen(
                             color = MaterialTheme.colorScheme.surfaceVariant
                         ) {
                             Text(
-                                text = viewModel.selectedProject?.nome ?: "Selecione um projeto",
+                                text = viewModel.selectedProject?.nome ?: stringResource(id = R.string.select_project),
                                 modifier = Modifier.padding(vertical = 12.dp),
                                 fontSize = 16.sp,
                                 textAlign = TextAlign.Center,
@@ -74,7 +76,7 @@ fun TaskManagementScreen(
                     IconButton(onClick = { }) {
                         Icon(
                             imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu"
+                            contentDescription = stringResource(id = R.string.menu),
                         )
                     }
                 },
@@ -82,7 +84,7 @@ fun TaskManagementScreen(
                     IconButton(onClick = onProfileClick) {
                         Icon(
                             imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Perfil",
+                            contentDescription = stringResource(id = R.string.profile),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -137,12 +139,12 @@ fun TaskManagementScreen(
     if (viewModel.showProjectDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.showProjectDialog = false },
-            title = { Text("Selecione um projeto") },
+            title = { Text(stringResource(id = R.string.select_project)) },
             text = {
                 Column {
                     // Opção para mostrar todas as tarefas
                     Text(
-                        text = "Todos os projetos",
+                        text = stringResource(id = R.string.all_projects),
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {

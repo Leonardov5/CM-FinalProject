@@ -23,10 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.finalproject.R
+import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.data.model.Task
 import com.example.finalproject.data.model.TaskStatus
 import com.example.finalproject.data.model.DemoTasks
@@ -36,6 +40,7 @@ import com.example.finalproject.ui.components.tasks.AddWorkerDialog
 import com.example.finalproject.ui.theme.*
 import com.example.finalproject.ui.viewmodels.tasks.TaskDetailViewModel
 import com.example.finalproject.ui.viewmodels.tasks.TaskManagementViewModel
+import com.example.finalproject.utils.updateAppLanguage
 
 fun formatDate(iso: String?): String? {
     return try {
@@ -57,8 +62,14 @@ fun TaskDetailScreen(
     onAddWorker: () -> Unit = {},
     viewModel: TaskDetailViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+
     LaunchedEffect(key1 = true) {
         viewModel.loadTask(taskId)
+        viewModel.loadTrabalhadoresTarefa(taskId)
+
+        val savedLanguage = PreferencesManager.getLanguage(context)
+        updateAppLanguage(context, savedLanguage)
     }
 
     LaunchedEffect(viewModel.task?.projetoId) {
@@ -118,7 +129,7 @@ fun TaskDetailScreen(
                     ) {
                         ActionButton(
                             icon = Icons.Default.Done,
-                            label = "Marcar como Concluída",
+                            label = stringResource(id = R.string.mark_as_completed),
                             onClick = {
                                 onStatusChange(TarefaStatus.concluida)
                                 showFabActions = false
@@ -126,7 +137,7 @@ fun TaskDetailScreen(
                         )
                         ActionButton(
                             icon = Icons.Default.PlayArrow,
-                            label = "Marcar como Em Andamento",
+                            label = stringResource(id = R.string.mark_as_active),
                             onClick = {
                                 onStatusChange(TarefaStatus.em_andamento)
                                 showFabActions = false
@@ -134,7 +145,7 @@ fun TaskDetailScreen(
                         )
                         ActionButton(
                             icon = Icons.Default.Add,
-                            label = "Adicionar Trabalhador",
+                            label = stringResource(id = R.string.add_worker),
                             onClick = {
                                 showFabActions = false
                                 viewModel.toggleAddWorkerDialog()
@@ -142,7 +153,7 @@ fun TaskDetailScreen(
                         )
                         ActionButton(
                             icon = Icons.Default.Delete,
-                            label = "Excluir Task",
+                            label = stringResource(id = R.string.delete_task),
                             onClick = {
                                 showFabActions = false
                                 onDeleteTask()
@@ -156,7 +167,7 @@ fun TaskDetailScreen(
                 ) {
                     Icon(
                         imageVector = if (showFabActions) Icons.Default.Close else Icons.Default.Add,
-                        contentDescription = if (showFabActions) "Fechar menu" else "Abrir menu"
+                        contentDescription = if (showFabActions) stringResource(id = R.string.close_menu) else stringResource(id = R.string.open_menu)
                     )
                 }
             }
@@ -238,7 +249,7 @@ private fun TaskContent(
 
         // Seção de progresso
         TaskInfoSection(
-            title = "Progresso",
+            title = stringResource(id = R.string.progress),
             content = {
                 LinearProgressIndicator(
                     progress = task.taxaConclusao.toFloat().coerceIn(0f, 1f),
@@ -261,7 +272,7 @@ private fun TaskContent(
         // Seção de descrição
         task.descricao?.let {
             TaskInfoSection(
-                title = "Descrição",
+                title = stringResource(id = R.string.description),
                 content = {
                     Text(
                         text = it,
@@ -276,7 +287,7 @@ private fun TaskContent(
         // Seção de data de criação
         task.createdAt?.let {
             TaskInfoSection(
-                title = "Data de Criação",
+                title = stringResource(id = R.string.created_at),
                 content = {
                     Text(
                         text = formatDate(it) ?: "",
@@ -291,7 +302,7 @@ private fun TaskContent(
         // Seção de prioridade
         task.prioridade?.let {
             TaskInfoSection(
-                title = "Prioridade",
+                title = stringResource(id = R.string.priority),
                 content = {
                     Text(
                         text = "$it",
@@ -305,14 +316,21 @@ private fun TaskContent(
 
         // Seção de trabalhadores
         TaskInfoSection(
-            title = "Trabalhadores",
+            title = stringResource(id = R.string.workers),
             content = {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    WorkerAvatar("LV", primaryLight)
-                    WorkerAvatar("MA", secondaryLight)
-                    WorkerAvatar("GG", tertiaryLight)
+                    viewModel.trabalhadoresTarefa.forEach { userId ->
+                        val user = viewModel.membrosProjeto.find { it.id == userId }
+                        if (user != null) {
+                            println("DEBUG - User found: ${user.nome} (${user.id})")
+                            WorkerAvatar(
+                                initials = user.nome.take(2).uppercase(),
+                                backgroundColor = primaryLight
+                            )
+                        }
+                    }
 
                     Box(
                         modifier = Modifier
@@ -323,14 +341,13 @@ private fun TaskContent(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Adicionar trabalhador",
+                            contentDescription = stringResource(id = R.string.add_worker),
                             tint = onSurfaceVariantLight
                         )
                     }
                 }
             }
         )
-
         // Espaço para o FAB
         Spacer(modifier = Modifier.height(100.dp))
     }
@@ -365,10 +382,10 @@ private fun StatusChip(status: TarefaStatus) {
     }
 
     val statusText = when(status) {
-        TarefaStatus.pendente -> "A Fazer"
-        TarefaStatus.em_andamento -> "Em Andamento"
-        TarefaStatus.concluida -> "Concluído"
-        TarefaStatus.cancelada -> "Cancelada"
+        TarefaStatus.pendente -> stringResource(id = R.string.to_do)
+        TarefaStatus.em_andamento -> stringResource(id = R.string.on_going)
+        TarefaStatus.concluida -> stringResource(id = R.string.completed)
+        TarefaStatus.cancelada -> stringResource(id = R.string.cancelled)
     }
 
     Surface(

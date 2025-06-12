@@ -86,8 +86,9 @@ class TarefaRepository {
 
     suspend fun adicionarUsuarioATarefa(userId: String, tarefaId: String): Boolean {
         return try {
+            println("DEBUG - Adicionando usuário $userId à tarefa $tarefaId")
             val result = supabase.from("utilizador_tarefa")
-                .insert(mapOf("user_uuid" to userId, "tarefa_uuid" to tarefaId)) {
+                .insert(mapOf("utilizador_uuid" to userId, "tarefa_uuid" to tarefaId)) {
                     select()
                 }
                 .decodeSingleOrNull<Map<String, Any>>()
@@ -105,7 +106,8 @@ class TarefaRepository {
                     filter { eq("tarefa_uuid", tarefaId) }
                 }
                 .decodeList<Map<String, String>>()
-            result.mapNotNull { it["user_uuid"] }
+            println("DEBUG - Trabalhadores da tarefa $tarefaId: ${result.size}")
+            result.mapNotNull { it["utilizador_uuid"] }
         } catch (e: Exception) {
             emptyList()
         }

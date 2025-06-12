@@ -45,6 +45,20 @@ class TaskDetailViewModel(
     var filtredMembros by mutableStateOf<List<User>>(emptyList())
         private set
 
+    fun loadTrabalhadoresTarefa(tarefaId: String) {
+        viewModelScope.launch {
+            isLoading = true
+            try {
+                trabalhadoresTarefa = taskRepository.getTrabalhadoresDaTarefa(tarefaId)
+                println("Debug - foram carregados ${trabalhadoresTarefa.size} trabalhadores para a tarefa $tarefaId")
+            } catch (e: Exception) {
+                println("Error fetching task workers: ${e.message}")
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
     fun loadMembrosProjeto(projetoId: String) {
         viewModelScope.launch {
             val membros = projetoRepository.listarMembrosDoProjeto(projetoId) // retorna List<UserProject>
