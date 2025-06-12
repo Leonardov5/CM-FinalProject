@@ -66,6 +66,53 @@ class TarefaRepository {
             emptyList()
         }
     }
+
+    suspend fun getTarefaById(taskId: String): Tarefa? {
+        return try {
+            val tarefa = supabase.from("tarefa")
+                .select {
+                    filter {
+                        eq("tarefa_uuid", taskId)
+                    }
+                    limit(1)
+                }
+                .decodeSingle<Tarefa>()
+            tarefa
+        } catch (e: Exception) {
+            println("DEBUG - Erro ao buscar tarefa por id: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun adicionarUsuarioATarefa(userId: String, tarefaId: String): Boolean {
+        return try {
+            println("DEBUG - Adicionando usuário $userId à tarefa $tarefaId")
+            val result = supabase.from("utilizador_tarefa")
+                .insert(mapOf("utilizador_uuid" to userId, "tarefa_uuid" to tarefaId)) {
+                    select()
+                }
+                .decodeSingleOrNull<Map<String, Any>>()
+            result != null
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+
+    suspend fun getTrabalhadoresDaTarefa(tarefaId: String): List<String> {
+        return try {
+            val result = supabase.from("utilizador_tarefa")
+                .select {
+                    filter { eq("tarefa_uuid", tarefaId) }
+                }
+                .decodeList<Map<String, String>>()
+            println("DEBUG - Trabalhadores da tarefa $tarefaId: ${result.size}")
+            result.mapNotNull { it["utilizador_uuid"] }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
     suspend fun listarTarefas(): List<Tarefa> {
         return try {
             val tarefas = supabase.from("tarefa")

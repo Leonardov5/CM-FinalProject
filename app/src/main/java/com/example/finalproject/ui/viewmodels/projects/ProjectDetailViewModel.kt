@@ -48,15 +48,15 @@ class ProjectDetailViewModel(
     var navigateToTasksForProject by mutableStateOf<String?>(null)
         private set
 
+    var membrosProjeto by mutableStateOf<List<User>>(emptyList())
+        private set
     // Lista de membros do projeto com informações completas
     var membrosProjetoCompleto by mutableStateOf<List<UserProject>>(emptyList())
         private set
 
-    // No ProjectDetailViewModel
     var showAddMemberDialog by mutableStateOf(false)
         private set
 
-    // No ProjectDetailViewModel.kt
     var allUsers by mutableStateOf<List<User>>(emptyList())
         private set
 

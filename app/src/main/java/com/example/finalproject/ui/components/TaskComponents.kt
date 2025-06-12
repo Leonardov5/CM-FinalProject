@@ -12,14 +12,27 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.finalproject.R
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.model.TarefaStatus
 import com.example.finalproject.data.model.Task
 import com.example.finalproject.data.model.TaskStatus
 import com.example.finalproject.ui.theme.*
+
+fun formatDate(iso: String?): String? {
+    return try {
+        val isoFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault())
+        val dateFormat = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
+        iso?.let { dateFormat.format(isoFormat.parse(it)) }
+    } catch (e: Exception) {
+        iso
+    }
+}
 
 @Composable
 fun TabRow(
@@ -38,17 +51,17 @@ fun TabRow(
         Tab(
             selected = selectedTab == TarefaStatus.pendente,
             onClick = { onTabSelected(TarefaStatus.pendente) },
-            text = { Text("To-Do") },
+            text = { Text(stringResource(id = R.string.to_do)) },
         )
         Tab(
             selected = selectedTab == TarefaStatus.em_andamento,
             onClick = { onTabSelected(TarefaStatus.em_andamento) },
-            text = { Text("On-Going") },
+            text = { Text(stringResource(id = R.string.on_going)) },
         )
         Tab(
             selected = selectedTab == TarefaStatus.concluida,
             onClick = { onTabSelected(TarefaStatus.concluida) },
-            text = { Text("Done") },
+            text = { Text(stringResource(id = R.string.done)) },
         )
     }
 }
@@ -82,15 +95,20 @@ fun TaskCard(task: Tarefa, onClick: () -> Unit = {}) {
                 )
 
                 Text(
-                    text = "Criado: ${task.createdAt ?: "Data não disponível"}",
+                    text = stringResource(
+                        id = R.string.created_at,
+                        formatDate(task.createdAt) ?: stringResource(id = R.string.unknown_creation_date)
+                    ),
                     fontSize = 12.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
 
             IconButton(onClick = onClick) {
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowUp,
-                    contentDescription = "Ver detalhes",
+                    contentDescription = stringResource(id = R.string.view_details),
                     modifier = Modifier.rotate(90f),
                 )
             }
