@@ -140,9 +140,7 @@ fun TaskManagementScreen(
             title = { Text(stringResource(id = R.string.select_project)) },
             text = {
                 Column {
-                    // Opção para mostrar todas as tarefas
-                    Text(
-                        text = stringResource(id = R.string.all_projects),
+                    Surface(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
@@ -157,7 +155,7 @@ fun TaskManagementScreen(
                         tonalElevation = 2.dp
                     ) {
                         Text(
-                            text = "Todos os projetos",
+                            text = stringResource(id = R.string.all_projects),
                             modifier = Modifier.padding(12.dp),
                             color = if (viewModel.selectedProject == null)
                                 MaterialTheme.colorScheme.onSecondaryContainer
@@ -166,7 +164,6 @@ fun TaskManagementScreen(
                             fontWeight = FontWeight.Medium
                         )
                     }
-
                     // List of projects
                     viewModel.projects.forEach { projeto ->
                         val isSelected = viewModel.selectedProject?.id == projeto.id
