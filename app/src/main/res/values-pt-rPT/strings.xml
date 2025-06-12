@@ -156,4 +156,6 @@
     <string name="team_member">Membro de equipa</string>
     <string name="close">Fechar</string>
     <string name="joined_project_at">Juntou-se ao projeto a</string>
+    <string name="remove">Remover</string>
+    <string name="remove_from_task_confirm">Deseja realmente remover este utilizador da tarefa?</string>
 </resources>

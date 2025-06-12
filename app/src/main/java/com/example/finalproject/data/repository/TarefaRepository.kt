@@ -98,6 +98,21 @@ class TarefaRepository {
         }
     }
 
+    suspend fun removerUsuarioDaTarefa(userId: String, tarefaId: String): Boolean {
+        return try {
+            val result = supabase.from("utilizador_tarefa")
+                .delete {
+                    filter {
+                        eq("utilizador_uuid", userId)
+                        eq("tarefa_uuid", tarefaId)
+                    }
+                }
+            // Se não lançar exceção, considera sucesso
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 
     suspend fun getTrabalhadoresDaTarefa(tarefaId: String): List<String> {
         return try {

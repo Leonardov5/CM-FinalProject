@@ -156,4 +156,6 @@
     <string name="team_member">Team member</string>
     <string name="close">Close</string>
     <string name="joined_project_at">Joined project at</string>
+    <string name="remove">Remove</string>
+    <string name="remove_from_task_confirm">Are you sure you want to remove this user from the task?</string>
 </resources>

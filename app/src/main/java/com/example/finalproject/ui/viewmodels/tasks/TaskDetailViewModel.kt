@@ -12,6 +12,7 @@ import com.example.finalproject.data.model.UserProject
 import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
 import com.example.finalproject.data.repository.UserRepository
+import com.example.finalproject.data.service.UserService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -32,6 +33,11 @@ class TaskDetailViewModel(
     var showAddWorkerDialog by mutableStateOf(false)
         private set
 
+    var isAdmin by mutableStateOf(false)
+        private set
+
+    var isManager by mutableStateOf(false)
+        private set
 
     var trabalhadoresTarefa by mutableStateOf<List<String>>(emptyList())
         private set
@@ -44,6 +50,19 @@ class TaskDetailViewModel(
 
     var filtredMembros by mutableStateOf<List<User>>(emptyList())
         private set
+
+    fun checkUser(currentUser: User? = null) {
+        viewModelScope.launch {
+            try {
+                val user = currentUser ?: UserService.getCurrentUserData()
+                isAdmin = user?.admin == true
+                val membrosProjetoCompleto = projetoRepository.listarMembrosProjetoCompleto(task?.projetoId ?: "")
+                isManager = membrosProjetoCompleto.any { it.userId == user?.id && it.isManager }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     fun loadTrabalhadoresTarefa(tarefaId: String) {
         viewModelScope.launch {
@@ -105,6 +124,17 @@ class TaskDetailViewModel(
             onResult(result)
             if (result) {
                 loadTask(tarefaId) // Atualiza a tarefa para refletir os trabalhadores
+            }
+        }
+    }
+
+    fun removeWorkerFromTask(userId: String, tarefaId: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val result = taskRepository.removerUsuarioDaTarefa(userId, tarefaId)
+            onResult(result)
+            if (result) {
+                loadTask(tarefaId)
+                loadTrabalhadoresTarefa(tarefaId)
             }
         }
     }

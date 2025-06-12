@@ -36,7 +36,10 @@ import com.example.finalproject.data.model.TaskStatus
 import com.example.finalproject.data.model.DemoTasks
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.model.TarefaStatus
+import com.example.finalproject.data.model.User
 import com.example.finalproject.ui.components.tasks.AddWorkerDialog
+import com.example.finalproject.ui.components.tasks.WorkerCardTask
+import com.example.finalproject.ui.components.tasks.WorkerTaskDetailDialog
 import com.example.finalproject.ui.theme.*
 import com.example.finalproject.ui.viewmodels.tasks.TaskDetailViewModel
 import com.example.finalproject.ui.viewmodels.tasks.TaskManagementViewModel
@@ -77,6 +80,7 @@ fun TaskDetailScreen(
             if (projetoId.isNotBlank()) {
                 viewModel.loadMembrosProjeto(projetoId)
                 viewModel.filterMembros()
+                viewModel.checkUser()
             }
         }
     }
@@ -113,62 +117,68 @@ fun TaskDetailScreen(
             )
         },
         floatingActionButton = {
-            Column(
-                horizontalAlignment = Alignment.End
-            ) {
-                // FAB menu
-                AnimatedVisibility(
-                    visible = showFabActions,
-                    enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }) + expandVertically(),
-                    exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }) + shrinkVertically()
+            if (viewModel.isAdmin || viewModel.isManager) {
+                Column(
+                    horizontalAlignment = Alignment.End
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.End,
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.padding(bottom = 16.dp)
+                    // FAB menu
+                    AnimatedVisibility(
+                        visible = showFabActions,
+                        enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }) + expandVertically(),
+                        exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }) + shrinkVertically()
                     ) {
-                        ActionButton(
-                            icon = Icons.Default.Done,
-                            label = stringResource(id = R.string.mark_as_completed),
-                            onClick = {
-                                onStatusChange(TarefaStatus.concluida)
-                                showFabActions = false
+                        Column(
+                            horizontalAlignment = Alignment.End,
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        ) {
+                            ActionButton(
+                                icon = Icons.Default.Done,
+                                label = stringResource(id = R.string.mark_as_completed),
+                                onClick = {
+                                    onStatusChange(TarefaStatus.concluida)
+                                    showFabActions = false
+                                }
+                            )
+                            ActionButton(
+                                icon = Icons.Default.PlayArrow,
+                                label = stringResource(id = R.string.mark_as_active),
+                                onClick = {
+                                    onStatusChange(TarefaStatus.em_andamento)
+                                    showFabActions = false
+                                }
+                            )
+                            ActionButton(
+                                icon = Icons.Default.Add,
+                                label = stringResource(id = R.string.add_worker),
+                                onClick = {
+                                    showFabActions = false
+                                    viewModel.toggleAddWorkerDialog()
+                                }
+                            )
+                            if( viewModel.isAdmin) {
+                                ActionButton(
+                                    icon = Icons.Default.Delete,
+                                    label = stringResource(id = R.string.delete_task),
+                                    onClick = {
+                                        showFabActions = false
+                                        onDeleteTask()
+                                    }
+                                )
                             }
-                        )
-                        ActionButton(
-                            icon = Icons.Default.PlayArrow,
-                            label = stringResource(id = R.string.mark_as_active),
-                            onClick = {
-                                onStatusChange(TarefaStatus.em_andamento)
-                                showFabActions = false
-                            }
-                        )
-                        ActionButton(
-                            icon = Icons.Default.Add,
-                            label = stringResource(id = R.string.add_worker),
-                            onClick = {
-                                showFabActions = false
-                                viewModel.toggleAddWorkerDialog()
-                            }
-                        )
-                        ActionButton(
-                            icon = Icons.Default.Delete,
-                            label = stringResource(id = R.string.delete_task),
-                            onClick = {
-                                showFabActions = false
-                                onDeleteTask()
-                            }
+                        }
+                    }
+                    FloatingActionButton(
+                        onClick = { showFabActions = !showFabActions },
+
+                        ) {
+                        Icon(
+                            imageVector = if (showFabActions) Icons.Default.Close else Icons.Default.Add,
+                            contentDescription = if (showFabActions) stringResource(id = R.string.close_menu) else stringResource(
+                                id = R.string.open_menu
+                            )
                         )
                     }
-                }
-                FloatingActionButton(
-                    onClick = { showFabActions = !showFabActions },
-
-                ) {
-                    Icon(
-                        imageVector = if (showFabActions) Icons.Default.Close else Icons.Default.Add,
-                        contentDescription = if (showFabActions) stringResource(id = R.string.close_menu) else stringResource(id = R.string.open_menu)
-                    )
                 }
             }
         },
@@ -225,6 +235,8 @@ private fun TaskContent(
     viewModel: TaskDetailViewModel = viewModel()
 ) {
     val statusEnum = viewModel.statusToEnum(task.status)
+    var selectedWorker by remember { mutableStateOf<User?>(null) }
+    var showWorkerDialog by remember { mutableStateOf(false) }
 
     StatusChip(status = statusEnum)
 
@@ -318,33 +330,48 @@ private fun TaskContent(
         TaskInfoSection(
             title = stringResource(id = R.string.workers),
             content = {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
+                Column {
                     viewModel.trabalhadoresTarefa.forEach { userId ->
                         val user = viewModel.membrosProjeto.find { it.id == userId }
                         if (user != null) {
-                            println("DEBUG - User found: ${user.nome} (${user.id})")
-                            WorkerAvatar(
-                                initials = user.nome.take(2).uppercase(),
-                                backgroundColor = primaryLight
+                            WorkerCardTask(
+                                worker = user,
+                                onClick = {
+                                    if (viewModel.isAdmin || viewModel.isManager){
+                                        selectedWorker = user
+                                        showWorkerDialog = true
+                                    }
+                                }
                             )
                         }
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    if(viewModel.isAdmin || viewModel.isManager){
+                        Button(
+                            onClick = { viewModel.toggleAddWorkerDialog() },
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.add_worker))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(id = R.string.add_worker))
+                        }
 
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .clickable { onAddWorker() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = stringResource(id = R.string.add_worker),
-                            tint = onSurfaceVariantLight
-                        )
                     }
+                }
+            }
+        )
+
+        // Diálogo de detalhes do trabalhador
+        WorkerTaskDetailDialog(
+            show = showWorkerDialog,
+            worker = selectedWorker,
+            onDismiss = { showWorkerDialog = false },
+            onRemove = { userId ->
+                viewModel.removeWorkerFromTask(userId, viewModel.task?.id ?: "") {
+                    showWorkerDialog = false
                 }
             }
         )
@@ -398,26 +425,6 @@ private fun StatusChip(status: TarefaStatus) {
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium
-        )
-    }
-}
-
-@Composable
-private fun WorkerAvatar(
-    initials: String,
-    backgroundColor: Color
-) {
-    Box(
-        modifier = Modifier
-            .size(40.dp)
-            .clip(CircleShape)
-            .background(backgroundColor),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = initials,
-            color = Color.White,
-            fontWeight = FontWeight.Bold
         )
     }
 }
