@@ -1,21 +1,15 @@
 package com.example.finalproject
 
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.finalproject.ui.components.BottomNavigation
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 
-class NavigationTest {
+class NavBarTest {
     @get:Rule
     val rule = createComposeRule()
 
