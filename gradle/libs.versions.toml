@@ -15,6 +15,7 @@ lifecycleRuntimeKtx = "2.9.0"
 activityCompose = "1.10.1"
 composeBom = "2024.09.00"
 materialIconsExtended = "1.7.8"
+mockitoKotlin = "4.1.0"
 navigationCompose = "2.9.0"
 googleGmsGoogleServices = "4.4.2"
 firebaseFirestore = "25.1.4"
@@ -55,6 +56,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktorClientAndroid" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
 postgrest-kt = { module = "io.github.jan-tennert.supabase:postgrest-kt", version.ref = "postgrestKt" }
 postgrest-kt-v21 = { module = "io.github.jan-tennert.supabase:postgrest-kt", version.ref = "postgrestKtVersion" }
 storage-kt = { module = "io.github.jan-tennert.supabase:storage-kt", version.ref = "storageKt" }
