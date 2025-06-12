@@ -4,7 +4,9 @@ import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.data.model.UserProject
 import com.example.finalproject.data.service.SupabaseProvider
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.rpc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.buildJsonObject
@@ -213,6 +215,53 @@ class ProjetoRepository {
         } catch (e: Exception) {
             e.printStackTrace()
             emptyList()
+        }
+    }
+
+    // Lista todos os membros de um projeto com JOIN para obter informações completas
+    suspend fun listarMembrosProjetoCompleto(projectId: String): List<UserProject> {
+        return try {
+            withContext(Dispatchers.IO) {
+                val query = Columns.raw("*, utilizador!inner(nome, fotografia, username, admin)")
+                supabase.from("utilizador_projeto")
+                    .select(columns = query) {
+                        filter { eq("projeto_uuid", projectId) }
+                    }
+                    .decodeList<UserProject>()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+    // Atualiza o status e a função de um membro no projeto
+    suspend fun atualizarMembrosDoProjetoStatus(
+        userId: String,
+        projectId: String,
+        isManager: Boolean,
+        isActive: Boolean
+    ): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                val data = buildJsonObject {
+                    put("utilizador_uuid", userId)
+                    put("projeto_uuid", projectId)
+                    put("e_gestor", isManager)
+                    put("ativo", isActive)
+                }
+                supabase.from("utilizador_projeto")
+                    .upsert(data) {
+                        filter {
+                            eq("utilizador_uuid", userId)
+                            eq("projeto_uuid", projectId)
+                        }
+                    }
+                true
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
     }
 }

@@ -60,7 +60,7 @@ fun TaskCard(task: Tarefa, onClick: () -> Unit = {}) {
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.tertiaryContainer,
+        color = MaterialTheme.colorScheme.secondaryContainer,
         shadowElevation = 2.dp
     ) {
         Row(
@@ -69,12 +69,6 @@ fun TaskCard(task: Tarefa, onClick: () -> Unit = {}) {
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.List,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                modifier = Modifier.size(24.dp)
-            )
 
             Spacer(modifier = Modifier.width(16.dp))
 

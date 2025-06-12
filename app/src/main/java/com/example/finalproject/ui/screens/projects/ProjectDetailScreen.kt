@@ -1,8 +1,9 @@
 package com.example.finalproject.ui.screens.projects
 
 import AddMemberDialog
-import android.app.Activity
 import android.os.Build
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -10,45 +11,74 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import android.widget.Toast
-import androidx.annotation.RequiresApi
-import androidx.compose.foundation.clickable
-import androidx.compose.material3.ScaffoldDefaults.contentWindowInsets
-import androidx.compose.ui.res.stringResource
-import com.example.finalproject.R
-import com.example.finalproject.data.PreferencesManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.finalproject.R
 import com.example.finalproject.Screen
-import com.example.finalproject.data.model.Projeto
+import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.data.model.User
-import com.example.finalproject.data.repository.ProjetoRepository
-import com.example.finalproject.data.repository.TarefaRepository
-import com.example.finalproject.data.service.UserService
 import com.example.finalproject.ui.components.projects.AddTaskDialog
 import com.example.finalproject.ui.components.projects.EditProjectDialog
-import com.example.finalproject.ui.theme.*
+import com.example.finalproject.ui.components.projects.WorkerDetailDialog
+import com.example.finalproject.ui.components.projects.WorkersListProject
+import com.example.finalproject.ui.theme.onSurfaceVariantLight
+import com.example.finalproject.ui.theme.primaryLight
+import com.example.finalproject.ui.theme.surfaceVariantLight
 import com.example.finalproject.ui.viewmodels.projects.ProjectDetailViewModel
 import com.example.finalproject.utils.updateAppLanguage
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
 import java.util.Locale
 
 fun formatDate(iso: String?): String? {
@@ -81,7 +111,7 @@ fun ProjectDetailScreen(
         viewModel.loadUser(currentUser)
         viewModel.loadProject(projetoId)
         viewModel.checkIfManager(projetoId)
-        viewModel.loadMembrosProjeto(projetoId)
+        viewModel.loadMembrosProjetoCompleto(projetoId) // Usando o novo método
 
         val savedLanguage = PreferencesManager.getLanguage(context)
         print("Saved language: $savedLanguage")
@@ -322,21 +352,16 @@ fun ProjectDetailScreen(
                 ProjectInfoSection(
                     title = stringResource(id = R.string.workers),
                     content = {
-                        if (viewModel.membrosProjeto.isEmpty()) {
-                            Text(
-                                text = stringResource(id = R.string.no_workers),
-                                fontSize = 16.sp,
-                            )
-                        } else {
-                            Column {
-                                viewModel.membrosProjeto.forEach { user ->
-                                    Text(
-                                        text = user.nome,
-                                        fontSize = 16.sp,
-                                    )
-                                }
+                        // Usar diretamente a lista de membros com informações completas
+                        WorkersListProject(
+                            workers = viewModel.membrosProjetoCompleto,
+                            emptyText = stringResource(id = R.string.no_workers),
+                            onWorkerClick = { userId ->
+                                // Encontrar o worker pelo ID e mostrar o diálogo de detalhes
+                                val worker = viewModel.membrosProjetoCompleto.find { it.userId == userId }
+                                worker?.let { viewModel.showWorkerDetailDialog(it) }
                             }
-                        }
+                        )
                     }
                 )
 
@@ -438,7 +463,7 @@ fun ProjectDetailScreen(
             viewModel.loadAllUsers()
         }
         val usersNotInProject = viewModel.allUsers.filter { user ->
-            viewModel.membrosProjeto.none { membro -> membro.id == user.id }
+            viewModel.membrosProjetoCompleto.none { membro -> membro.userId == user.id }
         }
         AddMemberDialog(
             isAdmin = viewModel.isAdmin,
@@ -477,6 +502,22 @@ fun ProjectDetailScreen(
                     }
                 }
             }
+        )
+    }
+
+    // Diálogo para detalhes do trabalhador
+    if (viewModel.showWorkerDetailDialog) {
+        WorkerDetailDialog(
+            show = true,
+            worker = viewModel.selectedWorker,
+            onDismiss = { viewModel.hideWorkerDetailDialog() },
+            onEdit = { userId, isManager, isActive ->
+                scope.launch {
+                    viewModel.updateWorkerRole(userId, isManager, isActive)
+                    Toast.makeText(context, "Dados do membro atualizados com sucesso", Toast.LENGTH_SHORT).show()
+                }
+            },
+            isAdmin = viewModel.isAdmin || viewModel.isManager
         )
     }
 }
@@ -533,7 +574,7 @@ private fun ActionButton(
     Surface(
         modifier = Modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        color = surfaceVariantLight,
+        color = MaterialTheme.colorScheme.primaryContainer,
         shadowElevation = 2.dp
     ) {
         Row(
@@ -545,7 +586,7 @@ private fun ActionButton(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = primaryLight,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 modifier = Modifier.size(24.dp)
             )
 
@@ -553,7 +594,7 @@ private fun ActionButton(
 
             Text(
                 text = label,
-                color = onSurfaceVariantLight,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium
             )

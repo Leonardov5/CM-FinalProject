@@ -131,4 +131,8 @@
     <string name="task_added_success">Task added successfully</string>
     <string name="task_add_error">Error adding task: %1$s</string>
     <string name="member_added_success">Member added successfully</string>
+    <string name="project_manager">Project manager</string>
+    <string name="team_member">Team member</string>
+    <string name="close">Close</string>
+    <string name="joined_project_at">Joined project at</string>
 </resources>

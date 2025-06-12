@@ -101,7 +101,6 @@ fun TaskManagementScreen(
                 CircularProgressIndicator(color = primaryLight)
             }
         } else {
-            // Tab Row
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -127,7 +126,6 @@ fun TaskManagementScreen(
                         )
                     }
 
-                    // Add some bottom padding
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                     }
@@ -140,30 +138,60 @@ fun TaskManagementScreen(
             onDismissRequest = { viewModel.showProjectDialog = false },
             title = { Text("Selecione um projeto") },
             text = {
-                Column {
-                    // Opção para mostrar todas as tarefas
-                    Text(
-                        text = "Todos os projetos",
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Surface(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
                                 viewModel.selectProject(null)
                                 viewModel.showProjectDialog = false
-                            }
-                            .padding(8.dp)
-                    )
-                    // Lista de projetos reais
-                    viewModel.projects.forEach { projeto ->
+                            },
+                        color = if (viewModel.selectedProject == null)
+                            MaterialTheme.colorScheme.secondaryContainer
+                        else
+                            MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(12.dp),
+                        tonalElevation = 2.dp
+                    ) {
                         Text(
-                            text = projeto.nome,
+                            text = "Todos os projetos",
+                            modifier = Modifier.padding(12.dp),
+                            color = if (viewModel.selectedProject == null)
+                                MaterialTheme.colorScheme.onSecondaryContainer
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    // List of projects
+                    viewModel.projects.forEach { projeto ->
+                        val isSelected = viewModel.selectedProject?.id == projeto.id
+                        Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
                                     viewModel.selectProject(projeto)
                                     viewModel.showProjectDialog = false
-                                }
-                                .padding(8.dp)
-                        )
+                                },
+                            color = if (isSelected)
+                                MaterialTheme.colorScheme.secondaryContainer
+                            else
+                                MaterialTheme.colorScheme.surfaceVariant,
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = projeto.nome,
+                                modifier = Modifier.padding(12.dp),
+                                color = if (isSelected)
+                                    MaterialTheme.colorScheme.onSecondaryContainer
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
             },

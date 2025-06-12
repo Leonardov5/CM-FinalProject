@@ -131,4 +131,8 @@
     <string name="task_added_success">Tarefa adicionada com sucesso</string>
     <string name="task_add_error">Erro ao adicionar tarefa: %1$s</string>
     <string name="member_added_success">Membro adicionado com sucesso</string>
+    <string name="project_manager">Gestor do projeto</string>
+    <string name="team_member">Membro de equipa</string>
+    <string name="close">Fechar</string>
+    <string name="joined_project_at">Juntou-se ao projeto a</string>
 </resources>
