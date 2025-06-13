@@ -35,7 +35,8 @@ fun formatDate(iso: String?): String? {
 @Composable
 fun TabRow(
     selectedTab: TarefaStatus,
-    onTabSelected: (TarefaStatus) -> Unit
+    onTabSelected: (TarefaStatus) -> Unit,
+    isAdmin: Boolean
 ) {
     TabRow(
         selectedTabIndex = selectedTab.ordinal,
@@ -61,6 +62,14 @@ fun TabRow(
             onClick = { onTabSelected(TarefaStatus.concluida) },
             text = { Text(stringResource(id = R.string.done)) },
         )
+        if(isAdmin){
+            Tab(
+                selected = selectedTab == TarefaStatus.cancelada,
+                onClick = { onTabSelected(TarefaStatus.cancelada) },
+                text = { Text(stringResource(id = R.string.cancelled_task)) },
+            )
+        }
+
     }
 }
 

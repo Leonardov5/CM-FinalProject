@@ -9,13 +9,16 @@ import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.model.TarefaStatus
+import com.example.finalproject.data.model.User
 import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
+import com.example.finalproject.data.service.UserService
 import kotlinx.coroutines.launch
 
 class TaskManagementViewModel(
     private val projetoRepository: ProjetoRepository = ProjetoRepository(),
     private val taskRepository: TarefaRepository = TarefaRepository()
+
 ) : ViewModel() {
     var isLoading by mutableStateOf(false)
         private set
@@ -25,6 +28,22 @@ class TaskManagementViewModel(
 
     var tasks by mutableStateOf<List<Tarefa>>(emptyList())
         private set
+
+    var isAdmin by mutableStateOf(false)
+        private set
+
+
+    fun checkUser(currentUser: User? = null) {
+        viewModelScope.launch {
+            try {
+                val user = currentUser ?: UserService.getCurrentUserData()
+                isAdmin = user?.admin == true
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
 
     fun loadTasks() {
         viewModelScope.launch {
