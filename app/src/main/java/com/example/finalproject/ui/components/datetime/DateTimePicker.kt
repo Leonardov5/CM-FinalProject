@@ -16,8 +16,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import com.example.finalproject.R
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -132,7 +134,7 @@ fun DateTimePickerDialog(
                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 ) {
-                    Text("Data")
+                    Text(stringResource(id = R.string.date))
                 }
 
                 TextButton(
@@ -144,7 +146,7 @@ fun DateTimePickerDialog(
                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 ) {
-                    Text("Hora")
+                    Text(stringResource(id = R.string.hour))
                 }
             }
         },
@@ -199,12 +201,12 @@ fun DateTimePickerDialog(
                     onDateTimeSelected(dateTime)
                 }
             ) {
-                Text("Confirmar")
+                Text(stringResource(id = R.string.confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismissRequest) {
-                Text("Cancelar")
+                Text(stringResource(id = R.string.cancel))
             }
         },
         properties = DialogProperties(

@@ -23,10 +23,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.finalproject.R
 import com.example.finalproject.ui.components.datetime.DateTimePickerDialog
 import com.example.finalproject.ui.components.datetime.DateTimePickerField
 import com.example.finalproject.ui.components.datetime.DateTimePickerViewModel
@@ -70,7 +72,7 @@ fun LogWorkDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Registar Trabalho",
+                    text = stringResource(id = R.string.LogWork),
                     style = MaterialTheme.typography.headlineSmall
                 )
 
@@ -78,12 +80,12 @@ fun LogWorkDialog(
 
                 // Campo de data e hora
                 DateTimePickerField(
-                    label = "Data",
+                    label = stringResource(id = R.string.date),
                     selectedDateTime = viewModel.data,
                     formattedDateTime = formattedDateTime,
                     onDateTimePickerClick = { showDateTimePicker = true },
                     isError = viewModel.dataError,
-                    errorMessage = "Data é obrigatória"
+                    errorMessage = stringResource(id = R.string.date_mandatory)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -92,10 +94,10 @@ fun LogWorkDialog(
                 OutlinedTextField(
                     value = viewModel.local,
                     onValueChange = { viewModel.local = it },
-                    label = { Text("Local") },
+                    label = { Text(stringResource(id = R.string.location)) },
                     isError = viewModel.localError,
                     supportingText = if (viewModel.localError) {
-                        { Text("Local é obrigatório") }
+                        { Text(stringResource(id = R.string.location_mandatory)) }
                     } else null,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -111,11 +113,11 @@ fun LogWorkDialog(
                             viewModel.taxaConclusao = it
                         }
                     },
-                    label = { Text("Taxa de Conclusão (%)") },
+                    label = { Text(stringResource(id = R.string.completion_rate) + " (%)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     isError = viewModel.taxaConclusaoError,
                     supportingText = if (viewModel.taxaConclusaoError) {
-                        { Text("Valor deve estar entre 0 e 100") }
+                        { Text(stringResource(id = R.string.completion_rate_error)) }
                     } else null,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -131,11 +133,11 @@ fun LogWorkDialog(
                             viewModel.tempoDispensado = it
                         }
                     },
-                    label = { Text("Tempo Dispensado (minutos)") },
+                    label = { Text(stringResource(id = R.string.time_spent)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     isError = viewModel.tempoDispensadoError,
                     supportingText = if (viewModel.tempoDispensadoError) {
-                        { Text("Tempo deve ser maior que 0") }
+                        { Text(stringResource(id = R.string.time_spent_error)) }
                     } else null,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -174,7 +176,7 @@ fun LogWorkDialog(
                             strokeWidth = 2.dp
                         )
                     }
-                    Text("Registrar")
+                    Text(stringResource(id = R.string.resgiter_work))
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -192,7 +194,7 @@ fun LogWorkDialog(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Cancelar")
+                    Text(stringResource(id = R.string.cancel))
                 }
             }
         }

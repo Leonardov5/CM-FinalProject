@@ -158,4 +158,13 @@
     <string name="joined_project_at">Joined project at</string>
     <string name="remove">Remove</string>
     <string name="remove_from_task_confirm">Are you sure you want to remove this user from the task?</string>
+    <string name="LogWork">Log Work</string>
+    <string name="date">Date</string>
+    <string name="hour">Hour</string>
+    <string name="date_mandatory">Date is mandatory</string>
+    <string name="location">Location</string>
+    <string name="location_mandatory">Location is mandatory</string>
+    <string name="time_spent">Time Spent (minutes)</string>
+    <string name="time_spent_error">The time must be greater than 0</string>
+    <string name="resgiter_work">Log</string>
 </resources>

@@ -158,4 +158,13 @@
     <string name="joined_project_at">Juntou-se ao projeto a</string>
     <string name="remove">Remover</string>
     <string name="remove_from_task_confirm">Deseja realmente remover este utilizador da tarefa?</string>
+    <string name="LogWork">Registar Trabalho</string>
+    <string name="date">Data</string>
+    <string name="hour">Hora</string>
+    <string name="date_mandatory">Data é obrigatória</string>
+    <string name="location">Local</string>
+    <string name="location_mandatory">Local é obrigatório</string>
+    <string name="time_spent">Tempo Dispensado (minutos)</string>
+    <string name="time_spent_error">O tempo deve ser maior que 0</string>
+    <string name="resgiter_work">Registar</string>
 </resources>
