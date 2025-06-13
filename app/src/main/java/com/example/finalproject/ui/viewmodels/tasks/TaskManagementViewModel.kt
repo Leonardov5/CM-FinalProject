@@ -6,12 +6,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.finalproject.data.model.DemoTasks
 import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.model.TarefaStatus
-import com.example.finalproject.data.model.Task
-import com.example.finalproject.data.model.TaskStatus
 import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
 import kotlinx.coroutines.launch

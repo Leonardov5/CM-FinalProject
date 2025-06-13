@@ -12,17 +12,18 @@ import com.example.finalproject.data.model.UserProject
 import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
 import com.example.finalproject.data.repository.UserRepository
+import com.example.finalproject.data.service.AuthService
 import com.example.finalproject.data.service.UserService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
 
 class TaskDetailViewModel(
     private val taskRepository: TarefaRepository = TarefaRepository(),
     private val projetoRepository: ProjetoRepository = ProjetoRepository()
 
 ) : ViewModel(){
-
 
     var task by mutableStateOf<Tarefa?>(null)
         private set
@@ -135,6 +136,25 @@ class TaskDetailViewModel(
             if (result) {
                 loadTask(tarefaId)
                 loadTrabalhadoresTarefa(tarefaId)
+            }
+        }
+    }
+
+    // Esta função não registra trabalho, apenas atualiza a interface após um registro
+    fun reloadTaskAfterLogWork(
+        tarefaId: String,
+        onComplete: () -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            try {
+                isLoading = true
+                // Apenas recarrega a tarefa para atualizar a UI
+                loadTask(tarefaId)
+                onComplete()
+            } catch (e: Exception) {
+                println("Error reloading task: ${e.message}")
+            } finally {
+                isLoading = false
             }
         }
     }

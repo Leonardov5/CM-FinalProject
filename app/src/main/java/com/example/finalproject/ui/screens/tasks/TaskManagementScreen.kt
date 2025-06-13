@@ -164,6 +164,9 @@ fun TaskManagementScreen(
                             fontWeight = FontWeight.Medium
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     // List of projects
                     viewModel.projects.forEach { projeto ->
                         val isSelected = viewModel.selectedProject?.id == projeto.id
@@ -190,6 +193,8 @@ fun TaskManagementScreen(
                                 fontWeight = FontWeight.Medium
                             )
                         }
+
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
             },

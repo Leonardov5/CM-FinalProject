@@ -20,8 +20,6 @@ import androidx.compose.ui.unit.sp
 import com.example.finalproject.R
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.model.TarefaStatus
-import com.example.finalproject.data.model.Task
-import com.example.finalproject.data.model.TaskStatus
 import com.example.finalproject.ui.theme.*
 
 fun formatDate(iso: String?): String? {

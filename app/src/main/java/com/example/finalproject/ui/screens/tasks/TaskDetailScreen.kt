@@ -1,5 +1,7 @@
 package com.example.finalproject.ui.screens.tasks
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -31,19 +33,18 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject.R
 import com.example.finalproject.data.PreferencesManager
-import com.example.finalproject.data.model.Task
-import com.example.finalproject.data.model.TaskStatus
-import com.example.finalproject.data.model.DemoTasks
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.model.TarefaStatus
 import com.example.finalproject.data.model.User
 import com.example.finalproject.ui.components.tasks.AddWorkerDialog
+import com.example.finalproject.ui.components.tasks.LogWorkDialog
 import com.example.finalproject.ui.components.tasks.WorkerCardTask
 import com.example.finalproject.ui.components.tasks.WorkerTaskDetailDialog
 import com.example.finalproject.ui.theme.*
 import com.example.finalproject.ui.viewmodels.tasks.TaskDetailViewModel
 import com.example.finalproject.ui.viewmodels.tasks.TaskManagementViewModel
 import com.example.finalproject.utils.updateAppLanguage
+import java.time.LocalDateTime
 
 fun formatDate(iso: String?): String? {
     return try {
@@ -55,6 +56,7 @@ fun formatDate(iso: String?): String? {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskDetailScreen(
@@ -66,6 +68,7 @@ fun TaskDetailScreen(
     viewModel: TaskDetailViewModel = viewModel()
 ) {
     val context = LocalContext.current
+    var showLogWorkDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = true) {
         viewModel.loadTask(taskId)
@@ -156,6 +159,14 @@ fun TaskDetailScreen(
                                     viewModel.toggleAddWorkerDialog()
                                 }
                             )
+                            ActionButton(
+                                icon = Icons.Default.Work,
+                                label = "Log Work",
+                                onClick = {
+                                    showFabActions = false
+                                    showLogWorkDialog = true
+                                }
+                            )
                             if( viewModel.isAdmin) {
                                 ActionButton(
                                     icon = Icons.Default.Delete,
@@ -205,7 +216,12 @@ fun TaskDetailScreen(
                         onStatusChange = onStatusChange,
                         onDeleteTask = onDeleteTask,
                         onAddWorker = onAddWorker,
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        onLogWork = { hours, description ->
+                            //viewModel.logWork(taskId, hours, description) {
+                                // feedback opcional
+                            //}
+                        }
                     )
                 }
             }
@@ -224,6 +240,18 @@ fun TaskDetailScreen(
             }
         )
     }
+
+    if (showLogWorkDialog && viewModel.task != null) {
+        LogWorkDialog(
+            show = true,
+            tarefaId = taskId,
+            onDismiss = { showLogWorkDialog = false },
+            onSuccess = {
+                // Apenas recarregar a tarefa para mostrar possíveis atualizações
+                viewModel.reloadTaskAfterLogWork(taskId)
+            }
+        )
+    }
 }
 
 @Composable
@@ -232,7 +260,8 @@ private fun TaskContent(
     onStatusChange: (TarefaStatus) -> Unit,
     onDeleteTask: () -> Unit,
     onAddWorker: () -> Unit,
-    viewModel: TaskDetailViewModel = viewModel()
+    viewModel: TaskDetailViewModel = viewModel(),
+    onLogWork: (hours: Int, description: String) -> Unit = { _, _ -> }
 ) {
     val statusEnum = viewModel.statusToEnum(task.status)
     var selectedWorker by remember { mutableStateOf<User?>(null) }
