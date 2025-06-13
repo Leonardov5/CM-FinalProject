@@ -36,6 +36,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.outlined.Analytics
+import androidx.compose.material.icons.outlined.Monitor
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -230,6 +232,14 @@ fun ProjectDetailScreen(
                                     viewModel.toggleFabActions()
                                     viewModel.showDeleteConfirmDialog()
                                 }
+                            )
+                        }
+                        if(viewModel.isAdmin){
+                            ActionButton(
+                                icon = Icons.Outlined.Analytics,
+                                // TODO: change this so it uses translation files
+                                label = "Export Analytics",
+                                onClick = {}
                             )
                         }
                     }
