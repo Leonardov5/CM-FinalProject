@@ -158,6 +158,16 @@
     <string name="joined_project_at">Juntou-se ao projeto a</string>
     <string name="remove">Remover</string>
     <string name="remove_from_task_confirm">Deseja realmente remover este utilizador da tarefa?</string>
+    <string name="bottom_nav_users">Utilizadores</string>
+    <string name="user_management_title">Gestão de Utilizadores</string>
+    <string name="no_users_found">Nenhum utilizador encontrado.</string>
+    <string name="add_user">Adicionar Utilizador</string>
+    <string name="edit_user">Editar</string>
+    <string name="delete_user">Apagar</string>
+    <string name="admin_label">Administrador</string>
+    <string name="delete_user_dialog_title">Apagar utilizador</string>
+    <string name="delete_user_dialog_text">Tem certeza que deseja apagar o utilizador &quot;%1$s&quot;?</string>
+    <string name="create_user_title">Criar novo utilizador</string>
     <string name="LogWork">Registar Trabalho</string>
     <string name="date">Data</string>
     <string name="hour">Hora</string>
@@ -177,4 +187,6 @@
     <string name="edit_observation">Editar observação</string>
     <string name="existing_images">Imagens existentes</string>
     <string name="new_images">Novas imagens</string>
+    <string name="admin_password_dialog_title">Confirme a senha do Admin</string>
+
 </resources>

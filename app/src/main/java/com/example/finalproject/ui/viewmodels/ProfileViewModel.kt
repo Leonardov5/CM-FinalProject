@@ -100,6 +100,20 @@ class ProfileViewModel: ViewModel() {
     var showPasswordForEmailChange by mutableStateOf(false)
         private set
 
+    var isAdmin by mutableStateOf(false)
+        private set
+
+    fun checkIfAdmin() {
+        viewModelScope.launch {
+            try {
+                val user = UserService.getCurrentUserData()
+                isAdmin = user?.admin == true
+            } catch (e: Exception) {
+                isAdmin = false
+            }
+        }
+    }
+
     // Funções para atualizar estados
     fun onNameChange(newName: String) {
         name = newName

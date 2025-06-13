@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -31,6 +32,8 @@ import com.example.finalproject.data.service.AuthService
 import kotlinx.coroutines.launch
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.finalproject.ui.screens.users.UserManagementScreen
+import com.example.finalproject.ui.viewmodels.users.UserManagementViewModel
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")
@@ -51,6 +54,7 @@ sealed class Screen(val route: String) {
     object Observacoes : Screen("observacoes/{tarefaId}") {
         fun createRoute(tarefaId: String) = "observacoes/$tarefaId"
     }
+    object UserManagement : Screen("user_management")
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -259,6 +263,17 @@ fun AppNavigation(
                     onBackPressed = {
                         navController.popBackStack()
                     }
+                )
+            }
+
+            composable(route = Screen.UserManagement.route) {
+                val userManagementViewModel: UserManagementViewModel = viewModel()
+                UserManagementScreen(
+                    onProfileClick = {
+                        navController.navigate(Screen.Profile.route)
+                    },
+                    viewModel = userManagementViewModel,
+                    onAddUser = { /* navegação para tela de adicionar usuário */ },
                 )
             }
         }
