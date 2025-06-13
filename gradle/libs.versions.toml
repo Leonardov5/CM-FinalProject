@@ -1,8 +1,10 @@
 [versions]
 agp = "8.9.2"
+androidxJunit = "1.1.5"
 appcompat = "1.7.1"
 artifactid = "version"
 coilCompose = "2.5.0"
+core = "1.6.1"
 firebaseBom = "33.14.0"
 gotrueKt = "2.1.1"
 kotlin = "2.0.21"
@@ -23,20 +25,25 @@ firebaseAuth = "23.2.1"
 postgrestKt = "2.1.1"
 postgrestKtVersion = "2.1"
 roomRuntime = "2.7.1"
+runner = "1.5.2"
 storageKt = "2.1.1"
+uiTestJunit4 = "x.x.x"
 workRuntimeKtx = "2.10.1"
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-core = { module = "androidx.core:core", version.ref = "coreKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-junit-v115 = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 artifactid = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+core = { module = "androidx.test:core", version.ref = "core" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-database = { module = "com.google.firebase:firebase-database" }
 gotrue-kt = { module = "io.github.jan-tennert.supabase:gotrue-kt", version.ref = "gotrueKt" }
@@ -60,6 +67,7 @@ mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "
 postgrest-kt = { module = "io.github.jan-tennert.supabase:postgrest-kt", version.ref = "postgrestKt" }
 postgrest-kt-v21 = { module = "io.github.jan-tennert.supabase:postgrest-kt", version.ref = "postgrestKtVersion" }
 storage-kt = { module = "io.github.jan-tennert.supabase:storage-kt", version.ref = "storageKt" }
+ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "uiTestJunit4" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
