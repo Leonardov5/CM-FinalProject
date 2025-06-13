@@ -142,7 +142,7 @@
     <string name="delete_task">Excluir Task</string>
     <string name="task_not_found">Tarefa não encontrada</string>
     <string name="to_do">A Fazer</string>
-    <string name="on_going">Em Andamento</string>
+    <string name="on_going">Ativo</string>
     <string name="done">Concluído</string>
     <string name="cancelled_task">Cancelada</string>
     <string name="creation_date">Data de Criação</string>
@@ -188,5 +188,6 @@
     <string name="existing_images">Imagens existentes</string>
     <string name="new_images">Novas imagens</string>
     <string name="admin_password_dialog_title">Confirme a senha do Admin</string>
-
+    <string name="delete_task_dialog_title">Confirmar Exclusão da Tarefa</string>
+    <string name="delete_task_dialog_text">Tens certeza que desejas excluir a tarefa &quot;%1$s&quot;? Esta ação não pode ser desfeita.</string>
 </resources>

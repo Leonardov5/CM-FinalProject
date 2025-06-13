@@ -32,6 +32,7 @@ class TaskManagementViewModel(
     var isAdmin by mutableStateOf(false)
         private set
 
+    var showProjectDialog by mutableStateOf(false)
 
     fun checkUser(currentUser: User? = null) {
         viewModelScope.launch {
@@ -95,6 +96,5 @@ class TaskManagementViewModel(
     fun selectTab(tab: TarefaStatus) {
         selectedTab = tab
     }
-    var showProjectDialog by mutableStateOf(false)
 
 }

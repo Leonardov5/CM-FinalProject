@@ -141,4 +141,17 @@ class TarefaRepository {
             emptyList()
         }
     }
+
+    suspend fun deletarTarefaPorId(taskId: String): Boolean {
+        return try {
+            supabase.from("tarefa")
+                .delete {
+                    filter { eq("tarefa_uuid", taskId) }
+                }
+            true
+        } catch (e: Exception) {
+            println("DEBUG - Erro ao deletar tarefa: ${e.message}")
+            false
+        }
+    }
 }

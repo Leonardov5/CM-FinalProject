@@ -56,6 +56,14 @@ class TaskDetailViewModel(
     var navigateToObservacoesEvent by mutableStateOf<String?>(null)
         private set
 
+
+    var showDeleteTaskDialog by mutableStateOf(false)
+        private set
+
+    fun toggleDeleteTaskDialog() {
+        showDeleteTaskDialog = !showDeleteTaskDialog
+    }
+
     fun checkUser(currentUser: User? = null) {
         viewModelScope.launch {
             try {
@@ -171,5 +179,14 @@ class TaskDetailViewModel(
     // Função para limpar o evento de navegação após consumido
     fun onObservacoesNavigated() {
         navigateToObservacoesEvent = null
+    }
+
+    fun deletarTarefa(taskId: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            isLoading = true
+            val sucesso = taskRepository.deletarTarefaPorId(taskId)
+            isLoading = false
+            onResult(sucesso)
+        }
     }
 }

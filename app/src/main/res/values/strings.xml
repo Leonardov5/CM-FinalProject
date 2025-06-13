@@ -188,4 +188,6 @@
     <string name="existing_images">Existing images</string>
     <string name="new_images">New images</string>
     <string name="admin_password_dialog_title">Confirm Admin Password</string>
+    <string name="delete_task_dialog_title">Confirm Task Deletion</string>
+    <string name="delete_task_dialog_text">Are you sure you want to delete the task &quot;%1$s&quot;? This action cannot be undone.</string>
 </resources>
