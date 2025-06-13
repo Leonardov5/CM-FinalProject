@@ -52,6 +52,10 @@ class TaskDetailViewModel(
     var filtredMembros by mutableStateOf<List<User>>(emptyList())
         private set
 
+    // Evento de navegação para tela de observações
+    var navigateToObservacoesEvent by mutableStateOf<String?>(null)
+        private set
+
     fun checkUser(currentUser: User? = null) {
         viewModelScope.launch {
             try {
@@ -157,5 +161,15 @@ class TaskDetailViewModel(
                 isLoading = false
             }
         }
+    }
+
+    // Função para navegar para a tela de observações
+    fun navigateToObservacoes(tarefaId: String) {
+        navigateToObservacoesEvent = tarefaId
+    }
+
+    // Função para limpar o evento de navegação após consumido
+    fun onObservacoesNavigated() {
+        navigateToObservacoesEvent = null
     }
 }

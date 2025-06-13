@@ -103,7 +103,7 @@ fun TaskDetailScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Detalhes da Task",
+                        text = stringResource(id = R.string.task_details_title),
                         fontWeight = FontWeight.Medium
                     )
                 },
@@ -111,7 +111,7 @@ fun TaskDetailScreen(
                     IconButton(onClick = onBackPressed) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Voltar"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 },
@@ -151,14 +151,16 @@ fun TaskDetailScreen(
                                     showFabActions = false
                                 }
                             )
-                            ActionButton(
-                                icon = Icons.Default.Add,
-                                label = stringResource(id = R.string.add_worker),
-                                onClick = {
-                                    showFabActions = false
-                                    viewModel.toggleAddWorkerDialog()
-                                }
-                            )
+                            if(viewModel.isAdmin || viewModel.isManager) {
+                                ActionButton(
+                                    icon = Icons.Default.Add,
+                                    label = stringResource(id = R.string.add_worker),
+                                    onClick = {
+                                        showFabActions = false
+                                        viewModel.toggleAddWorkerDialog()
+                                    }
+                                )
+                            }
                             ActionButton(
                                 icon = Icons.Default.Work,
                                 label = "Log Work",
@@ -355,6 +357,50 @@ private fun TaskContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
+        // Seção de observações
+        TaskInfoSection(
+            title = stringResource(id = R.string.observations),
+            content = {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            // Navegar para a tela de observações da tarefa
+                            if (viewModel.task != null) {
+                                viewModel.navigateToObservacoes(viewModel.task!!.id ?: "")
+                            }
+                        },
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    tonalElevation = 2.dp
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.see_observations),
+                                fontSize = 16.sp
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = "See Observations",
+                        )
+                    }
+                }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         // Seção de trabalhadores
         TaskInfoSection(
             title = stringResource(id = R.string.workers),
@@ -374,26 +420,10 @@ private fun TaskContent(
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    if(viewModel.isAdmin || viewModel.isManager){
-                        Button(
-                            onClick = { viewModel.toggleAddWorkerDialog() },
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp)
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.add_worker))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(stringResource(id = R.string.add_worker))
-                        }
-
-                    }
                 }
             }
         )
 
-        // Diálogo de detalhes do trabalhador
         WorkerTaskDetailDialog(
             show = showWorkerDialog,
             worker = selectedWorker,
@@ -404,12 +434,11 @@ private fun TaskContent(
                 }
             }
         )
-        // Espaço para o FAB
+
         Spacer(modifier = Modifier.height(100.dp))
     }
 }
 
-// Componentes específicos do TaskDetailScreen
 @Composable
 private fun TaskInfoSection(
     title: String,

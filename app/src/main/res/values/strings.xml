@@ -92,8 +92,8 @@
     <string name="progress">Progress</string>
     <string name="description">Description</string>
     <string name="dates">Dates</string>
-    <string name="created_at">Created at: %1$s</string>
-    <string name="updated_at">Updated at: %1$s</string>
+    <string name="created_at">Created at:</string>
+    <string name="updated_at">Updated at:</string>
     <string name="unknown_creation_date">Unknown creation date</string>
     <string name="unknown_update_date">Unknown update date</string>
     <string name="workers">Workers</string>
@@ -167,4 +167,14 @@
     <string name="time_spent">Time Spent (minutes)</string>
     <string name="time_spent_error">The time must be greater than 0</string>
     <string name="resgiter_work">Log</string>
+    <string name="observations">Observations</string>
+    <string name="see_observations">See observations</string>
+    <string name="no_observations">No observations found</string>
+    <string name="add_observation">Add observation</string>
+    <string name="add_observation_placeholder">Describe your observation...</string>
+    <string name="add_image">Add image</string>
+    <string name="selected_images">Selected images</string>
+    <string name="edit_observation">Edit observation</string>
+    <string name="existing_images">Existing images</string>
+    <string name="new_images">New images</string>
 </resources>

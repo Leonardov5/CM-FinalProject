@@ -1,11 +1,15 @@
 package com.example.finalproject
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.finalproject.ui.screens.tasks.TaskDetailScreen
+import com.example.finalproject.ui.screens.tasks.ObservacoesScreen
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -44,8 +48,12 @@ sealed class Screen(val route: String) {
     object ProjectDetail : Screen("project/{projectId}") {
         fun createRoute(projectId: String) = "project/$projectId"
     }
+    object Observacoes : Screen("observacoes/{tarefaId}") {
+        fun createRoute(tarefaId: String) = "observacoes/$tarefaId"
+    }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(
@@ -57,7 +65,7 @@ fun AppNavigation(
 
     val showBottomBar = when (currentDestination?.route) {
         Screen.Login.route, Screen.Register.route, Screen.Profile.route,
-        Screen.TaskDetail.route, Screen.ProjectDetail.route -> false
+        Screen.TaskDetail.route, Screen.ProjectDetail.route, Screen.Observacoes.route -> false
         else -> true
     }
 
@@ -210,6 +218,18 @@ fun AppNavigation(
                         // Por enquanto não faz nada
                     }
                 )
+
+                // Observar o evento de navegação para observações
+                val viewModel = androidx.lifecycle.viewmodel.compose.viewModel<com.example.finalproject.ui.viewmodels.tasks.TaskDetailViewModel>()
+
+                // Quando o evento de navegação for acionado, navegar para a tela de observações
+                val navigateToObservacoesEvent = viewModel.navigateToObservacoesEvent
+                LaunchedEffect(navigateToObservacoesEvent) {
+                    navigateToObservacoesEvent?.let { tarefaId ->
+                        navController.navigate(Screen.Observacoes.createRoute(tarefaId))
+                        viewModel.onObservacoesNavigated() // Limpar o evento após navegar
+                    }
+                }
             }
 
             composable(
@@ -225,6 +245,19 @@ fun AppNavigation(
                     },
                     onAddTaskClick = {
                         // Implemente a adição de task ao projeto
+                    }
+                )
+            }
+
+            composable(
+                route = Screen.Observacoes.route,
+                arguments = listOf(navArgument("tarefaId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val tarefaId = backStackEntry.arguments?.getString("tarefaId") ?: ""
+                ObservacoesScreen(
+                    tarefaId = tarefaId,
+                    onBackPressed = {
+                        navController.popBackStack()
                     }
                 )
             }

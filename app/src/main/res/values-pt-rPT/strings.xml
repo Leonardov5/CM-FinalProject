@@ -167,4 +167,14 @@
     <string name="time_spent">Tempo Dispensado (minutos)</string>
     <string name="time_spent_error">O tempo deve ser maior que 0</string>
     <string name="resgiter_work">Registar</string>
+    <string name="observations">Observações</string>
+    <string name="see_observations">Ver observações</string>
+    <string name="no_observations">Nenhuma observação encontrada</string>
+    <string name="add_observation">Adicionar observação</string>
+    <string name="add_observation_placeholder">Descreva a sua observação...</string>
+    <string name="add_image">Adicionar imagem</string>
+    <string name="selected_images">Imagens selecionadas</string>
+    <string name="edit_observation">Editar observação</string>
+    <string name="existing_images">Imagens existentes</string>
+    <string name="new_images">Novas imagens</string>
 </resources>
