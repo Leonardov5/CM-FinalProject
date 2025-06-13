@@ -136,7 +136,8 @@ class TaskDetailViewModel(
             val result = taskRepository.adicionarUsuarioATarefa(userId, tarefaId)
             onResult(result)
             if (result) {
-                loadTask(tarefaId) // Atualiza a tarefa para refletir os trabalhadores
+                loadTask(tarefaId)
+                loadTrabalhadoresTarefa(tarefaId)
             }
         }
     }
