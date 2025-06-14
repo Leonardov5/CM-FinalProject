@@ -12,11 +12,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlin.time.Duration.Companion.seconds
 
-/**
- * Provedor de acesso ao cliente Supabase
- */
 object SupabaseProvider {
-    // Configuração personalizada do serializador JSON
     private val json = Json {
         ignoreUnknownKeys = true
         coerceInputValues = true
@@ -27,10 +23,9 @@ object SupabaseProvider {
         supabaseUrl = BuildConfig.SUPABASE_URL,
         supabaseKey = BuildConfig.SUPABASE_KEY
     ) {
-        // Usar o serializador personalizado com configurações de tolerância a campos desconhecidos
         install(Postgrest) {
             serializer = KotlinXSerializer(json)
-            this@createSupabaseClient.requestTimeout = 5.seconds // Define o timeout como 10 segundos
+            this@createSupabaseClient.requestTimeout = 5.seconds
         }
         install(Storage)
         install(Auth)
@@ -38,8 +33,7 @@ object SupabaseProvider {
     suspend fun isDatabaseConnected(): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                // Realiza uma consulta mínima para verificar a conexão
-                client.postgrest["projeto"]
+                client.postgrest["utilizador"]
                     .select { limit(1) }
                 true
             } catch (e: Exception) {

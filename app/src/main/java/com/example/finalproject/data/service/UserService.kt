@@ -13,7 +13,7 @@ import java.util.Locale
 
 object UserService {
     private val supabase = SupabaseProvider.client
-    private const val USERS_TABLE = "utilizador"  // Nome correto da tabela
+    private const val USERS_TABLE = "utilizador"
 
     suspend fun saveUserData(username: String, nome: String = "", admin: Boolean = false): Boolean {
         return try {
@@ -30,12 +30,11 @@ object UserService {
             )
 
             withContext(Dispatchers.IO) {
-                // Transformar o objeto User em um JsonObject para garantir que todos os campos sejam enviados
                 val userJson = buildJsonObject {
                     put("utilizador_uuid", userId)
                     put("username", username)
                     put("nome", nome)
-                    put("admin", admin)  // Usando o novo campo admin em vez de tipo
+                    put("admin", admin)
                     put("created_at", now)
                     put("updated_at", now)
                 }

@@ -50,12 +50,10 @@ fun DateTimePickerField(
     isError: Boolean = false,
     errorMessage: String = ""
 ) {
-    // TextField com elementos clicáveis
     Box(modifier = Modifier.fillMaxWidth()) {
-        // TextField normal
         OutlinedTextField(
             value = formattedDateTime,
-            onValueChange = { /* Readonly, não faz nada */ },
+            onValueChange = { },
             label = { Text(label) },
             readOnly = true,
             modifier = Modifier.fillMaxWidth(),
@@ -72,7 +70,6 @@ fun DateTimePickerField(
             } else null
         )
 
-        // Box clicável que cobre exatamente o OutlinedTextField (sem o supportingText)
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -94,27 +91,22 @@ fun DateTimePickerDialog(
     initialDateTime: LocalDateTime? = null,
     viewModel: DateTimePickerViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
-    // Inicialize o viewModel com o datetime inicial se fornecido
     LaunchedEffect(initialDateTime) {
         viewModel.setInitialDateTime(initialDateTime)
     }
 
-    // Observar o estado do UI
     val uiState by viewModel.uiState.collectAsState()
 
     // Converter para milissegundos para uso com os componentes nativos
+    // Usamos 12:00 (meio-dia) para evitar problemas de fuso horário
     val initialMillis = if (uiState.selectedDate != null) {
-        // Converter java.time.LocalDate para milissegundos usando Calendar
         val date = uiState.selectedDate
         val calendar = Calendar.getInstance()
         calendar.set(date.year, date.monthValue - 1, date.getDayOfMonth(), 12, 0, 0)
-        // Usar 12:00 (meio-dia) para evitar problemas de fuso horário
         calendar.set(Calendar.MILLISECOND, 0)
         calendar.timeInMillis
     } else {
-        // Usar Calendar para obter a data atual no fuso horário local
         val calendar = Calendar.getInstance()
-        // Usar meio-dia (12:00) em vez de meia-noite para evitar problemas de fuso horário
         calendar.set(Calendar.HOUR_OF_DAY, 12)
         calendar.set(Calendar.MINUTE, 0)
         calendar.set(Calendar.SECOND, 0)
@@ -191,16 +183,13 @@ fun DateTimePickerDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    // Converter os estados dos pickers nativos para LocalDateTime
                     val selectedDateMillis = datePickerState.selectedDateMillis ?: System.currentTimeMillis()
-
-                    // Usar Calendar para converter de milissegundos para LocalDate
                     val calendar = Calendar.getInstance()
                     calendar.timeInMillis = selectedDateMillis
 
                     val selectedDate = LocalDate.of(
                         calendar.get(Calendar.YEAR),
-                        calendar.get(Calendar.MONTH) + 1, // Calendar months are 0-based
+                        calendar.get(Calendar.MONTH) + 1,
                         calendar.get(Calendar.DAY_OF_MONTH)
                     )
 
@@ -209,7 +198,6 @@ fun DateTimePickerDialog(
                         timePickerState.minute
                     )
 
-                    // Combinar data e hora
                     val dateTime = LocalDateTime.of(selectedDate, selectedTime)
 
                     onDateTimeSelected(dateTime)

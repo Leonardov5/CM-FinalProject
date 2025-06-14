@@ -85,10 +85,9 @@ fun TrabalhosScreen(
     val context = LocalContext.current
     var showLogWorkDialog by remember { mutableStateOf(false) }
 
-    // Carregar trabalhos e usuário quando a tela for iniciada
     LaunchedEffect(tarefaId) {
         viewModel.carregarTrabalhos(tarefaId)
-        viewModel.loadUser() // Carrega o usuário atual e verifica permissões
+        viewModel.loadUser()
     }
 
     Scaffold(
@@ -152,7 +151,7 @@ fun TrabalhosScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Resumo da tarefa
+                        // Informações da tarefa
                         item {
                             viewModel.tarefa?.let { tarefa ->
                                 Card(
@@ -171,7 +170,6 @@ fun TrabalhosScreen(
 
                                         Spacer(modifier = Modifier.height(8.dp))
 
-                                        // Progresso da tarefa
                                         LinearProgressIndicator(
                                             progress = (tarefa.taxaConclusao / 100).toFloat().coerceIn(0f, 1f),
                                             modifier = Modifier
@@ -190,7 +188,7 @@ fun TrabalhosScreen(
                             }
                         }
 
-                        // Lista de trabalhos
+                        // Trabalhos
                         items(viewModel.trabalhos.sortedByDescending { it.data }) { trabalho ->
                             TrabalhoItem(
                                 trabalho = trabalho,
@@ -214,14 +212,13 @@ fun TrabalhosScreen(
         }
     }
 
-    // Dialog para adicionar novo trabalho
+    // Adicionar trabalho
     if (showLogWorkDialog) {
         LogWorkDialog(
             show = true,
             tarefaId = tarefaId,
             onDismiss = { showLogWorkDialog = false },
             onSuccess = {
-                // Recarregar os trabalhos após adicionar um novo
                 viewModel.carregarTrabalhos(tarefaId)
                 showLogWorkDialog = false
             }
@@ -247,7 +244,6 @@ fun TrabalhoItem(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Cabeçalho com informações do usuário e data
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -257,7 +253,7 @@ fun TrabalhoItem(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Avatar do usuário
+                    // Imagem do utilizador
                     Box(
                         modifier = Modifier
                             .size(40.dp)
@@ -277,7 +273,6 @@ fun TrabalhoItem(
                                 modifier = Modifier.fillMaxSize()
                             )
                         } else {
-                            // Fallback para usuários sem foto
                             if (usuario != null) {
                                 Image(
                                     imageVector = Icons.Default.Person,
@@ -295,7 +290,7 @@ fun TrabalhoItem(
                         }
                     }
 
-                    // Nome do usuário e data
+                    // Nome do utilizador
                     Column {
                         Text(
                             text = usuario?.nome ?: stringResource(id = R.string.unknown_user),
@@ -312,7 +307,7 @@ fun TrabalhoItem(
                     }
                 }
 
-                // Ações (excluir) - apenas para admin ou gerente
+                // Eliminar trabalho
                 if (isAdmin || isManager) {
                     IconButton(onClick = { showDeleteConfirmation = true }) {
                         Icon(
@@ -343,14 +338,14 @@ fun TrabalhoItem(
                 )
             }
 
-            // Contribuição para o progresso
+            // Contribuição
             Text(
                 text = stringResource(id = R.string.contribution) + ": ${(trabalho.contribuicao).toInt()}%",
                 fontSize = 14.sp,
                 modifier = Modifier.padding(vertical = 4.dp)
             )
 
-            // Local (se disponível)
+            // Local
             trabalho.local?.let { local ->
                 if (local.isNotBlank()) {
                     Row(
@@ -374,7 +369,7 @@ fun TrabalhoItem(
         }
     }
 
-    // Diálogo de confirmação para excluir trabalho
+    // Confirmar eliminar trabalho
     if (showDeleteConfirmation) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirmation = false },

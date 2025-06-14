@@ -10,9 +10,8 @@ import com.example.finalproject.data.model.User
 import com.example.finalproject.data.model.UserProject
 import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
-import com.example.finalproject.data.repository.UserRepository
+import com.example.finalproject.data.repository.UtilizadorRepository
 import com.example.finalproject.data.service.UserService
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
 import java.text.SimpleDateFormat
@@ -23,7 +22,6 @@ import java.io.File
 class ProjectDetailViewModel(
     private val projetoRepository: ProjetoRepository = ProjetoRepository(),
     private val tarefaRepository: TarefaRepository = TarefaRepository(),
-    private val userRepository: UserRepository = UserRepository(),
     private val analyticsExporter: ProjectAnalyticsExporter = ProjectAnalyticsExporter()
 ) : ViewModel() {
 
@@ -55,9 +53,6 @@ class ProjectDetailViewModel(
     var navigateToTasksForProject by mutableStateOf<String?>(null)
         private set
 
-    var membrosProjeto by mutableStateOf<List<User>>(emptyList())
-        private set
-    // Lista de membros do projeto com informações completas
     var membrosProjetoCompleto by mutableStateOf<List<UserProject>>(emptyList())
         private set
 
@@ -70,14 +65,12 @@ class ProjectDetailViewModel(
     var isManager by mutableStateOf(false)
         private set
 
-    // Variáveis para o diálogo de detalhes do worker
     var showWorkerDetailDialog by mutableStateOf(false)
         private set
 
     var selectedWorker by mutableStateOf<UserProject?>(null)
         private set
 
-    // Analytics exporter dialog state
     var showAnalyticsExporterDialog by mutableStateOf(false)
         private set
 
@@ -86,7 +79,7 @@ class ProjectDetailViewModel(
 
     fun loadAllUsers() {
         viewModelScope.launch {
-            allUsers = UserRepository().listarTodosUsuarios()
+            allUsers = UtilizadorRepository().listarTodosUtilizadores()
         }
     }
 
@@ -214,7 +207,7 @@ class ProjectDetailViewModel(
     // Apagar projeto
     fun deleteProject(projetoId: String) = viewModelScope.launch {
         try {
-            val result = projetoRepository.apagarProjeto(UUID.fromString(projetoId))
+            val result = projetoRepository.eliminarProjeto(UUID.fromString(projetoId))
             if (result) {
                 hideDeleteConfirmDialog()
             }
@@ -224,7 +217,7 @@ class ProjectDetailViewModel(
     }
 
     fun addMemberToProject(userId: String, isManager: Boolean) = viewModelScope.launch {
-        val result = projetoRepository.adicionarUsuarioAoProjeto(userId, projeto?.id.toString(), isManager)
+        val result = projetoRepository.adicionarUtilizadorProjeto(userId, projeto?.id.toString(), isManager)
         if (result) {
             hideAddMemberDialog()
             // Recarregar a lista de membros
@@ -234,7 +227,7 @@ class ProjectDetailViewModel(
 
     fun checkIfManager(projectId: String) {
         viewModelScope.launch {
-            val membros = projetoRepository.listarMembrosDoProjeto(projectId)
+            val membros = projetoRepository.listarMembrosProjeto(projectId)
             val userId = user?.id
             isManager = membros.any { it.userId == userId && it.isManager }
         }
@@ -278,10 +271,9 @@ class ProjectDetailViewModel(
         selectedWorker = null
     }
 
-    // Função para atualizar o papel e o estado do worker (gestor ou não, ativo ou não)
     fun updateWorkerRole(userId: String, isManager: Boolean, isActive: Boolean) = viewModelScope.launch {
         try {
-            val success = projetoRepository.atualizarMembrosDoProjetoStatus(
+            val success = projetoRepository.atualizarMembroDoProjeto(
                 userId = userId,
                 projectId = projeto?.id.toString(),
                 isManager = isManager,
@@ -289,7 +281,6 @@ class ProjectDetailViewModel(
             )
 
             if (success) {
-                // Recarregar a lista de membros após a atualização
                 loadMembrosProjetoCompleto(projeto?.id.toString())
                 hideWorkerDetailDialog()
             }
@@ -298,10 +289,9 @@ class ProjectDetailViewModel(
         }
     }
 
-    // Methods for analytics exporter dialog
     fun showAnalyticsExporterDialog() {
         showAnalyticsExporterDialog = true
-        // Preload analytics data for the current project
+
         projeto?.id?.toString()?.let { projectId ->
             analyticsExporter.loadAnalytics(projectId)
         }
@@ -316,27 +306,22 @@ class ProjectDetailViewModel(
         projeto?.id?.toString()?.let { projectId ->
             viewModelScope.launch {
                 try {
-                    // Get the app's external files directory (doesn't require special permissions)
                     val externalFilesDir = context?.getExternalFilesDir(null)
 
                     if (externalFilesDir != null) {
-                        // Create directory for exports
                         val exportDir = File(externalFilesDir, "project_analytics")
                         if (!exportDir.exists()) {
                             exportDir.mkdirs()
                         }
 
-                        // Create filename from project name and date
                         val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
                         val projectName = projeto?.nome?.replace(" ", "_") ?: "project"
                         val baseFileName = "${projectName}_analytics_$currentDate"
 
                         val filePath = File(exportDir, baseFileName).absolutePath
 
-                        // Export the analytics data
                         analyticsExporter.exportAnalytics(projectId, filePath, format)
 
-                        // Add debug log to verify file creation
                         val finalFile = if (filePath.endsWith(format.extension)) {
                             File(filePath)
                         } else {

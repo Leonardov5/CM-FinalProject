@@ -58,7 +58,7 @@ fun WorkerCardProject(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar - Usando a fotografia do utilizador
+            // Imagem
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -66,7 +66,6 @@ fun WorkerCardProject(
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                // Verifica se existe URL de fotografia
                 if (worker.utilizador?.fotografia?.isNotBlank() == true) {
                     val context = LocalContext.current
                     AsyncImage(
@@ -79,7 +78,6 @@ fun WorkerCardProject(
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
-                    // Fallback para o ícone de pessoa quando não há foto
                     Image(
                         imageVector = Icons.Default.Person,
                         contentDescription = null,
@@ -91,7 +89,6 @@ fun WorkerCardProject(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Info
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -104,7 +101,7 @@ fun WorkerCardProject(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                // Role
+                // Cargo
                 Text(
                     if (worker.isManager) {
                         stringResource(id = R.string.project_manager)
@@ -119,7 +116,7 @@ fun WorkerCardProject(
                 )
             }
 
-            // Badge para gestor
+            // Tag de gestor
             if (worker.isManager) {
                 Badge(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,

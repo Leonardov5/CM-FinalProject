@@ -16,7 +16,6 @@ class EditProjectViewModel(
     private val projetoRepository: ProjetoRepository = ProjetoRepository()
 ) : ViewModel() {
 
-    // Estados de UI
     var nome by mutableStateOf("")
         private set
 
@@ -41,7 +40,6 @@ class EditProjectViewModel(
     private val _events = MutableSharedFlow<EditProjectEvent>()
     val events: SharedFlow<EditProjectEvent> = _events
 
-    // Inicializar os campos com os dados do projeto existente
     fun initWithProject(projeto: Projeto?) {
         projeto?.let {
             nome = it.nome
@@ -51,7 +49,6 @@ class EditProjectViewModel(
         }
     }
 
-    // Atualizações de estado
     fun updateNome(value: String) {
         nome = value
         clearError()
@@ -72,7 +69,6 @@ class EditProjectViewModel(
         clearError()
     }
 
-    // Validação de dados
     private fun validate(): Boolean {
         if (nome.isBlank()) {
             setError("O nome do projeto não pode estar vazio")
@@ -87,11 +83,9 @@ class EditProjectViewModel(
         return true
     }
 
-    // Operações de salvar
     fun saveProject(projetoId: String?) {
         if (!validate()) return
 
-        // Se não temos um ID de projeto, não podemos editar
         if (projetoId == null) {
             setError("ID do projeto não fornecido. Não é possível editar.")
             return
@@ -102,7 +96,6 @@ class EditProjectViewModel(
 
         viewModelScope.launch {
             try {
-                // Editar projeto existente
                 val success = projetoRepository.atualizarProjeto(
                     UUID.fromString(projetoId),
                     nome,
@@ -125,7 +118,6 @@ class EditProjectViewModel(
         }
     }
 
-    // Gerenciamento de erros
     private fun setError(message: String) {
         hasError = true
         errorMessage = message
@@ -136,7 +128,6 @@ class EditProjectViewModel(
         errorMessage = null
     }
 
-    // Eventos para navegação/notificação
     sealed class EditProjectEvent {
         data class Success(val projetoId: String) : EditProjectEvent()
     }

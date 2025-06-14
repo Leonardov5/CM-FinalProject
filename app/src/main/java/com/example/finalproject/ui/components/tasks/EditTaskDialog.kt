@@ -106,7 +106,6 @@ fun EditTaskDialog(
         }
     }
 
-    // Mostrar DateTimePicker para data e hora de início
     if (uiState.showDataInicioDialog) {
         DateTimePickerDialog(
             onDismissRequest = { viewModel.hideDataInicioDialog() },
@@ -118,7 +117,6 @@ fun EditTaskDialog(
         )
     }
 
-    // DateTimePicker para data e hora de fim
     if (uiState.showDataFimDialog) {
         DateTimePickerDialog(
             onDismissRequest = { viewModel.hideDataFimDialog() },
@@ -175,7 +173,6 @@ fun EditTaskDialog(
                     options = viewModel.prioridades.map { prioridadeDisplay(it) },
                     selectedOption = prioridadeDisplay(uiState.prioridade),
                     onOptionSelected = { selected ->
-                        // Converter de volta para o valor do backend ao salvar
                         val backendValue = when (selected) {
                             low -> "baixa"
                             medium -> "media"
@@ -211,7 +208,6 @@ fun EditTaskDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Seletor de data e hora de início
                 DateTimePickerField(
                     label = stringResource(R.string.start_date_time),
                     selectedDateTime = dataInicioLocal,
@@ -223,7 +219,6 @@ fun EditTaskDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Seletor de data e hora de fim
                 DateTimePickerField(
                     label = stringResource(R.string.end_date_time),
                     selectedDateTime = dataFimLocal,
@@ -235,7 +230,6 @@ fun EditTaskDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Campo para taxa de conclusão
                 OutlinedTextField(
                     value = uiState.taxaConclusao.toString(),
                     onValueChange = {

@@ -77,7 +77,7 @@ fun UserManagementScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* ação do menu */ }) {
+                    IconButton(onClick = { }) {
                         Icon(
                             Icons.Default.Menu,
                             contentDescription = stringResource(id = R.string.menu),
@@ -164,7 +164,7 @@ fun UserManagementScreen(
         }
     }
 
-    // Diálogo de confirmação para apagar usuário
+    // Confirmar eliminar utilizador
     if (userToDelete != null) {
         AlertDialog(
             onDismissRequest = { userToDelete = null },
@@ -185,6 +185,7 @@ fun UserManagementScreen(
         )
     }
 
+    // Editar utilizador
     if (viewModel.showEditDialog && viewModel.userToEdit != null) {
         EditUserDialog(
             user = viewModel.userToEdit!!,
@@ -238,6 +239,7 @@ fun UserManagementScreen(
         )
     }
 
+    // Registar novo utilizador
     if (viewModel.showCreateDialog) {
         RegisterUserDialog(
             onDismiss = { viewModel.toggleCreateDialog() },

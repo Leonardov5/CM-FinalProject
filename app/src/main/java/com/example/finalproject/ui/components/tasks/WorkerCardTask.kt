@@ -51,7 +51,7 @@ fun WorkerCardTask(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar
+            // Imagem
             Box(
                 modifier = Modifier
                     .size(48.dp)

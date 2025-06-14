@@ -33,7 +33,6 @@ fun TaskAnalyticsExporterDialog(
     val context = LocalContext.current
     val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-    // Pré-carregar todas as strings traduzidas
     val exportTaskAnalyticsText = stringResource(R.string.export_task_analytics)
     val selectFormatText = stringResource(R.string.select_format)
     val fileWillBeSavedAsText = stringResource(R.string.file_will_be_saved_as)
@@ -46,23 +45,18 @@ fun TaskAnalyticsExporterDialog(
     val closeText = stringResource(R.string.close)
     val cancelText = stringResource(R.string.cancel)
 
-    // Get the analytics exporter to monitor state
     val analyticsExporter = remember { TaskAnalyticsExporter() }
 
-    // Success state to show confirmation
     var exportSuccess by remember { mutableStateOf(false) }
     var fileSaved by remember { mutableStateOf("") }
 
-    // Selected format state
     var selectedFormat by remember { mutableStateOf(TaskExportFormat.CSV) }
 
-    // Generate filename based on task name or ID if name not available
     val displayName = taskName?.replace(" ", "_") ?: "Task_$taskId"
     val fileName by remember(selectedFormat, displayName) {
         mutableStateOf("${displayName}_analytics_$currentDate${selectedFormat.extension}")
     }
 
-    // Check if we have storage permission
     val hasStoragePermission = remember {
         ContextCompat.checkSelfPermission(
             context,
@@ -70,13 +64,11 @@ fun TaskAnalyticsExporterDialog(
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    // Listen for export success from analytics exporter
     LaunchedEffect(analyticsExporter.exportSuccess) {
         analyticsExporter.exportSuccess?.let { success ->
             if (success) {
                 exportSuccess = true
 
-                // Set the file path for display
                 val externalFilesDir = context.getExternalFilesDir(null)
                 val appStoragePath = if (hasStoragePermission) {
                     "Downloads/task_analytics"
@@ -86,14 +78,12 @@ fun TaskAnalyticsExporterDialog(
 
                 fileSaved = "$fileSavedToText\n$appStoragePath/${fileName}"
 
-                // Show a toast message that the file was saved successfully
                 Toast.makeText(
                     context,
                     fileSavedSuccessToastText,
                     Toast.LENGTH_SHORT
                 ).show()
 
-                // Also print file location to logcat for debugging
                 println("File should be at: ${externalFilesDir?.absolutePath}/task_analytics/${fileName}")
             }
         }
@@ -121,7 +111,6 @@ fun TaskAnalyticsExporterDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Format selection
                 Text(
                     text = selectFormatText,
                     style = MaterialTheme.typography.bodyMedium,
@@ -161,7 +150,6 @@ fun TaskAnalyticsExporterDialog(
                     CircularProgressIndicator()
                 }
 
-                // Success message
                 if (exportSuccess) {
                     Card(
                         colors = CardDefaults.cardColors(
@@ -197,7 +185,6 @@ fun TaskAnalyticsExporterDialog(
                     }
                 }
 
-                // Show error message if there is one
                 analyticsExporter.errorMessage?.let { error ->
                     Card(
                         colors = CardDefaults.cardColors(
@@ -227,7 +214,6 @@ fun TaskAnalyticsExporterDialog(
                             onClick = {
                                 onExport(selectedFormat)
 
-                                // Show a toast when starting the export
                                 Toast.makeText(
                                     context,
                                     startingExportText,

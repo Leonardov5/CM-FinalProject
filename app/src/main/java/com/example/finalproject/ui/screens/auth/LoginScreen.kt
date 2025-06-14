@@ -54,7 +54,6 @@ fun LoginScreen(
     val context = LocalContext.current
     var isLanguageLoaded by remember { mutableStateOf(false) }
 
-    // Observar o estado de login bem-sucedido
     LaunchedEffect(viewModel.isLoginSuccessful) {
         if (viewModel.isLoginSuccessful) {
             viewModel.clearLoginSuccessState()
@@ -62,7 +61,6 @@ fun LoginScreen(
         }
     }
 
-    // Observar mensagens de erro e limpar após Toast
     LaunchedEffect(viewModel.errorMessage) {
         viewModel.errorMessage?.let { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -136,7 +134,6 @@ fun LoginScreen(
                     }
                 )
 
-                // Mostrar erro na UI (caso queira manter, mas agora será limpo após Toast)
                 if (viewModel.errorMessage != null) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(

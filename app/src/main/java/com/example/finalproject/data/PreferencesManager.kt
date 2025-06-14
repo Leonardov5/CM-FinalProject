@@ -13,6 +13,6 @@ object PreferencesManager {
 
     fun getLanguage(context: Context): String {
         val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        return sharedPreferences.getString(LANGUAGE_KEY, "en") ?: "en" // Padrão: inglês
+        return sharedPreferences.getString(LANGUAGE_KEY, "en") ?: "en"
     }
 }

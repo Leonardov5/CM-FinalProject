@@ -7,10 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.finalproject.R
 import com.example.finalproject.data.model.Notificacao
 import com.example.finalproject.data.repository.NotificacaoRepository
-import com.example.finalproject.utils.updateAppLanguage
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -27,13 +25,11 @@ class UpdatesViewModel : ViewModel() {
 
     private var applicationContext: Context? = null
 
-
-    // Carregar notificações do usuário
     fun loadUpdates() {
         viewModelScope.launch {
             isLoading = true
             try {
-                notificacoes = notificacoesRepository.listarNotificacoesDoUsuario()
+                notificacoes = notificacoesRepository.listarNotificacoesDoUtilizador()
             } catch (e: Exception) {
                 println("DEBUG - Erro ao carregar notificações: ${e.message}")
             } finally {
@@ -42,30 +38,21 @@ class UpdatesViewModel : ViewModel() {
         }
     }
 
-    // Formatar a data da notificação para exibição
     fun formatarData(notificacao: Notificacao): String {
         val dateString = notificacao.createdAt ?: return "Data desconhecida"
 
         try {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-            val outputFormat = SimpleDateFormat("dd MMM, yyyy", Locale("pt", "BR"))
+            val outputFormat = SimpleDateFormat("dd MMM yyyy", Locale("pt", "PT"))
 
             val date = inputFormat.parse(dateString)
             return date?.let { outputFormat.format(it) } ?: "Data inválida"
         } catch (e: Exception) {
-            return try {
-                // Tenta outro formato caso o primeiro falhe
-                val alternativeFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault())
-                val outputFormat = SimpleDateFormat("dd MMM, yyyy", Locale("pt", "BR"))
-                val date = alternativeFormat.parse(dateString)
-                date?.let { outputFormat.format(it) } ?: "Data inválida"
-            } catch (e2: Exception) {
-                "Data inválida"
-            }
+            e.printStackTrace()
+            return "Data inválida"
         }
     }
 
-    // Marcar uma notificação como lida
     fun markAsRead(notificacaoId: String) {
         viewModelScope.launch {
             val success = notificacoesRepository.marcarComoLida(notificacaoId)
@@ -81,10 +68,9 @@ class UpdatesViewModel : ViewModel() {
         }
     }
 
-    // Em UpdatesViewModel.kt - Adicione este método
     fun deleteNotification(notificacaoId: String) {
         viewModelScope.launch {
-            val success = notificacoesRepository.deletarNotificacao(notificacaoId)
+            val success = notificacoesRepository.eliminarNotificacao(notificacaoId)
             if (success) {
                 notificacoes = notificacoes.filter { it.id != notificacaoId }
             }
@@ -92,7 +78,6 @@ class UpdatesViewModel : ViewModel() {
     }
 
 
-    // Marcar todas as notificações como lidas
     fun markAllAsRead() {
         viewModelScope.launch {
             val success = notificacoesRepository.marcarTodasComoLidas()
@@ -102,10 +87,8 @@ class UpdatesViewModel : ViewModel() {
         }
     }
 
-    // Lista original de notificações (para restaurar após filtro)
     private var notificacoesOriginais = emptyList<Notificacao>()
 
-    // Filtrar notificações com base na consulta de pesquisa
     fun filterNotificacoes(query: String) {
         if (notificacoesOriginais.isEmpty()) {
             notificacoesOriginais = notificacoes
@@ -118,7 +101,6 @@ class UpdatesViewModel : ViewModel() {
 
         val queryLowerCase = query.lowercase(Locale.getDefault())
         notificacoes = notificacoesOriginais.filter { notificacao ->
-            // Pesquisa no título e mensagem
             val title = getTitleFromNotificacao(notificacao)
             val message = getMessageFromNotificacao(notificacao)
             val objeto = notificacao.objeto ?: ""
@@ -129,14 +111,12 @@ class UpdatesViewModel : ViewModel() {
         }
     }
 
-    // Resetar filtro e mostrar todas as notificações originais
     fun resetFilter() {
         if (notificacoesOriginais.isNotEmpty()) {
             notificacoes = notificacoesOriginais
         }
     }
 
-    // Funções auxiliares para obter título e mensagem a partir de códigos de notificação
     private fun getTitleFromNotificacao(notificacao: Notificacao): String {
         return when (notificacao.mensagem) {
             "USER_ADDED_TO_TASK" -> "Adicionado a uma tarefa"

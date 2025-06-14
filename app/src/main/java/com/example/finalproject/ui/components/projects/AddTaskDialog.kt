@@ -70,11 +70,8 @@ fun AddTaskDialog(
     val completed = stringResource(id = R.string.status_completed)
     val cancelled = stringResource(id = R.string.status_cancelled)
 
-
-    // Coletar o estado da UI do ViewModel
     val uiState by viewModel.uiState.collectAsState()
 
-    // Mostrar DateTimePicker para data e hora de início
     if (uiState.showDataInicioDialog) {
         DateTimePickerDialog(
             onDismissRequest = { viewModel.hideDataInicioDialog() },
@@ -86,7 +83,6 @@ fun AddTaskDialog(
         )
     }
 
-    // DateTimePicker para data e hora de fim
     if (uiState.showDataFimDialog) {
         DateTimePickerDialog(
             onDismissRequest = { viewModel.hideDataFimDialog() },

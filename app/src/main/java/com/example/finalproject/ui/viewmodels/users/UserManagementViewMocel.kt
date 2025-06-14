@@ -3,20 +3,18 @@ package com.example.finalproject.ui.viewmodels.users
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.model.User
-import com.example.finalproject.data.repository.ProjetoRepository
-import com.example.finalproject.data.repository.UserRepository
+import com.example.finalproject.data.repository.UtilizadorRepository
 import com.example.finalproject.data.service.UserService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class UserManagementViewModel(
-    private val userRepository: UserRepository = UserRepository()
+    private val utilizadorRepository: UtilizadorRepository = UtilizadorRepository()
     ) : ViewModel() {
     private val _users = MutableStateFlow<List<User>>(emptyList())
     val users = _users.asStateFlow()
@@ -45,14 +43,14 @@ class UserManagementViewModel(
 
     fun loadUsers() {
         viewModelScope.launch {
-            _users.value = userRepository.listarTodosUsuarios()
-            adminEmail = userRepository.getCurrentUser()?.email
+            _users.value = utilizadorRepository.listarTodosUtilizadores()
+            adminEmail = utilizadorRepository.getCurrentUser()?.email
         }
     }
 
     fun deleteUser(userId: String) {
         viewModelScope.launch {
-            val success = userRepository.deletarUsuario(userId)
+            val success = utilizadorRepository.eliminarUtilizador(userId)
             if (success) loadUsers()
         }
     }
@@ -68,7 +66,7 @@ class UserManagementViewModel(
 
     fun editarUsuario(userId: String, nome: String, username: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val sucesso = userRepository.atualizarUsuario(userId, nome, username)
+            val sucesso = utilizadorRepository.atualizarUtilizador(userId, nome, username)
             if (sucesso) loadUsers()
             onResult(sucesso)
         }
@@ -82,13 +80,13 @@ class UserManagementViewModel(
         isAdmin: Boolean
     ) {
         viewModelScope.launch {
-            val authSuccess = userRepository.registerUser(email, password)
+            val authSuccess = utilizadorRepository.registerUser(email, password)
             if (authSuccess) {
                 UserService.saveUserData(username, name, isAdmin)
                 val adminEmailValue = adminEmail
                 val adminPasswordValue = adminPassword
                 if (adminEmailValue != null && adminPasswordValue != null) {
-                    userRepository.loginUser(adminEmailValue, adminPasswordValue)
+                    utilizadorRepository.loginUser(adminEmailValue, adminPasswordValue)
                 }
                 loadUsers()
             }
@@ -98,7 +96,7 @@ class UserManagementViewModel(
     fun confirmAdminPassword(password: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             val email = adminEmail ?: return@launch onResult(false)
-            val success = userRepository.loginUser(email, password)
+            val success = utilizadorRepository.loginUser(email, password)
             if (success) {
                 adminPassword = password
             }

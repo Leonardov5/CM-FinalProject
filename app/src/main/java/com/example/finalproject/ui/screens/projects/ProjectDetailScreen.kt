@@ -109,7 +109,6 @@ fun ProjectDetailScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    // Carregar o usuário atual se não for fornecido
     LaunchedEffect(key1 = true) {
         viewModel.loadUser(currentUser)
         viewModel.loadProject(projetoId)
@@ -117,7 +116,6 @@ fun ProjectDetailScreen(
         viewModel.loadMembrosProjetoCompleto(projetoId)
 
         val savedLanguage = PreferencesManager.getLanguage(context)
-        print("Saved language: $savedLanguage")
         updateAppLanguage(context, savedLanguage)
     }
 
@@ -166,11 +164,9 @@ fun ProjectDetailScreen(
             )
         },
         floatingActionButton = {
-            // Mostrar FAB apenas para admin
             Column(
                 horizontalAlignment = Alignment.End
             ) {
-                // FAB menu
                 AnimatedVisibility(
                     visible = viewModel.showFabActions,
                     enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }) + expandVertically(),
@@ -243,7 +239,6 @@ fun ProjectDetailScreen(
                         }
                     }
                 }
-                // Main FAB
                 FloatingActionButton(
                     onClick = { viewModel.toggleFabActions() },
                 ) {
@@ -273,7 +268,7 @@ fun ProjectDetailScreen(
                     .padding(horizontal = 16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                // Título do projeto
+                // Título
                 Text(
                     text = viewModel.projeto!!.nome,
                     fontSize = 24.sp,
@@ -281,12 +276,12 @@ fun ProjectDetailScreen(
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
 
-                // Status indicator
+                // Status
                 StatusChip(status = viewModel.projeto!!.status)
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Seção de progresso
+                // Progresso
                 ProjectInfoSection(
                     title = stringResource(id = R.string.progress),
                     content = {
@@ -310,7 +305,7 @@ fun ProjectDetailScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Seção de descrição
+                // Descrição
                 viewModel.projeto!!.descricao?.let {
                     ProjectInfoSection(
                         title = stringResource(id = R.string.description),
@@ -325,7 +320,7 @@ fun ProjectDetailScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                    // Seção de datas
+                    // Datas
                     ProjectInfoSection(
                         title = stringResource(id = R.string.dates),
                         content = {
@@ -358,27 +353,23 @@ fun ProjectDetailScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Trabalhadores
                 ProjectInfoSection(
                     title = stringResource(id = R.string.workers),
                     content = {
-                        // Usar diretamente a lista de membros com informações completas
                         WorkersListProject(
                             workers = viewModel.membrosProjetoCompleto,
                             emptyText = stringResource(id = R.string.no_workers),
                             onWorkerClick = { userId ->
-                                // Encontrar o worker pelo ID e mostrar o diálogo de detalhes
                                 val worker = viewModel.membrosProjetoCompleto.find { it.userId == userId }
                                 worker?.let { viewModel.showWorkerDetailDialog(it) }
                             }
                         )
                     }
                 )
-
-                    // Espaço para o FAB
                     Spacer(modifier = Modifier.height(100.dp))
                 }
             } else {
-                // Mostrar mensagem se o projeto não for encontrado
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -393,7 +384,7 @@ fun ProjectDetailScreen(
             }
         }
 
-    // Diálogo de confirmação para apagar projeto
+    // Confirmação de eliminar projeto
     if (viewModel.showDeleteConfirmDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.hideDeleteConfirmDialog() },
@@ -431,7 +422,7 @@ fun ProjectDetailScreen(
         )
     }
 
-    // Diálogo para adicionar tarefa
+    // Adicionar tarefa
     if (viewModel.showAddTaskDialog) {
         AddTaskDialog(
             show = true,
@@ -466,7 +457,7 @@ fun ProjectDetailScreen(
         )
     }
 
-// No ProjectDetailScreen.kt
+    // Adicionar membro
     if (viewModel.showAddMemberDialog) {
         LaunchedEffect(Unit) {
             viewModel.loadAllUsers()
@@ -486,7 +477,8 @@ fun ProjectDetailScreen(
             }
         )
     }
-    // Diálogo para editar projeto
+
+    // Editar projeto
     if (viewModel.showEditProjectDialog) {
         EditProjectDialog(
             show = true,
@@ -514,7 +506,7 @@ fun ProjectDetailScreen(
         )
     }
 
-    // Diálogo para detalhes do trabalhador
+    // Detalhes do trabalhador
     if (viewModel.showWorkerDetailDialog) {
         WorkerDetailDialog(
             show = true,
@@ -529,7 +521,7 @@ fun ProjectDetailScreen(
         )
     }
 
-    // Diálogo para exportar análises do projeto
+    // Exportar análises do projeto
     if (viewModel.showAnalyticsExporterDialog) {
         ProjectAnalyticsExporterDialog(
             show = true,
@@ -544,7 +536,6 @@ fun ProjectDetailScreen(
     }
 }
 
-// Componentes para a tela de detalhes do projeto
 @Composable
 private fun ProjectInfoSection(
     title: String,

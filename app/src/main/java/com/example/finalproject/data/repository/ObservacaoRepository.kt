@@ -20,11 +20,10 @@ class ObservacaoRepository {
                     order("created_at", Order.DESCENDING)
                 }
                 .decodeList<Observacao>()
-                
-            println("DEBUG - Observações carregadas: ${observacoes.size}")
+
             observacoes
         } catch (e: Exception) {
-            println("DEBUG - Erro ao listar observações: ${e.message}")
+            e.printStackTrace()
             emptyList()
         }
     }
@@ -32,8 +31,7 @@ class ObservacaoRepository {
     suspend fun criarObservacao(tarefaId: String, observacao: String, imagens: List<ByteArray> = emptyList()): Observacao? {
         return try {
             val currentUserUUID = AuthService.getCurrentUserId()
-            
-            // Criar a observação
+
             val novaObservacao = supabase.from("observacao").insert(
                 Observacao(
                     tarefaId = tarefaId,
@@ -45,23 +43,21 @@ class ObservacaoRepository {
                 select()
             }.decodeSingle<Observacao>()
             
-            // Upload das imagens, se houver
+            // Upload das imagens
             val imagensUrls = mutableListOf<String>()
             if (imagens.isNotEmpty() && novaObservacao.id != null) {
                 imagens.forEachIndexed { index, imagemBytes ->
                     val imagemNome = "${novaObservacao.id}_imagem_$index.jpg"
                     supabase.storage.from("observacoes").upload(imagemNome, imagemBytes)
-                    
-                    // Obter URL da imagem
+
                     val imagemUrl = supabase.storage.from("observacoes").publicUrl(imagemNome)
                     imagensUrls.add(imagemUrl)
                 }
-                
-                // Atualizar a observação com as URLs das imagens
+
                 if (imagensUrls.isNotEmpty()) {
                     supabase.from("observacao").update(
                         {
-                            set("anexos", imagensUrls) // Corrigido de "imagens" para "anexos"
+                            set("anexos", imagensUrls)
                         }
                     ) {
                         filter {
@@ -70,11 +66,10 @@ class ObservacaoRepository {
                     }
                 }
             }
-            
-            // Retornar a observação criada
+
             novaObservacao.copy(anexos = imagensUrls)
         } catch (e: Exception) {
-            println("DEBUG - Erro ao criar observação: ${e.message}")
+            e.printStackTrace()
             null
         }
     }
@@ -88,7 +83,6 @@ class ObservacaoRepository {
         return try {
             val currentUserUUID = AuthService.getCurrentUserId()
 
-            // Buscar a observação atual
             val observacaoAtual = supabase.from("observacao")
                 .select {
                     filter {
@@ -97,36 +91,29 @@ class ObservacaoRepository {
                 }
                 .decodeSingle<Observacao>()
 
-            // Identificar imagens a remover (estão na observação atual mas não em imagensAtuais)
             val imagensParaRemover = observacaoAtual.anexos.filter { url -> url !in imagensAtuais }
 
-            // Remover imagens do armazenamento que não estão mais na lista
             imagensParaRemover.forEach { imagemUrl ->
                 try {
                     val imagemNome = imagemUrl.substringAfterLast("/")
                     supabase.storage.from("observacoes").delete(imagemNome)
                 } catch (e: Exception) {
-                    println("DEBUG - Erro ao excluir imagem ${imagemUrl}: ${e.message}")
-                    // Continua mesmo se falhar a exclusão de uma imagem
-                }
+                    e.printStackTrace()                }
             }
 
-            // Definir lista final de URLs (as que permaneceram + novas)
             val imagensUrls = imagensAtuais.toMutableList()
 
-            // Upload de novas imagens, se houver
+            // Upload das novas imagens
             if (novasImagens.isNotEmpty()) {
                 novasImagens.forEachIndexed { index, imagemBytes ->
                     val imagemNome = "${observacaoId}_imagem_${System.currentTimeMillis()}_$index.jpg"
                     supabase.storage.from("observacoes").upload(imagemNome, imagemBytes)
 
-                    // Obter URL da nova imagem
                     val imagemUrl = supabase.storage.from("observacoes").publicUrl(imagemNome)
                     imagensUrls.add(imagemUrl)
                 }
             }
 
-            // Atualizar a observação
             supabase.from("observacao").update(
                 {
                     set("observacao", textoObservacao)
@@ -139,7 +126,7 @@ class ObservacaoRepository {
                 }
             }
 
-            // Retornar a observação atualizada
+            // Retorna a observação atualizada
             supabase.from("observacao")
                 .select {
                     filter {
@@ -148,14 +135,13 @@ class ObservacaoRepository {
                 }
                 .decodeSingle<Observacao>()
         } catch (e: Exception) {
-            println("DEBUG - Erro ao atualizar observação: ${e.message}")
+            e.printStackTrace()
             null
         }
     }
 
-    suspend fun excluirImagem(observacaoId: String, imagemUrl: String): Boolean {
+    suspend fun eliminarImagem(observacaoId: String, imagemUrl: String): Boolean {
         return try {
-            // Buscar observação para obter as imagens
             val observacao = supabase.from("observacao")
                 .select {
                     filter {
@@ -164,14 +150,11 @@ class ObservacaoRepository {
                 }
                 .decodeSingle<Observacao>()
 
-            // Remover a imagem do armazenamento
             val imagemNome = imagemUrl.substringAfterLast("/")
             supabase.storage.from("observacoes").delete(imagemNome)
 
-            // Atualizar a lista de anexos da observação
             val novasUrls = observacao.anexos.filter { it != imagemUrl }
 
-            // Atualizar a observação sem a imagem excluída
             supabase.from("observacao").update(
                 {
                     set("anexos", novasUrls)
@@ -185,14 +168,13 @@ class ObservacaoRepository {
 
             true
         } catch (e: Exception) {
-            println("DEBUG - Erro ao excluir imagem: ${e.message}")
+            e.printStackTrace()
             false
         }
     }
 
-    suspend fun excluirObservacao(observacaoId: String): Boolean {
+    suspend fun eliminarObservacao(observacaoId: String): Boolean {
         return try {
-            // Primeiro, buscar a observação para obter as informações das imagens
             val observacao = supabase.from("observacao")
                 .select {
                     filter {
@@ -200,19 +182,16 @@ class ObservacaoRepository {
                     }
                 }
                 .decodeSingle<Observacao>()
-            
-            // Excluir as imagens da observação, se houver
+
             observacao.anexos.forEach { imagemUrl ->
                 try {
                     val imagemNome = imagemUrl.substringAfterLast("/")
                     supabase.storage.from("observacoes").delete(imagemNome)
                 } catch (e: Exception) {
-                    println("DEBUG - Erro ao excluir imagem ${imagemUrl}: ${e.message}")
-                    // Continua tentando excluir as outras imagens
+                    e.printStackTrace()
                 }
             }
 
-            // Excluir a observação
             supabase.from("observacao").delete {
                 filter {
                     eq("observacao_uuid", observacaoId)
@@ -221,7 +200,7 @@ class ObservacaoRepository {
             
             true
         } catch (e: Exception) {
-            println("DEBUG - Erro ao excluir observação: ${e.message}")
+            e.printStackTrace()
             false
         }
     }

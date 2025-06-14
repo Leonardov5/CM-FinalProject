@@ -1,8 +1,6 @@
 package com.example.finalproject.ui.viewmodels
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,10 +10,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.local.AppDatabase
 import com.example.finalproject.data.local.LocalUser
 import com.example.finalproject.data.service.AuthService
-import com.example.finalproject.data.service.StorageService
+import com.example.finalproject.data.service.SupabaseProvider
 import com.example.finalproject.data.service.UserService
 import com.example.finalproject.data.sync.UserSyncManager
 import com.example.finalproject.ui.screens.isOnline
+import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,7 +25,6 @@ import java.util.Date
 import java.util.Locale
 
 class ProfileViewModel: ViewModel() {
-    // Estados do perfil
     var name by mutableStateOf("")
         private set
 
@@ -51,16 +49,6 @@ class ProfileViewModel: ViewModel() {
     var profileImageUrl by mutableStateOf<String?>(null)
         private set
 
-    // Estado para o bitmap da imagem de perfil
-    var profileImageBitmap by mutableStateOf<Bitmap?>(null)
-        // Setter público para permitir modificação a partir de fora da classe
-
-    // Função para atualizar o bitmap da imagem de perfil
-    fun updateProfileImageBitmap(bitmap: Bitmap?) {
-        profileImageBitmap = bitmap
-    }
-
-    // Estados de UI
     var isLoading by mutableStateOf(false)
         private set
 
@@ -114,7 +102,6 @@ class ProfileViewModel: ViewModel() {
         }
     }
 
-    // Funções para atualizar estados
     fun onNameChange(newName: String) {
         name = newName
     }
@@ -170,7 +157,7 @@ class ProfileViewModel: ViewModel() {
     fun hideEmailPasswordDialog() {
         showEmailPasswordDialog = false
         passwordForEmailChange = ""
-        email = originalEmail // Restaurar email original se o diálogo for fechado
+        email = originalEmail
     }
 
     // Carregar dados do perfil
@@ -191,18 +178,6 @@ class ProfileViewModel: ViewModel() {
                         email = localUser.email
                         originalEmail = localUser.email
                         profileImageUrl = localUser.fotografia
-
-                        // Carregar a imagem de perfil imediatamente após obter a URL
-                        if (profileImageUrl != null && profileImageUrl!!.isNotEmpty()) {
-                            println("Carregando imagem do perfil a partir da URL: $profileImageUrl")
-                            val bitmap = loadProfileImageFromUrl(profileImageUrl!!)
-                            if (bitmap != null) {
-                                println("Imagem de perfil carregada com sucesso, atualizando UI")
-                                updateProfileImageBitmap(bitmap)
-                            } else {
-                                println("Falha ao carregar a imagem de perfil")
-                            }
-                        }
                     }
 
                     // Verificar conectividade
@@ -219,21 +194,7 @@ class ProfileViewModel: ViewModel() {
                             username = updatedUser.username
                             email = updatedUser.email
                             originalEmail = updatedUser.email
-
-                            // Verificar se a URL da imagem foi atualizada
-                            if (profileImageUrl != updatedUser.fotografia) {
-                                profileImageUrl = updatedUser.fotografia
-
-                                // Recarregar a imagem se a URL mudou
-                                if (profileImageUrl != null && profileImageUrl!!.isNotEmpty()) {
-                                    println("URL da imagem foi atualizada, recarregando: $profileImageUrl")
-                                    val bitmap = loadProfileImageFromUrl(profileImageUrl!!)
-                                    if (bitmap != null) {
-                                        println("Nova imagem de perfil carregada com sucesso")
-                                        updateProfileImageBitmap(bitmap)
-                                    }
-                                }
-                            }
+                            profileImageUrl = updatedUser.fotografia
                         }
                     }
                 } else {
@@ -406,83 +367,40 @@ class ProfileViewModel: ViewModel() {
             errorMessage = null
 
             try {
-                val imageUrl = StorageService.uploadProfileImage(context, uri)
+                val userId = AuthService.getCurrentUserId() ?: throw Exception("Utilizador não autenticado")
+                val fileName = "$userId.jpg"
 
-                if (imageUrl != null) {
-                    // Atualizar a URL da imagem no banco de dados
-                    val success = UserService.updateUserData(fotografia = imageUrl)
+                val inputStream = context.contentResolver.openInputStream(uri)
+                    ?: throw Exception("Não foi possível abrir a imagem")
 
-                    if (success) {
-                        profileImageUrl = imageUrl
-                        successMessage = "Foto de perfil atualizada com sucesso!"
-                    } else {
-                        errorMessage = "Não foi possível atualizar a foto no perfil"
-                    }
+                val bytes = inputStream.readBytes()
+                inputStream.close()
+
+                val supabase = SupabaseProvider.client
+                supabase.storage.from("perfil")
+                    .upload(fileName, bytes, upsert = true)
+
+
+                val imageUrl = supabase.storage.from("perfil")
+                    .publicUrl(fileName)
+
+                val success = UserService.updateUserData(fotografia = imageUrl)
+
+                if (success) {
+                    profileImageUrl = imageUrl
+                    successMessage = "Foto de perfil atualizada com sucesso!"
                 } else {
-                    errorMessage = "Erro ao fazer upload da imagem"
+                    errorMessage = "Não foi possível atualizar a foto no perfil"
                 }
             } catch (e: Exception) {
                 errorMessage = "Erro ao processar a imagem: ${e.message}"
+                e.printStackTrace()
             } finally {
                 isUploadingImage = false
             }
         }
     }
 
-    // Função para carregar imagem do perfil a partir da URL
-    suspend fun loadProfileImageFromUrl(url: String): Bitmap? {
-        return withContext(Dispatchers.IO) {
-            try {
-                println("Tentando carregar imagem da URL: $url")
-
-                // Usar HttpURLConnection para maior controle e logs detalhados
-                val connection = URL(url).openConnection() as HttpURLConnection
-                connection.connectTimeout = 15000 // 15 segundos de timeout
-                connection.readTimeout = 15000
-                connection.doInput = true
-
-                // Como a URL é pública, não precisamos adicionar tokens de autenticação
-                connection.connect()
-
-                val responseCode = connection.responseCode
-                println("Resposta HTTP: $responseCode")
-
-                if (responseCode == 200) {
-                    val inputStream = connection.inputStream
-                    val bitmap = BitmapFactory.decodeStream(inputStream)
-                    inputStream.close()
-
-                    if (bitmap != null) {
-                        println("Bitmap carregado com sucesso. Tamanho: ${bitmap.width}x${bitmap.height}")
-                        bitmap
-                    } else {
-                        println("Falha ao decodificar o bitmap (null)")
-                        null
-                    }
-                } else {
-                    println("Falha ao carregar imagem. Código de resposta: $responseCode")
-
-                    // Log adicional para depuração em caso de falha
-                    try {
-                        val errorStream = connection.errorStream
-                        val errorMessage = errorStream?.bufferedReader()?.use { it.readText() }
-                        println("Mensagem de erro: $errorMessage")
-                        errorStream?.close()
-                    } catch (e: Exception) {
-                        println("Não foi possível ler o erro: ${e.message}")
-                    }
-
-                    null
-                }
-            } catch (e: Exception) {
-                println("Exceção ao carregar imagem: ${e.javaClass.simpleName} - ${e.message}")
-                e.printStackTrace()
-                null
-            }
-        }
-    }
-
-    // Função para fazer logout
     fun logout(onLogoutSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
@@ -498,7 +416,6 @@ class ProfileViewModel: ViewModel() {
         }
     }
 
-    // Limpar mensagens
     fun clearMessages() {
         errorMessage = null
         successMessage = null

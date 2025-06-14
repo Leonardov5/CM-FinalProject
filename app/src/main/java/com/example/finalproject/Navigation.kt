@@ -29,17 +29,11 @@ import com.example.finalproject.ui.screens.UpdatesScreen
 import com.example.finalproject.ui.screens.auth.LoginScreen
 import com.example.finalproject.ui.screens.auth.RegisterScreen
 import com.example.finalproject.ui.screens.tasks.TaskManagementScreen
-import com.example.finalproject.ui.screens.ProfileScreen
 import com.example.finalproject.ui.screens.projects.ProjectDetailScreen
 import com.example.finalproject.ui.screens.projects.ProjectsScreen
-import com.example.finalproject.ui.screens.tasks.ObservacoesScreen
-import com.example.finalproject.ui.screens.tasks.TaskDetailScreen
-import com.example.finalproject.ui.screens.tasks.TaskManagementScreen
 import com.example.finalproject.ui.screens.tasks.TrabalhosScreen
 import com.example.finalproject.ui.viewmodels.tasks.TaskDetailViewModel
 import kotlinx.coroutines.launch
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.finalproject.ui.screens.users.UserManagementScreen
 import com.example.finalproject.ui.viewmodels.users.UserManagementViewModel
 
@@ -92,11 +86,11 @@ fun AppNavigation(
                     currentRoute = currentDestination?.route ?: startDestination,
                     onNavigate = { route ->
                         navController.navigate(route) {
-                            // Configuração para evitar múltiplas instâncias da mesma tela
+                            // Evita múltiplas instâncias da mesma página
                             launchSingleTop = true
                             // Restaura o estado quando re-selecionado
                             restoreState = true
-                            // Pop até a tela inicial para evitar pilha grande
+                            // Pop até a página inicial do grafo
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
@@ -225,13 +219,11 @@ fun AppNavigation(
                         navController.popBackStack()
                     },
                     onStatusChange = { newStatus ->
-                        // Por enquanto não faz nada com o status
                     },
                     onDeleteTask = {
                         navController.popBackStack()
                     },
                     onAddWorker = {
-                        // Por enquanto n��o faz nada
                     },
                     onNavigateToTrabalhos = { tarefaId ->
                         navController.navigate(Screen.Trabalhos.createRoute(tarefaId))
@@ -239,7 +231,6 @@ fun AppNavigation(
                     viewModel = viewModel
                 )
 
-                // Observar o evento de navegação para observações
                 LaunchedEffect(viewModel.navigateToObservacoesEvent) {
                     viewModel.navigateToObservacoesEvent?.let { tarefaId ->
                         navController.navigate(Screen.Observacoes.createRoute(tarefaId))
@@ -248,7 +239,6 @@ fun AppNavigation(
                 }
             }
 
-            // Rota para a tela de observações de uma tarefa
             composable(
                 route = Screen.Observacoes.route,
                 arguments = listOf(navArgument("tarefaId") { type = NavType.StringType })
@@ -263,7 +253,6 @@ fun AppNavigation(
                 )
             }
 
-            // Rota para a tela de trabalhos de uma tarefa
             composable(
                 route = Screen.Trabalhos.route,
                 arguments = listOf(navArgument("tarefaId") { type = NavType.StringType })
@@ -285,11 +274,10 @@ fun AppNavigation(
                         navController.navigate(Screen.Profile.route)
                     },
                     viewModel = userManagementViewModel,
-                    onAddUser = { /* navegação para tela de adicionar usuário */ },
+                    onAddUser = {  },
                 )
             }
 
-            // Rota para a tela de detalhes do projeto
             composable(
                 route = Screen.ProjectDetail.route,
                 arguments = listOf(navArgument("projectId") { type = NavType.StringType })

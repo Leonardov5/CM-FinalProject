@@ -15,35 +15,29 @@ import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 class LogWorkViewModel : ViewModel() {
-    // Estados para os campos do formulário
     var data by mutableStateOf<LocalDateTime?>(LocalDateTime.now())
     var local by mutableStateOf("")
     var contribuicao by mutableStateOf("0.0")
     var tempoDispensado by mutableStateOf("")
 
-    // Estado de carregamento e erros
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
 
-    // Estados de validação
     var dataError by mutableStateOf(false)
     var localError by mutableStateOf(false)
     var contribuicaoError by mutableStateOf(false)
     var tempoDispensadoError by mutableStateOf(false)
 
-    // Variável para armazenar o máximo de contribuição possível
     var maxContribuicaoPossivel by mutableStateOf(100.0)
         private set
 
     private val trabalhoRepository = TrabalhoRepository()
     private val tarefaRepository = TarefaRepository()
 
-    // Método para validar o formulário
     fun validateForm(
         contributionMaxError: String,
         contributionMaxError2: String
     ): Boolean {
-        // Resetar erros
         dataError = false
         localError = false
         contribuicaoError = false
@@ -51,26 +45,22 @@ class LogWorkViewModel : ViewModel() {
 
         var isValid = true
 
-        // Validar data
         if (data == null) {
             dataError = true
             isValid = false
         }
 
-        // Validar local
         if (local.isBlank()) {
             localError = true
             isValid = false
         }
 
-        // Validar contribuição
         try {
             val contribuicaoValue = contribuicao.toDoubleOrNull()
             if (contribuicaoValue == null || contribuicaoValue < 0) {
                 contribuicaoError = true
                 isValid = false
             } else if (contribuicaoValue > maxContribuicaoPossivel) {
-                // Verifica se a contribuição excede o máximo permitido para completar a tarefa
                 contribuicaoError = true
                 errorMessage = "$contributionMaxError $maxContribuicaoPossivel% $contributionMaxError2"
                 isValid = false
@@ -80,7 +70,6 @@ class LogWorkViewModel : ViewModel() {
             isValid = false
         }
 
-        // Validar tempo dispensado
         try {
             val tempo = tempoDispensado.toIntOrNull()
             if (tempo == null || tempo <= 0) {
@@ -95,7 +84,6 @@ class LogWorkViewModel : ViewModel() {
         return isValid
     }
 
-    // Metodo para salvar o registro de trabalho
     @RequiresApi(Build.VERSION_CODES.O)
     fun saveTrabalho(
         tarefaId: String,
@@ -114,13 +102,11 @@ class LogWorkViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                // Formatar a data para string ISO
                 val dataFormatada = data?.let {
-                    trabalhoRepository.formatarDataHora(it)
+                    trabalhoRepository.formatarDataHoraParaISO(it)
                 } ?: LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
 
-                // Registrar o trabalho no Supabase
-                val trabalho = trabalhoRepository.registrarTrabalho(
+                val trabalho = trabalhoRepository.registarTrabalho(
                     tarefaId = tarefaId,
                     data = dataFormatada,
                     local = local.takeIf { it.isNotBlank() },
@@ -134,47 +120,35 @@ class LogWorkViewModel : ViewModel() {
                 } else {
                     isLoading = false
                     errorMessage = "Falha ao registrar o trabalho"
-                    onError("Failure to register work")
                 }
             } catch (e: Exception) {
                 isLoading = false
                 errorMessage = e.message
-                onError(e.message ?: "Error registering work")
             }
         }
     }
 
-    // Metodo para carregar a taxa de conclusão atual da tarefa e calcular o máximo de contribuição possível
     fun carregarTaxaConclusaoAtual(tarefaId: String) {
         viewModelScope.launch {
             try {
-                val tarefa = tarefaRepository.getTarefaById(tarefaId)
+                val tarefa = tarefaRepository.obterTarefaPorId(tarefaId)
                 tarefa?.let {
-                    // Verificar se a tarefa já está 100% concluída
                     if (tarefa.taxaConclusao >= 100) {
-                        contribuicao = "0.0" // Não permite mais contribuição
+                        contribuicao = "0.0"
                     } else {
-                        // Calcular o máximo de contribuição possível (100% - taxa atual)
                         val maxContribuicao = 100.0 - tarefa.taxaConclusao
-                        // Definir uma contribuição padrão de 10%, ou o máximo disponível se for menor que 10%
                         val valorPadrao = minOf(10.0, maxContribuicao)
                         contribuicao = valorPadrao.toString()
                     }
 
-                    // Atualiza o valor máximo de contribuição possível
                     maxContribuicaoPossivel = 100.0 - tarefa.taxaConclusao
-
-                    // Log para depuração
-                    println("DEBUG - Taxa conclusão atual da tarefa: ${tarefa.taxaConclusao}%")
-                    println("DEBUG - Contribuição máxima possível: ${100.0 - (tarefa.taxaConclusao)}%")
                 }
             } catch (e: Exception) {
-                println("DEBUG - Erro ao carregar taxa de conclusão atual: ${e.message}")
+                e.printStackTrace()
             }
         }
     }
 
-    // Método para resetar o formulário
     @RequiresApi(Build.VERSION_CODES.O)
     fun resetForm() {
         data = LocalDateTime.now()

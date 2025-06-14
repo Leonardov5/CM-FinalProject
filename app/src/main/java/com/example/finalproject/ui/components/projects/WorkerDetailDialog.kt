@@ -71,7 +71,6 @@ fun WorkerDetailDialog(
                     .padding(16.dp)
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    // Botão X no canto superior direito
                     IconButton(
                         onClick = onDismiss,
                         modifier = Modifier
@@ -81,19 +80,18 @@ fun WorkerDetailDialog(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Fechar",
+                            contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
-                    // Conteúdo principal
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Foto do usuário
+                        // Imagem
                         Box(
                             modifier = Modifier
                                 .size(120.dp)
@@ -146,7 +144,7 @@ fun WorkerDetailDialog(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        // Data em que se juntou ao projeto
+                        // Data
                         worker.createdAt.let {
                             val formattedDate = try {
                                 val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
@@ -165,7 +163,7 @@ fun WorkerDetailDialog(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        // Cargo/função
+                        // Cargo
                         val role = if (worker.isManager) {
                             stringResource(id = R.string.project_manager)
                         } else {
@@ -190,14 +188,13 @@ fun WorkerDetailDialog(
                             )
                         }
 
-                        // Opção para alterar o cargo (apenas para admins)
+                        // Opção de gestor
                         if (isAdmin) {
                             Spacer(modifier = Modifier.height(16.dp))
 
                             var isManagerState by remember { mutableStateOf(worker.isManager) }
                             var isActiveState by remember { mutableStateOf(worker.active) }
 
-                            // Opção para alterar entre gestor e membro normal
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.fillMaxWidth()
@@ -217,7 +214,6 @@ fun WorkerDetailDialog(
 
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            // Opção para ativar/desativar o membro no projeto
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.fillMaxWidth()
@@ -241,7 +237,7 @@ fun WorkerDetailDialog(
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            // Botão para salvar as alterações - agora centralizado e mais largo
+                            // Guardar
                             Button(
                                 onClick = { onEdit(worker.userId, isManagerState, isActiveState) },
                                 enabled = isManagerState != worker.isManager || isActiveState != worker.active,
@@ -257,7 +253,6 @@ fun WorkerDetailDialog(
                             }
                         }
 
-                        // Espaço no final (removido o botão Close)
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }

@@ -20,7 +20,6 @@ object UserSyncManager {
 
                 if (remoteUser != null) {
                     if (localUser == null || remoteUser.updatedAt > localUser.updatedAt) {
-                        // Dados online são mais recentes, atualizar local
                         val newLocalUser = LocalUser(
                             id = remoteUser.id,
                             username = remoteUser.username,
@@ -31,7 +30,6 @@ object UserSyncManager {
                         )
                         userDao.insertUser(newLocalUser)
                     } else if (localUser.updatedAt > remoteUser.updatedAt) {
-                        // Dados locais são mais recentes, atualizar online
                         UserService.updateUserData(
                             username = localUser.username,
                             nome = localUser.nome,
@@ -51,10 +49,8 @@ object UserSyncManager {
 
         withContext(Dispatchers.IO) {
             try {
-                // Obter dados do Supabase
                 val remoteUser = UserService.getCurrentUserData()
                 if (remoteUser != null) {
-                    // Atualizar banco de dados local
                     val localUser = LocalUser(
                         id = remoteUser.id,
                         username = remoteUser.username,
@@ -81,7 +77,6 @@ object UserSyncManager {
                 val localUser = userDao.getUserById(userId)
 
                 if (localUser != null) {
-                    // Enviar alterações para o Supabase
                     UserService.updateUserData(
                         username = localUser.username,
                         nome = localUser.nome,

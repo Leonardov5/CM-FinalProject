@@ -43,7 +43,6 @@ fun LogWorkDialog(
     viewModel: LogWorkViewModel = viewModel(),
     dateTimePickerViewModel: DateTimePickerViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
-    // Carregar a taxa de conclusão atual da tarefa quando o diálogo é aberto
     LaunchedEffect(show) {
         if (show) {
             viewModel.carregarTaxaConclusaoAtual(tarefaId)
@@ -52,7 +51,6 @@ fun LogWorkDialog(
 
     if (!show) return
 
-    // Limpar os campos ao iniciar o diálogo
     LaunchedEffect(show) {
         if (show) {
             viewModel.resetForm()
@@ -85,7 +83,7 @@ fun LogWorkDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Campo de data e hora
+                // Data e hora
                 DateTimePickerField(
                     label = stringResource(id = R.string.date),
                     selectedDateTime = viewModel.data,
@@ -97,7 +95,7 @@ fun LogWorkDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Campo de local
+                // Local
                 OutlinedTextField(
                     value = viewModel.local,
                     onValueChange = { viewModel.local = it },
@@ -111,7 +109,7 @@ fun LogWorkDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Campo de contribuição
+                // Contribuição
                 OutlinedTextField(
                     value = viewModel.contribuicao,
                     onValueChange = {
@@ -131,11 +129,11 @@ fun LogWorkDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Campo de tempo dispensado
+                // Tempo dispensado
                 OutlinedTextField(
                     value = viewModel.tempoDispensado,
                     onValueChange = {
-                        // Aceitar apenas números inteiros
+                        // Aceita apenas números
                         if (it.isEmpty() || it.matches(Regex("^\\d+$"))) {
                             viewModel.tempoDispensado = it
                         }
@@ -151,7 +149,6 @@ fun LogWorkDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Mensagem de erro
                 viewModel.errorMessage?.let {
                     Text(
                         text = it,
@@ -161,7 +158,7 @@ fun LogWorkDialog(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                // Botões
+                // Registar
                 Button(
                     onClick = {
                         viewModel.saveTrabalho(
@@ -173,7 +170,7 @@ fun LogWorkDialog(
                                 onSuccess()
                                 onDismiss()
                             },
-                            onError = { /* Erro já é exibido via viewModel.errorMessage */ }
+                            onError = { }
                         )
                     },
                     enabled = !viewModel.isLoading,
@@ -190,7 +187,7 @@ fun LogWorkDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Botão de cancelar com estilo diferente
+                // Cancelar
                 Button(
                     onClick = {
                         viewModel.resetForm()
