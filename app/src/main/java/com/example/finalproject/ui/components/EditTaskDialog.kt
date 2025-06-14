@@ -191,6 +191,8 @@ fun EditTaskDialog(
                     errorMessage = stringResource(R.string.priority_required)
                 )
 
+                Spacer(modifier = Modifier.height(16.dp))
+
                 DropdownMenuBox(
                     label = stringResource(R.string.status),
                     options = viewModel.statusList.map { statusDisplay(it) },
@@ -232,6 +234,8 @@ fun EditTaskDialog(
                     isError = uiState.dataFimError,
                     errorMessage = stringResource(R.string.end_date_required)
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Campo para taxa de conclusão
                 OutlinedTextField(

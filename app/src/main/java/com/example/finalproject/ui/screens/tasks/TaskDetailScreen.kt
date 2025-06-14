@@ -143,70 +143,70 @@ fun TaskDetailScreen(
             )
         },
         floatingActionButton = {
-            if (viewModel.isAdmin || viewModel.isManager) {
-                Column(
-                    horizontalAlignment = Alignment.End
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
+                // FAB menu
+                AnimatedVisibility(
+                    visible = showFabActions,
+                    enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }) + expandVertically(),
+                    exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }) + shrinkVertically()
                 ) {
-                    // FAB menu
-                    AnimatedVisibility(
-                        visible = showFabActions,
-                        enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }) + expandVertically(),
-                        exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }) + shrinkVertically()
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(bottom = 16.dp)
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.End,
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        ) {
+                        if (viewModel.isAdmin || viewModel.isManager) {
                             ActionButton(
-                                icon = Icons.Default.Edit,
-                                label = stringResource(id = R.string.edit_task),
-                                onClick = {
-                                    viewModel.toggleEditTaskDialog()
-                                    showFabActions = false
+                            icon = Icons.Default.Edit,
+                            label = stringResource(id = R.string.edit_task),
+                            onClick = {
+                                viewModel.toggleEditTaskDialog()
+                                showFabActions = false
                                 }
                             )
-                            if(viewModel.isAdmin || viewModel.isManager) {
-                                ActionButton(
-                                    icon = Icons.Default.Add,
-                                    label = stringResource(id = R.string.add_worker),
-                                    onClick = {
-                                        showFabActions = false
-                                        viewModel.toggleAddWorkerDialog()
-                                    }
-                                )
-                            }
+                        }
+                        if(viewModel.isAdmin || viewModel.isManager) {
                             ActionButton(
-                                icon = Icons.Default.Work,
-                                label = "Log Work",
+                                icon = Icons.Default.Add,
+                                label = stringResource(id = R.string.add_worker),
                                 onClick = {
                                     showFabActions = false
-                                    showLogWorkDialog = true
+                                    viewModel.toggleAddWorkerDialog()
                                 }
                             )
-                            if( viewModel.isAdmin) {
-                                ActionButton(
-                                    icon = Icons.Default.Delete,
-                                    label = stringResource(id = R.string.delete_task),
-                                    onClick = {
-                                        showFabActions = false
-                                        viewModel.toggleDeleteTaskDialog()
-                                    }
-                                )
+                        }
+                        ActionButton(
+                            icon = Icons.Default.Work,
+                            label = stringResource(id = R.string.LogWork),
+                            onClick = {
+                                showFabActions = false
+                                showLogWorkDialog = true
                             }
+                        )
+                        if( viewModel.isAdmin) {
+                            ActionButton(
+                                icon = Icons.Default.Delete,
+                                label = stringResource(id = R.string.delete_task),
+                                onClick = {
+                                    showFabActions = false
+                                    viewModel.toggleDeleteTaskDialog()
+                                }
+                            )
                         }
                     }
-                    FloatingActionButton(
-                        onClick = { showFabActions = !showFabActions },
+                }
+                FloatingActionButton(
+                    onClick = { showFabActions = !showFabActions },
 
-                        ) {
-                        Icon(
-                            imageVector = if (showFabActions) Icons.Default.Close else Icons.Default.Add,
-                            contentDescription = if (showFabActions) stringResource(id = R.string.close_menu) else stringResource(
-                                id = R.string.open_menu
-                            )
+                    ) {
+                    Icon(
+                        imageVector = if (showFabActions) Icons.Default.Close else Icons.Default.Add,
+                        contentDescription = if (showFabActions) stringResource(id = R.string.close_menu) else stringResource(
+                            id = R.string.open_menu
                         )
-                    }
+                    )
                 }
             }
         },
