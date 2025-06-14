@@ -234,7 +234,7 @@
     <string name="notification_task_status_in_progress_title">Tarefa em andamento</string>
     <string name="notification_task_status_completed_title">Tarefa concluída</string>
     <string name="notification_task_status_canceled_title">Tarefa cancelada</string>
-    <string name="notification_user_added_to_task_message">Você foi adicionado a uma nova tarefa</string>
+    <string name="notification_user_added_to_task_message">Foi adicionado a uma nova tarefa</string>
     <string name="notification_project_status_active_message">Um projeto foi ativado</string>
     <string name="notification_project_status_inactive_message">Um projeto foi desativado</string>
     <string name="notification_project_status_completed_message">Um projeto foi marcado como concluído</string>
@@ -259,4 +259,7 @@
     <string name="selected_image">Imagem Selecionada</string>
     <string name="unknown_user">Utilizador Deconhecido</string>
     <string name="delete_work">Apagar Trabalho</string>
+    <string name="notification_user_added_to_project_title">Adicionado a um projeto</string>
+    <string name="notification_user_added_to_project_message">Foi adicionado a um projeto</string>
+    <string name="search">Pesquisar</string>
 </resources>

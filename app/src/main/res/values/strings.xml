@@ -259,4 +259,7 @@
     <string name="selected_image">Selected Image</string>
     <string name="unknown_user">Unknown User</string>
     <string name="delete_work">Delete Work</string>
-    </resources>
+    <string name="notification_user_added_to_project_title">Added to a project</string>
+    <string name="notification_user_added_to_project_message">You have been added to a project</string>
+    <string name="search">Search</string>
+</resources>
