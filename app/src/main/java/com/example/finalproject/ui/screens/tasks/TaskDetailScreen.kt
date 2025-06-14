@@ -629,10 +629,10 @@ private fun StatusChip(status: TarefaStatus) {
     }
 
     val statusText = when(status) {
-        TarefaStatus.pendente -> stringResource(id = R.string.to_do)
-        TarefaStatus.em_andamento -> stringResource(id = R.string.on_going)
-        TarefaStatus.concluida -> stringResource(id = R.string.completed)
-        TarefaStatus.cancelada -> stringResource(id = R.string.cancelled)
+        TarefaStatus.pendente -> stringResource(id = R.string.status_pending)
+        TarefaStatus.em_andamento -> stringResource(id = R.string.status_in_progress)
+        TarefaStatus.concluida -> stringResource(id = R.string.status_completed)
+        TarefaStatus.cancelada -> stringResource(id = R.string.status_cancelled)
     }
 
     Surface(
