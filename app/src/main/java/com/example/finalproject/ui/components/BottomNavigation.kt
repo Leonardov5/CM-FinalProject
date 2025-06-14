@@ -3,6 +3,7 @@ package com.example.finalproject.ui.components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Task
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -36,9 +37,15 @@ fun BottomNavigation(
         isLanguageLoaded = true
     }
 
+    val profileViewModel: ProfileViewModel = viewModel()
+    LaunchedEffect(Unit) {
+        profileViewModel.checkIfAdmin()
+        val isAdmin = profileViewModel.isAdmin
+    }
+
     if (!isLanguageLoaded) return // Wait until language is loaded
 
-    val items = listOf(
+    val items = mutableListOf(
         NavigationItem(
             route = Screen.TaskManagement.route,
             icon = Icons.Default.Task,
@@ -55,7 +62,15 @@ fun BottomNavigation(
             label = stringResource(R.string.bottom_nav_updates)
         )
     )
-
+    if (profileViewModel.isAdmin) {
+        items.add(
+            NavigationItem(
+                route = Screen.UserManagement.route,
+                icon = Icons.Default.Person,
+                label = stringResource(R.string.bottom_nav_users)
+            )
+        )
+    }
     NavigationBar {
         items.forEach { item ->
             NavigationBarItem(

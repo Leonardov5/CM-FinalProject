@@ -1,6 +1,5 @@
 package com.example.finalproject.ui.screens.projects
 
-import AddMemberDialog
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -36,6 +35,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.outlined.Analytics
+import androidx.compose.material.icons.outlined.Monitor
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -68,13 +69,15 @@ import com.example.finalproject.R
 import com.example.finalproject.Screen
 import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.data.model.User
+import com.example.finalproject.ui.components.projects.AddMemberDialog
 import com.example.finalproject.ui.components.projects.AddTaskDialog
 import com.example.finalproject.ui.components.projects.EditProjectDialog
+import com.example.finalproject.ui.components.projects.ProjectAnalyticsExporterDialog
 import com.example.finalproject.ui.components.projects.WorkerDetailDialog
 import com.example.finalproject.ui.components.projects.WorkersListProject
-import com.example.finalproject.ui.theme.onSurfaceVariantLight
 import com.example.finalproject.ui.theme.primaryLight
 import com.example.finalproject.ui.theme.surfaceVariantLight
+import com.example.finalproject.ui.viewmodels.projects.ProjectAnalyticsExporter
 import com.example.finalproject.ui.viewmodels.projects.ProjectDetailViewModel
 import com.example.finalproject.utils.updateAppLanguage
 import kotlinx.coroutines.launch
@@ -212,7 +215,7 @@ fun ProjectDetailScreen(
                                 }
                             )
                         }
-                        if( viewModel.isAdmin) {
+                        if( viewModel.isAdmin || viewModel.isManager) {
                             ActionButton(
                                 icon = Icons.Default.Edit,
                                 label = editProject,
@@ -229,6 +232,17 @@ fun ProjectDetailScreen(
                                 onClick = {
                                     viewModel.toggleFabActions()
                                     viewModel.showDeleteConfirmDialog()
+                                }
+                            )
+                        }
+                        if(viewModel.isAdmin){
+                            ActionButton(
+                                icon = Icons.Outlined.Analytics,
+                                // TODO: change this so it uses translation files
+                                label = "Export Analytics",
+                                onClick = {
+                                    viewModel.toggleFabActions()
+                                    viewModel.showAnalyticsExporterDialog()
                                 }
                             )
                         }
@@ -323,11 +337,11 @@ fun ProjectDetailScreen(
                             val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
                             val createdDate = viewModel.projeto!!.createdAt?.let {
-                                stringResource(id = R.string.created_at, formatDate(it) ?: it)
+                                stringResource(id = R.string.created_at) + "\n" + formatDate(it)
                             } ?: stringResource(id = R.string.unknown_creation_date)
 
                             val updatedDate = viewModel.projeto!!.updatedAt?.let {
-                                stringResource(id = R.string.updated_at, formatDate(it) ?: it)
+                                stringResource(id = R.string.updated_at) + "\n" + formatDate(it)
                             } ?: stringResource(id = R.string.unknown_update_date)
 
 
@@ -472,7 +486,10 @@ fun ProjectDetailScreen(
             onAdd = { userId, isManager ->
                 scope.launch {
                     viewModel.addMemberToProject(userId, isManager)
-                    Toast.makeText(context, "Membro adicionado com sucesso", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context,
+                        // TODO: Translate hard-coded string "Membro adicionado com sucesso"
+                        "Membro adicionado com sucesso",
+                        Toast.LENGTH_SHORT).show()
                 }
             }
         )
@@ -514,10 +531,27 @@ fun ProjectDetailScreen(
             onEdit = { userId, isManager, isActive ->
                 scope.launch {
                     viewModel.updateWorkerRole(userId, isManager, isActive)
-                    Toast.makeText(context, "Dados do membro atualizados com sucesso", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context,
+                        // TODO: Translate hard-coded string "Dados do membro atualizados com sucesso"
+                        "Dados do membro atualizados com sucesso",
+                        Toast.LENGTH_SHORT).show()
                 }
             },
             isAdmin = viewModel.isAdmin || viewModel.isManager
+        )
+    }
+
+    // Diálogo para exportar análises do projeto
+    if (viewModel.showAnalyticsExporterDialog) {
+        ProjectAnalyticsExporterDialog(
+            show = true,
+            projetoId = projetoId,
+            onDismiss = { viewModel.hideAnalyticsExporterDialog() },
+            onExport = { format ->
+                scope.launch {
+                    viewModel.exportProjectAnalytics(format, context)
+                }
+            }
         )
     }
 }

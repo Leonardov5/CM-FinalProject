@@ -1,36 +1,87 @@
 package com.example.finalproject.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.finalproject.ui.theme.*
+import com.example.finalproject.R
+import com.example.finalproject.data.PreferencesManager
+import com.example.finalproject.data.model.Notificacao
 import com.example.finalproject.ui.viewmodels.UpdatesViewModel
+import com.example.finalproject.utils.updateAppLanguage
 
-data class Update(
-    val id: Int,
-    val title: String,
-    val message: String,
-    val date: String,
-    val isNew: Boolean = false
-)
+@Composable
+private fun getTitleFromNotificacao(notificacao: Notificacao): String {
+    return when (notificacao.mensagem) {
+        "USER_ADDED_TO_TASK" -> stringResource(R.string.notification_user_added_to_task_title)
+        "PROJECT_STATUS_CHANGED_TO_ACTIVE" -> stringResource(R.string.notification_project_status_active_title)
+        "PROJECT_STATUS_CHANGED_TO_INACTIVE" -> stringResource(R.string.notification_project_status_inactive_title)
+        "PROJECT_STATUS_CHANGED_TO_COMPLETED" -> stringResource(R.string.notification_project_status_completed_title)
+        "PROJECT_STATUS_CHANGED_TO_CANCELED" -> stringResource(R.string.notification_project_status_canceled_title)
+        "TASK_STATUS_CHANGED_TO_PENDING" -> stringResource(R.string.notification_task_status_pending_title)
+        "TASK_STATUS_CHANGED_TO_IN_PROGRESS" -> stringResource(R.string.notification_task_status_in_progress_title)
+        "TASK_STATUS_CHANGED_TO_COMPLETED" -> stringResource(R.string.notification_task_status_completed_title)
+        "TASK_STATUS_CHANGED_TO_CANCELED" -> stringResource(R.string.notification_task_status_canceled_title)
+        else -> stringResource(R.string.notification_default_title)
+    }
+}
+
+@Composable
+private fun getMessageFromNotificacao(notificacao: Notificacao): String {
+    return when (notificacao.mensagem) {
+        "USER_ADDED_TO_TASK" -> stringResource(R.string.notification_user_added_to_task_message)
+        "PROJECT_STATUS_CHANGED_TO_ACTIVE" -> stringResource(R.string.notification_project_status_active_message)
+        "PROJECT_STATUS_CHANGED_TO_INACTIVE" -> stringResource(R.string.notification_project_status_inactive_message)
+        "PROJECT_STATUS_CHANGED_TO_COMPLETED" -> stringResource(R.string.notification_project_status_completed_message)
+        "PROJECT_STATUS_CHANGED_TO_CANCELED" -> stringResource(R.string.notification_project_status_canceled_message)
+        "TASK_STATUS_CHANGED_TO_PENDING" -> stringResource(R.string.notification_task_status_pending_message)
+        "TASK_STATUS_CHANGED_TO_IN_PROGRESS" -> stringResource(R.string.notification_task_status_in_progress_message)
+        "TASK_STATUS_CHANGED_TO_COMPLETED" -> stringResource(R.string.notification_task_status_completed_message)
+        "TASK_STATUS_CHANGED_TO_CANCELED" -> stringResource(R.string.notification_task_status_canceled_message)
+        else -> notificacao.mensagem
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,6 +90,13 @@ fun UpdatesScreen(
     onProfileClick: () -> Unit = {},
     viewModel: UpdatesViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        val savedLanguage = PreferencesManager.getLanguage(context)
+        updateAppLanguage(context, savedLanguage)
+        viewModel.loadUpdates()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -53,7 +111,7 @@ fun UpdatesScreen(
                             color = MaterialTheme.colorScheme.surfaceVariant
                         ) {
                             Text(
-                                text = "Updates",
+                                text = stringResource(R.string.updates_title),
                                 modifier = Modifier.padding(vertical = 12.dp),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium,
@@ -68,7 +126,7 @@ fun UpdatesScreen(
                         Icon(
                             Icons.Default.Menu,
                             contentDescription = "Menu",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.background
                         )
                     }
                 },
@@ -109,11 +167,19 @@ fun UpdatesScreen(
                     .padding(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(viewModel.updates) { update ->
-                    UpdateCard(
-                        update = update,
-                        onClick = { viewModel.markAsRead(update.id) }
-                    )
+                items(viewModel.notificacoes) { notificacao ->
+                    if (notificacao.id != null) {
+                        UpdateCard(
+                            notificacao = notificacao,
+                            title = getTitleFromNotificacao(notificacao),
+                            message = getMessageFromNotificacao(notificacao),
+                            getFormattedDate = viewModel::formatarData,
+                            onClick = { id -> viewModel.markAsRead(id) },
+                            onDelete = {
+                                viewModel.deleteNotification(it)
+                            }
+                        )
+                    }
                 }
 
                 item {
@@ -123,80 +189,110 @@ fun UpdatesScreen(
         }
     }
 }
-
 @Composable
 fun UpdateCard(
-    update: Update,
-    onClick: () -> Unit = {}
+    notificacao: Notificacao,
+    title: String,
+    message: String,
+    getFormattedDate: (Notificacao) -> String,
+    onClick: (String) -> Unit = {},
+    onDelete: (String) -> Unit = {}  // Nova função de callback para exclusão
 ) {
+    val id = notificacao.id ?: return
+
     Surface(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = if (update.isNew) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainer,
+        color = if (!notificacao.vista) MaterialTheme.colorScheme.secondaryContainer
+        else MaterialTheme.colorScheme.surfaceContainer,
         shadowElevation = 2.dp,
-        onClick = onClick
+        onClick = { onClick(id) }
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            // Notification icon with circle background
-            Box(
+        Box(modifier = Modifier.fillMaxWidth()) {
+            // Botão de excluir no canto superior direito
+            IconButton(
+                onClick = { onDelete(id) },
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(if (update.isNew) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceContainer),
-                contentAlignment = Alignment.Center
+                    .align(Alignment.TopEnd)
+                    .size(32.dp)
+                    .padding(4.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = null,
-                    tint = if (update.isNew) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp)
+                    imageVector = Icons.Default.Close,
+                    contentDescription = stringResource(R.string.delete),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(16.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(
-                modifier = Modifier.weight(1f)
+            // Conteúdo original do card
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.Top
             ) {
-                Text(
-                    text = update.title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = if (update.isNew) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = update.message,
-                    fontSize = 14.sp,
-                    color = if (update.isNew) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = update.date,
-                    fontSize = 12.sp,
-                    color = if (update.isNew) MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-            }
-
-            if (update.isNew) {
+                // Notification icon com circle background
                 Box(
                     modifier = Modifier
-                        .size(8.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.tertiary)
-                )
+                        .background(
+                            if (!notificacao.vista) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f)
+                            else MaterialTheme.colorScheme.surfaceContainer
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = null,
+                        tint = if (!notificacao.vista) MaterialTheme.colorScheme.onTertiaryContainer
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = title,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = if (!notificacao.vista) MaterialTheme.colorScheme.onTertiaryContainer
+                        else MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = message,
+                        fontSize = 14.sp,
+                        color = if (!notificacao.vista) MaterialTheme.colorScheme.onTertiaryContainer
+                        else MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = getFormattedDate(notificacao),
+                        fontSize = 12.sp,
+                        color = if (!notificacao.vista) MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                }
+
+                if (!notificacao.vista) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.tertiary)
+                    )
+                }
             }
         }
     }
 }
-

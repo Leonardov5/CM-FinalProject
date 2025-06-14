@@ -3,25 +3,23 @@ package com.example.finalproject.ui.viewmodels.tasks
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.example.finalproject.data.model.TarefaStatus
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.model.Tarefa
+import com.example.finalproject.data.model.TarefaStatus
 import com.example.finalproject.data.model.User
 import com.example.finalproject.data.model.UserProject
 import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
 import com.example.finalproject.data.repository.UserRepository
-import kotlinx.coroutines.Dispatchers
+import com.example.finalproject.data.service.UserService
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class TaskDetailViewModel(
     private val taskRepository: TarefaRepository = TarefaRepository(),
     private val projetoRepository: ProjetoRepository = ProjetoRepository()
 
 ) : ViewModel(){
-
 
     var task by mutableStateOf<Tarefa?>(null)
         private set
@@ -32,6 +30,11 @@ class TaskDetailViewModel(
     var showAddWorkerDialog by mutableStateOf(false)
         private set
 
+    var isAdmin by mutableStateOf(false)
+        private set
+
+    var isManager by mutableStateOf(false)
+        private set
 
     var trabalhadoresTarefa by mutableStateOf<List<String>>(emptyList())
         private set
@@ -45,15 +48,79 @@ class TaskDetailViewModel(
     var filtredMembros by mutableStateOf<List<User>>(emptyList())
         private set
 
-    fun loadTrabalhadoresTarefa(tarefaId: String) {
+    // Evento de navegação para tela de observações
+    var navigateToObservacoesEvent by mutableStateOf<String?>(null)
+        private set
+
+
+    var showDeleteTaskDialog by mutableStateOf(false)
+        private set
+
+    var showEditTaskDialog by mutableStateOf(false)
+        private set
+
+    fun toggleEditTaskDialog() {
+        showEditTaskDialog = !showEditTaskDialog
+    }
+
+    fun toggleDeleteTaskDialog() {
+        showDeleteTaskDialog = !showDeleteTaskDialog
+    }
+
+    var navigateToTrabalhosEvent by mutableStateOf<String?>(null)
+        private set
+
+    var workerJoinDate by mutableStateOf<String?>(null)
+        private set
+
+    fun fetchWorkerJoinedDate(userId: String) {
+        workerJoinDate = null
         viewModelScope.launch {
-            isLoading = true
             try {
-                trabalhadoresTarefa = taskRepository.getTrabalhadoresDaTarefa(tarefaId)
-                println("Debug - foram carregados ${trabalhadoresTarefa.size} trabalhadores para a tarefa $tarefaId")
+                task?.id?.let { tarefaId ->
+
+                    val date = taskRepository.getUsuarioJoinDate(userId, tarefaId)
+
+                    workerJoinDate = date
+                }
             } catch (e: Exception) {
-                println("Error fetching task workers: ${e.message}")
-            } finally {
+                println("Erro ao buscar data de entrada do usuário: ${e.message}")
+            }
+        }
+    }
+
+    // Método público para modificar workerJoinDate
+    fun updateWorkerJoinDate(date: String?) {
+        workerJoinDate = date
+    }
+
+    var showTaskAnalyticsExporterDialog by mutableStateOf(false)
+        private set
+
+    fun checkUser(currentUser: User? = null) {
+        viewModelScope.launch {
+            try {
+                val user = currentUser ?: UserService.getCurrentUserData()
+                isAdmin = user?.admin == true
+                val membrosProjetoCompleto = projetoRepository.listarMembrosProjetoCompleto(task?.projetoId ?: "")
+                isManager = membrosProjetoCompleto.any { it.userId == user?.id && it.isManager }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    // Modificar o método loadTrabalhadoresTarefa para também buscar as datas de entrada
+    fun loadTrabalhadoresTarefa(tarefaId: String) {
+        isLoading = true
+        viewModelScope.launch {
+            try {
+                // Carregar a lista de IDs dos trabalhadores da tarefa
+                trabalhadoresTarefa = taskRepository.getTrabalhadoresDaTarefa(tarefaId)
+
+                isLoading = false
+            } catch (e: Exception) {
+                println("Erro ao carregar trabalhadores da tarefa: ${e.message}")
                 isLoading = false
             }
         }
@@ -102,9 +169,152 @@ class TaskDetailViewModel(
     fun addWorkerToTask(userId: String, tarefaId: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             val result = taskRepository.adicionarUsuarioATarefa(userId, tarefaId)
+            println("Debug - Adding worker to task: $userId to $tarefaId, result: $result")
             onResult(result)
             if (result) {
-                loadTask(tarefaId) // Atualiza a tarefa para refletir os trabalhadores
+                println("Debug - Worker added successfully")
+                loadTask(tarefaId)
+                loadTrabalhadoresTarefa(tarefaId)
+                task?.projetoId?.let { projetoId ->
+                    loadMembrosProjeto(projetoId)
+                }
+            }
+        }
+    }
+
+    fun removeWorkerFromTask(userId: String, tarefaId: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val result = taskRepository.removerUsuarioDaTarefa(userId, tarefaId)
+            onResult(result)
+            if (result) {
+                loadTask(tarefaId)
+                loadTrabalhadoresTarefa(tarefaId)
+                task?.projetoId?.let { projetoId ->
+                    loadMembrosProjeto(projetoId)
+                }
+            }
+        }
+    }
+
+    // Esta função não registra trabalho, apenas atualiza a interface após um registro
+    fun reloadTaskAfterLogWork(
+        tarefaId: String,
+        onComplete: () -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            try {
+                isLoading = true
+                // Apenas recarrega a tarefa para atualizar a UI
+                loadTask(tarefaId)
+                onComplete()
+            } catch (e: Exception) {
+                println("Error reloading task: ${e.message}")
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    // Função para navegar para a tela de observações
+    fun navigateToObservacoes(tarefaId: String) {
+        navigateToObservacoesEvent = tarefaId
+    }
+
+    // Função para limpar o evento de navegação após consumido
+    fun onObservacoesNavigated() {
+        navigateToObservacoesEvent = null
+    }
+
+    // Função para navegar para a tela de trabalhos
+    fun navigateToTrabalhos(tarefaId: String) {
+        navigateToTrabalhosEvent = tarefaId
+    }
+
+    // Função para limpar o evento de navegação de trabalhos após consumido
+    fun onTrabalhosNavigated() {
+        navigateToTrabalhosEvent = null
+    }
+
+    fun deletarTarefa(taskId: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            isLoading = true
+            val sucesso = taskRepository.deletarTarefaPorId(taskId)
+            isLoading = false
+            onResult(sucesso)
+        }
+    }
+
+    fun editarTarefa(
+        tarefaId: String,
+        nome: String,
+        descricao: String,
+        prioridade: String,
+        status: String,
+        dataInicio: String?,
+        dataFim: String?,
+        taxaConclusao: Double,
+        onComplete: (Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            isLoading = true
+            val sucesso = taskRepository.atualizarTarefa(
+                tarefaId = tarefaId,
+                nome = nome,
+                descricao = descricao,
+                prioridade = prioridade,
+                status = status,
+                dataInicio = dataInicio,
+                dataFim = dataFim,
+                taxaConclusao = taxaConclusao
+            )
+
+            if (sucesso) {
+                // Recarregar a tarefa para atualizar a UI
+                loadTask(tarefaId)
+            }
+
+            isLoading = false
+            onComplete(sucesso)
+        }
+    }
+
+    // Methods for task analytics exporter dialog
+    fun showTaskAnalyticsExporterDialog() {
+        showTaskAnalyticsExporterDialog = true
+    }
+
+    fun hideTaskAnalyticsExporterDialog() {
+        showTaskAnalyticsExporterDialog = false
+    }
+
+    fun exportTaskAnalytics(format: TaskExportFormat, context: android.content.Context? = null) {
+        task?.id?.let { taskId ->
+            viewModelScope.launch {
+                try {
+                    // Get the app's external files directory
+                    val externalFilesDir = context?.getExternalFilesDir(null)
+
+                    if (externalFilesDir != null) {
+                        // Create directory for exports
+                        val exportDir = java.io.File(externalFilesDir, "task_analytics")
+                        if (!exportDir.exists()) {
+                            exportDir.mkdirs()
+                        }
+
+                        // Create filename from task name and date
+                        val currentDate = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+                        val taskName = task?.nome?.replace(" ", "_") ?: "task"
+                        val baseFileName = "${taskName}_analytics_$currentDate"
+
+                        val filePath = java.io.File(exportDir, baseFileName).absolutePath
+
+                        // Export the analytics data
+                        val taskAnalyticsExporter = TaskAnalyticsExporter()
+                        taskAnalyticsExporter.exportAnalytics(taskId, filePath, format)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }

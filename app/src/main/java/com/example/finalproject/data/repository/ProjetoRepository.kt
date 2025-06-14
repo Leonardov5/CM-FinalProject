@@ -1,12 +1,12 @@
 package com.example.finalproject.data.repository
 
+import com.example.finalproject.data.model.ProjectAnalytics
 import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.data.model.UserProject
 import com.example.finalproject.data.service.SupabaseProvider
+import com.example.finalproject.data.service.UserService
 import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
-import io.github.jan.supabase.postgrest.rpc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.buildJsonObject
@@ -73,21 +73,48 @@ class ProjetoRepository {
     }
 
     /**
-     * Lista todos os projetos
-     * @return Lista de projetos ou lista vazia em caso de falha
+     * Lista os projetos com base no perfil do usuário atual
+     * @return Lista de projetos: todos os projetos para admin ou apenas os projetos do usuário para não-admin
      */
     suspend fun listarProjetos(): List<Projeto> {
         return try {
             withContext(Dispatchers.IO) {
-                supabase.from(PROJETO_TABLE)
-                    .select(columns = Columns.ALL)
-                    .decodeList<Projeto>()
+                val currentUser = UserService.getCurrentUserData()
+                val isAdmin = currentUser?.admin
+                val userId = currentUser?.id.toString()
+
+                println("DEBUG - ListarProjetos: isAdmin=$isAdmin, userId=$userId")
+
+                if (isAdmin == true) {
+                    // Administradores veem todos os projetos
+                    println("DEBUG - Buscando todos os projetos (admin)")
+                    supabase.from(PROJETO_TABLE)
+                        .select(columns = Columns.ALL)
+                        .decodeList<Projeto>()
+                        .also { println("DEBUG - Projetos encontrados: ${it.size}") }
+                } else {
+                    // Usuários normais veem apenas seus projetos usando JOIN
+                    println("DEBUG - Buscando projetos do usuário com JOIN")
+
+                    // Faz o JOIN entre projeto e utilizador_projeto
+                    supabase.from(PROJETO_TABLE)
+                        .select(columns = Columns.raw("*,utilizador_projeto!inner(utilizador_uuid,ativo)")) {
+                            filter {
+                                eq("utilizador_projeto.utilizador_uuid", userId)
+                                eq("utilizador_projeto.ativo", true)
+                            }
+                        }
+                        .decodeList<Projeto>()
+                        .also { println("DEBUG - Projetos do usuário encontrados: ${it.size}") }
+                }
             }
         } catch (e: Exception) {
+            println("DEBUG - Erro ao listar projetos: ${e.message}")
             e.printStackTrace()
             emptyList()
         }
     }
+
 
     /**
      * Obtém um projeto pelo UUID
@@ -262,6 +289,19 @@ class ProjetoRepository {
         } catch (e: Exception) {
             e.printStackTrace()
             false
+        }
+    }
+    suspend fun getProjectAnalytics(projectId: String): ProjectAnalytics?{
+        return try {
+            withContext(Dispatchers.IO) {
+                supabase.from("vw_project_stats")
+                    .select(columns = Columns.ALL) {
+                        filter { eq("projeto_uuid", projectId.toString()) }
+                    }.decodeSingleOrNull<ProjectAnalytics>()
+            }
+        } catch (e: Exception){
+            e.printStackTrace()
+            null
         }
     }
 }

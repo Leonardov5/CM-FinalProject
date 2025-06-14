@@ -4,13 +4,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import io.github.jan.supabase.gotrue.auth
-import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
 
 /**
  * Serviço para gerenciar uploads de imagens para o Supabase Storage
