@@ -54,6 +54,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Analytics
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -77,6 +81,7 @@ import com.example.finalproject.ui.components.tasks.WorkerTaskDetailDialog
 import com.example.finalproject.ui.viewmodels.tasks.TaskDetailViewModel
 import com.example.finalproject.utils.formatDate
 import com.example.finalproject.utils.updateAppLanguage
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,6 +96,7 @@ fun TaskDetailScreen(
     viewModel: TaskDetailViewModel = viewModel()
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var showLogWorkDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = true) {
@@ -195,6 +201,14 @@ fun TaskDetailScreen(
                                 }
                             )
                         }
+                        ActionButton(
+                            icon = Icons.Outlined.Analytics,
+                            // TODO: Translate hard-coded string "Export Analytics"
+                            label = "Export Analytics",
+                            onClick = {
+                                showFabActions = false
+                                viewModel.showTaskAnalyticsExporterDialog()
+                            })
                     }
                 }
                 FloatingActionButton(
@@ -224,7 +238,8 @@ fun TaskDetailScreen(
                 }
                 viewModel.task == null -> {
                     Text(
-                        text = "Tarefa não encontrada"
+                        // TODO: Translate hard-coded string "Tarefa não encontrada" - should use stringResource
+                        text = stringResource(id = R.string.task_not_found)
                     )
                 }
                 else -> {
@@ -334,6 +349,21 @@ fun TaskDetailScreen(
                             Toast.LENGTH_SHORT
                         ).show()
                     }
+                }
+            }
+        )
+    }
+
+    // Task Analytics Exporter Dialog
+    if (viewModel.showTaskAnalyticsExporterDialog) {
+        com.example.finalproject.ui.components.tasks.TaskAnalyticsExporterDialog(
+            show = true,
+            taskId = taskId,
+            taskName = viewModel.task?.nome,
+            onDismiss = { viewModel.hideTaskAnalyticsExporterDialog() },
+            onExport = { format ->
+                scope.launch {
+                    viewModel.exportTaskAnalytics(format, context)
                 }
             }
         )
