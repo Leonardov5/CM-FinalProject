@@ -1,9 +1,11 @@
 package com.example.finalproject
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,6 +25,7 @@ import com.example.finalproject.ui.theme.FinalProjectTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
 
         lifecycleScope.launch {
@@ -58,13 +61,7 @@ class MainActivity : ComponentActivity() {
 
             FinalProjectTheme(dynamicColor = false) {
                 // Usar o Navigation Component
-                AppNavigation(
-                    startDestination = if (isAuthenticated) {
-                        Screen.TaskManagement.route
-                    } else {
-                        Screen.Login.route
-                    }
-                )
+                AppNavigation()
             }
             scheduleSyncOnNetworkAvailable()
         }

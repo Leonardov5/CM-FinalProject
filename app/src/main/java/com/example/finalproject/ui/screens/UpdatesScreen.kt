@@ -272,7 +272,7 @@ fun UpdateCard(
                             color = if (!notificacao.vista)
                                 MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
                             else
-                                MaterialTheme.colorScheme.surfaceDim,
+                                MaterialTheme.colorScheme.surfaceContainerHighest,
                             shape = RoundedCornerShape(6.dp)
                         )
                         .clickable { onDelete(id) },
@@ -304,7 +304,7 @@ fun UpdateCard(
                         .clip(CircleShape)
                         .background(
                             if (!notificacao.vista) MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
-                            else MaterialTheme.colorScheme.surfaceDim
+                            else MaterialTheme.colorScheme.surfaceContainerHighest
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -312,7 +312,7 @@ fun UpdateCard(
                         imageVector = Icons.Default.Notifications,
                         contentDescription = null,
                         tint = if (!notificacao.vista) MaterialTheme.colorScheme.onSecondary
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -325,8 +325,8 @@ fun UpdateCard(
                     Text(
                         text = title,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = if (!notificacao.vista) MaterialTheme.colorScheme.onTertiaryContainer
+                        fontWeight = FontWeight.Bold,
+                        color = if (!notificacao.vista) MaterialTheme.colorScheme.onSecondaryContainer
                         else MaterialTheme.colorScheme.onSurface
                     )
 
@@ -335,7 +335,7 @@ fun UpdateCard(
                     Text(
                         text = message,
                         fontSize = 14.sp,
-                        color = if (!notificacao.vista) MaterialTheme.colorScheme.onTertiaryContainer
+                        color = if (!notificacao.vista) MaterialTheme.colorScheme.onSecondaryContainer
                         else MaterialTheme.colorScheme.onSurface
                     )
 
@@ -346,7 +346,7 @@ fun UpdateCard(
                             Surface(
                                 shape = RoundedCornerShape(4.dp),
                                 color = if (!notificacao.vista)
-                                    MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f)
+                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
                                 else
                                     MaterialTheme.colorScheme.surfaceContainerHighest
                             ) {
@@ -355,7 +355,7 @@ fun UpdateCard(
                                     fontSize = 13.sp,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                     color = if (!notificacao.vista)
-                                        MaterialTheme.colorScheme.onTertiaryContainer
+                                        MaterialTheme.colorScheme.onSecondary
                                     else
                                         MaterialTheme.colorScheme.onSurface
                                 )

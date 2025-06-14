@@ -11,8 +11,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -22,8 +26,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.data.service.AuthService
 import com.example.finalproject.ui.components.BottomNavigation
+import com.example.finalproject.ui.screens.IntroSlider
 import com.example.finalproject.ui.screens.ProfileScreen
 import com.example.finalproject.ui.screens.UpdatesScreen
 import com.example.finalproject.ui.screens.auth.LoginScreen
@@ -44,6 +50,7 @@ import com.example.finalproject.ui.screens.users.UserManagementScreen
 import com.example.finalproject.ui.viewmodels.users.UserManagementViewModel
 
 sealed class Screen(val route: String) {
+    object IntroSlider : Screen("intro_slider")
     object Login : Screen("login")
     object Register : Screen("register")
     object TaskManagement : Screen("tasks?projetoId={projetoId}") {
@@ -72,14 +79,35 @@ sealed class Screen(val route: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(
-    navController: NavHostController = rememberNavController(),
-    startDestination: String = Screen.Login.route
+    navController: NavHostController = rememberNavController()
 ) {
+    val context = LocalContext.current
+    var isAuthenticated by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    // Check authentication status
+    LaunchedEffect(Unit) {
+        isAuthenticated = AuthService.isAuthenticated()
+        isLoading = false
+    }
+
+    // Determine start destination based on first launch status and authentication
+    val startDestination = when {
+        // If still loading auth status, stay at login screen
+        isLoading -> Screen.Login.route
+        // If it's first launch, show intro slider regardless of auth status
+        PreferencesManager.isFirstLaunch(context) -> Screen.IntroSlider.route
+        // If authenticated, go directly to main screen
+        isAuthenticated -> Screen.TaskManagement.route
+        // Otherwise go to login
+        else -> Screen.Login.route
+    }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
     val showBottomBar = when (currentDestination?.route) {
-        Screen.Login.route, Screen.Register.route, Screen.Profile.route,
+        Screen.IntroSlider.route, Screen.Login.route, Screen.Register.route, Screen.Profile.route,
         Screen.TaskDetail.route, Screen.ProjectDetail.route, Screen.Observacoes.route,
         Screen.Trabalhos.route -> false
         else -> true
@@ -304,6 +332,12 @@ fun AppNavigation(
                     }
                 )
             }
+
+            // Rota para a tela de intro (apenas na primeira execução do app)
+            composable(route = Screen.IntroSlider.route) {
+                IntroSlider(navController = navController)
+            }
         }
     }
+
 }
