@@ -1,6 +1,5 @@
 package com.example.finalproject.ui.screens.projects
 
-import AddMemberDialog
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -68,6 +67,7 @@ import com.example.finalproject.R
 import com.example.finalproject.Screen
 import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.data.model.User
+import com.example.finalproject.ui.components.projects.AddMemberDialog
 import com.example.finalproject.ui.components.projects.AddTaskDialog
 import com.example.finalproject.ui.components.projects.EditProjectDialog
 import com.example.finalproject.ui.components.projects.WorkerDetailDialog

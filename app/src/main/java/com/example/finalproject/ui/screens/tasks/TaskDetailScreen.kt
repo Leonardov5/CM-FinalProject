@@ -325,6 +325,25 @@ private fun TaskContent(
     var selectedWorker by remember { mutableStateOf<User?>(null) }
     var showWorkerDialog by remember { mutableStateOf(false) }
 
+    // Efeito para buscar a data quando um trabalhador for selecionado
+    LaunchedEffect(selectedWorker) {
+        if (selectedWorker != null) {
+            selectedWorker?.id?.let { userId ->
+                if (userId.isNotEmpty()) {
+                    viewModel.fetchWorkerJoinedDate(userId)
+                }
+            }
+        } else {
+            viewModel.updateWorkerJoinDate(null)
+        }
+    }
+
+    // Observar quando a data for carregada para mostrar o diálogo
+    LaunchedEffect(viewModel.workerJoinDate) {
+        if (selectedWorker != null) {
+            showWorkerDialog = true
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -520,7 +539,6 @@ private fun TaskContent(
                                 onClick = {
                                     if (viewModel.isAdmin || viewModel.isManager){
                                         selectedWorker = user
-                                        showWorkerDialog = true
                                     }
                                 }
                             )
@@ -538,7 +556,8 @@ private fun TaskContent(
                 viewModel.removeWorkerFromTask(userId, viewModel.task?.id ?: "") {
                     showWorkerDialog = false
                 }
-            }
+            },
+            viewModel = viewModel
         )
 
         Spacer(modifier = Modifier.height(100.dp))
@@ -620,4 +639,3 @@ private fun ActionButton(
         }
     }
 }
-

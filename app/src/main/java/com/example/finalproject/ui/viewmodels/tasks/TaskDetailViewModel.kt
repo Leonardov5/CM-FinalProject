@@ -60,9 +60,32 @@ class TaskDetailViewModel(
         showDeleteTaskDialog = !showDeleteTaskDialog
     }
 
-    // Evento de navegação para tela de trabalhos
     var navigateToTrabalhosEvent by mutableStateOf<String?>(null)
         private set
+
+    var workerJoinDate by mutableStateOf<String?>(null)
+        private set
+
+    fun fetchWorkerJoinedDate(userId: String) {
+        workerJoinDate = null
+        viewModelScope.launch {
+            try {
+                task?.id?.let { tarefaId ->
+
+                    val date = taskRepository.getUsuarioJoinDate(userId, tarefaId)
+
+                    workerJoinDate = date
+                }
+            } catch (e: Exception) {
+                println("Erro ao buscar data de entrada do usuário: ${e.message}")
+            }
+        }
+    }
+
+    // Método público para modificar workerJoinDate
+    fun updateWorkerJoinDate(date: String?) {
+        workerJoinDate = date
+    }
 
     fun checkUser(currentUser: User? = null) {
         viewModelScope.launch {
@@ -77,15 +100,17 @@ class TaskDetailViewModel(
         }
     }
 
+    // Modificar o método loadTrabalhadoresTarefa para também buscar as datas de entrada
     fun loadTrabalhadoresTarefa(tarefaId: String) {
+        isLoading = true
         viewModelScope.launch {
-            isLoading = true
             try {
+                // Carregar a lista de IDs dos trabalhadores da tarefa
                 trabalhadoresTarefa = taskRepository.getTrabalhadoresDaTarefa(tarefaId)
-                println("Debug - foram carregados ${trabalhadoresTarefa.size} trabalhadores para a tarefa $tarefaId")
+
+                isLoading = false
             } catch (e: Exception) {
-                println("Error fetching task workers: ${e.message}")
-            } finally {
+                println("Erro ao carregar trabalhadores da tarefa: ${e.message}")
                 isLoading = false
             }
         }
@@ -134,10 +159,15 @@ class TaskDetailViewModel(
     fun addWorkerToTask(userId: String, tarefaId: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             val result = taskRepository.adicionarUsuarioATarefa(userId, tarefaId)
+            println("Debug - Adding worker to task: $userId to $tarefaId, result: $result")
             onResult(result)
             if (result) {
+                println("Debug - Worker added successfully")
                 loadTask(tarefaId)
                 loadTrabalhadoresTarefa(tarefaId)
+                task?.projetoId?.let { projetoId ->
+                    loadMembrosProjeto(projetoId)
+                }
             }
         }
     }
@@ -149,6 +179,9 @@ class TaskDetailViewModel(
             if (result) {
                 loadTask(tarefaId)
                 loadTrabalhadoresTarefa(tarefaId)
+                task?.projetoId?.let { projetoId ->
+                    loadMembrosProjeto(projetoId)
+                }
             }
         }
     }

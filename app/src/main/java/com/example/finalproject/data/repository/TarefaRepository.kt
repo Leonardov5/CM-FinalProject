@@ -88,13 +88,12 @@ class TarefaRepository {
 
     suspend fun adicionarUsuarioATarefa(userId: String, tarefaId: String): Boolean {
         return try {
-            println("DEBUG - Adicionando usuário $userId à tarefa $tarefaId")
             val result = supabase.from("utilizador_tarefa")
                 .insert(mapOf("utilizador_uuid" to userId, "tarefa_uuid" to tarefaId)) {
                     select()
                 }
-                .decodeSingleOrNull<Map<String, Any>>()
-            result != null
+                .decodeSingleOrNull<Map<String, String>>()
+            true
         } catch (e: Exception) {
             false
         }
@@ -109,7 +108,6 @@ class TarefaRepository {
                         eq("tarefa_uuid", tarefaId)
                     }
                 }
-            // Se não lançar exceção, considera sucesso
             true
         } catch (e: Exception) {
             false
@@ -127,6 +125,32 @@ class TarefaRepository {
             result.mapNotNull { it["utilizador_uuid"] }
         } catch (e: Exception) {
             emptyList()
+        }
+    }
+
+    suspend fun getUsuarioJoinDate(userId: String, tarefaId: String): String? {
+        // Verificar se os IDs não estão vazios
+        if (userId.isBlank() || tarefaId.isBlank()) {
+            println("DEBUG - ID de usuário ou tarefa vazios. userId: '$userId', tarefaId: '$tarefaId'")
+            return null
+        }
+
+        return try {
+            val result = supabase.from("utilizador_tarefa")
+                .select {
+                    filter {
+                        eq("utilizador_uuid", userId)
+                        eq("tarefa_uuid", tarefaId)
+                    }
+                    limit(1)
+                }
+                .decodeList<Map<String, String>>()
+                .firstOrNull()
+
+            result?.get("created_at")
+        } catch (e: Exception) {
+            println("DEBUG - Erro ao buscar data de entrada do usuário $userId: ${e.message}")
+            null
         }
     }
 
