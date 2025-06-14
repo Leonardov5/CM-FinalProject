@@ -102,7 +102,7 @@ fun ObservacoesScreen(
                     IconButton(onClick = onBackPressed) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Voltar"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 },
@@ -115,7 +115,7 @@ fun ObservacoesScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add Observation",
+                    contentDescription = stringResource(id = R.string.add_observation),
                 )
             }
         },
@@ -712,12 +712,11 @@ fun EditObservacaoDialog(
                                         .data(viewModel.imagensTemporarias[index])
                                         .crossfade(true)
                                         .build(),
-                                    contentDescription = "Imagem selecionada",
+                                    contentDescription = stringResource(id = R.string.selected_image),
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Crop
                                 )
 
-                                // Botão para remover nova imagem
                                 IconButton(
                                     onClick = { viewModel.removerImagem(index) },
                                     modifier = Modifier

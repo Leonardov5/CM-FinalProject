@@ -169,6 +169,7 @@
     <string name="delete_user_dialog_text">Tem certeza que deseja apagar o utilizador &quot;%1$s&quot;?</string>
     <string name="create_user_title">Criar novo utilizador</string>
     <string name="LogWork">Registar Trabalho</string>
+    <string name="add_work">Add Work</string>
     <string name="date">Data</string>
     <string name="hour">Hora</string>
     <string name="date_mandatory">Data é obrigatória</string>
@@ -243,4 +244,19 @@
     <string name="notification_task_status_completed_message">Uma tarefa foi concluída</string>
     <string name="notification_task_status_canceled_message">Uma tarefa foi cancelada</string>
     <string name="updates_title">Notificações</string>
+    <string name="export_project_analytics">Exportar Análises do Projeto</string>
+    <string name="select_format">Selecionar Formato:</string>
+    <string name="file_will_be_saved_as">O ficheiro será guardado como:</string>
+    <string name="file_saved_successfully">✓ Ficheiro Guardado com Sucesso!</string>
+    <string name="file_saved_to">Ficheiro guardado em:</string>
+    <string name="access_file_through_manager">Pode acedê-lo através do gestor de ficheiros do seu dispositivo</string>
+    <string name="file_exported">Ficheiro Exportado…</string>
+    <string name="export">Exportar</string>
+    <string name="file_saved_success_toast">Ficheiro guardado com sucesso!</string>
+    <string name="export_task_analytics">Exportar Análises da Tarefa</string>
+    <string name="starting_export">A iniciar exportação…</string>
+    <string name="worker_data_updated_success">Dados do membro atualizados com sucesso</string>
+    <string name="selected_image">Imagem Selecionada</string>
+    <string name="unknown_user">Utilizador Deconhecido</string>
+    <string name="delete_work">Apagar Trabalho</string>
 </resources>

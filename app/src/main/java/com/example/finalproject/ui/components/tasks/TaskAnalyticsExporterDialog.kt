@@ -18,7 +18,8 @@ import com.example.finalproject.ui.viewmodels.tasks.TaskExportFormat
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-
+import androidx.compose.ui.res.stringResource
+import com.example.finalproject.R
 @Composable
 fun TaskAnalyticsExporterDialog(
     show: Boolean,
@@ -31,6 +32,19 @@ fun TaskAnalyticsExporterDialog(
 
     val context = LocalContext.current
     val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+
+    // Pré-carregar todas as strings traduzidas
+    val exportTaskAnalyticsText = stringResource(R.string.export_task_analytics)
+    val selectFormatText = stringResource(R.string.select_format)
+    val fileWillBeSavedAsText = stringResource(R.string.file_will_be_saved_as)
+    val fileSavedSuccessfullyText = stringResource(R.string.file_saved_successfully)
+    val fileSavedToText = stringResource(R.string.file_saved_to)
+    val accessFileManagerText = stringResource(R.string.access_file_through_manager)
+    val startingExportText = stringResource(R.string.starting_export)
+    val fileSavedSuccessToastText = stringResource(R.string.file_saved_success_toast)
+    val exportText = stringResource(R.string.export)
+    val closeText = stringResource(R.string.close)
+    val cancelText = stringResource(R.string.cancel)
 
     // Get the analytics exporter to monitor state
     val analyticsExporter = remember { TaskAnalyticsExporter() }
@@ -70,12 +84,12 @@ fun TaskAnalyticsExporterDialog(
                     "App Files/task_analytics"
                 }
 
-                fileSaved = "File saved to:\n$appStoragePath/${fileName}"
+                fileSaved = "$fileSavedToText\n$appStoragePath/${fileName}"
 
                 // Show a toast message that the file was saved successfully
                 Toast.makeText(
                     context,
-                    "File saved successfully!",
+                    fileSavedSuccessToastText,
                     Toast.LENGTH_SHORT
                 ).show()
 
@@ -100,7 +114,7 @@ fun TaskAnalyticsExporterDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Export Task Analytics",
+                    text = exportTaskAnalyticsText,
                     style = MaterialTheme.typography.headlineSmall,
                     textAlign = TextAlign.Center
                 )
@@ -109,7 +123,7 @@ fun TaskAnalyticsExporterDialog(
 
                 // Format selection
                 Text(
-                    text = "Select Format:",
+                    text = selectFormatText,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.align(Alignment.Start)
                 )
@@ -131,7 +145,7 @@ fun TaskAnalyticsExporterDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "File will be saved as:",
+                    text = fileWillBeSavedAsText,
                     style = MaterialTheme.typography.bodyMedium
                 )
 
@@ -160,7 +174,7 @@ fun TaskAnalyticsExporterDialog(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "✓ File Saved Successfully!",
+                                text = fileSavedSuccessfullyText,
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                             )
@@ -174,7 +188,7 @@ fun TaskAnalyticsExporterDialog(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
-                                text = "You can access it through your device's file manager",
+                                text = accessFileManagerText,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                                 textAlign = TextAlign.Center
@@ -205,7 +219,7 @@ fun TaskAnalyticsExporterDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text(if (exportSuccess) "Close" else "Cancel")
+                        Text(if (exportSuccess) closeText else cancelText)
                     }
 
                     if (!exportSuccess) {
@@ -216,13 +230,13 @@ fun TaskAnalyticsExporterDialog(
                                 // Show a toast when starting the export
                                 Toast.makeText(
                                     context,
-                                    "Starting export...",
+                                    startingExportText,
                                     Toast.LENGTH_SHORT
                                 ).show()
                             },
                             enabled = !analyticsExporter.isLoading
                         ) {
-                            Text("Export")
+                            Text(exportText)
                         }
                     }
                 }

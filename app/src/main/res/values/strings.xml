@@ -178,6 +178,7 @@
     <string name="time_spent">Time Spent (minutes)</string>
     <string name="time_spent_error">The time must be greater than 0</string>
     <string name="resgiter_work">Log</string>
+    <string name="add_work">Add Work</string>
     <string name="observations">Observations</string>
     <string name="see_observations">See observations</string>
     <string name="no_observations">No observations found</string>
@@ -243,4 +244,19 @@
     <string name="notification_task_status_completed_message">A task has been completed</string>
     <string name="notification_task_status_canceled_message">A task has been canceled</string>
     <string name="updates_title">Updates</string>
-</resources>
+    <string name="export_project_analytics">Export Project Analytics</string>
+    <string name="select_format">Select Format:</string>
+    <string name="file_will_be_saved_as">File will be saved as:</string>
+    <string name="file_saved_successfully">✓ File Saved Successfully!</string>
+    <string name="file_saved_to">File saved to:</string>
+    <string name="access_file_through_manager">You can access it through your device\'s file manager</string>
+    <string name="file_exported">File Exported…</string>
+    <string name="export">Export</string>
+    <string name="file_saved_success_toast">File saved successfully!</string>
+    <string name="export_task_analytics">Export Task Analytics</string>
+    <string name="starting_export">Starting export…</string>
+    <string name="worker_data_updated_success">Member data updated successfully</string>
+    <string name="selected_image">Selected Image</string>
+    <string name="unknown_user">Unknown User</string>
+    <string name="delete_work">Delete Work</string>
+    </resources>

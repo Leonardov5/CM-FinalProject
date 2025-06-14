@@ -1,4 +1,4 @@
-package com.example.finalproject.ui.components
+package com.example.finalproject.ui.components.tasks
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -30,7 +29,6 @@ import com.example.finalproject.ui.components.datetime.DateTimePickerViewModel
 import com.example.finalproject.ui.components.dropdown.DropdownMenuBox
 import com.example.finalproject.ui.viewmodels.tasks.EditTaskViewModel
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun prioridadeDisplay(prioridade: String): String = when (prioridade) {

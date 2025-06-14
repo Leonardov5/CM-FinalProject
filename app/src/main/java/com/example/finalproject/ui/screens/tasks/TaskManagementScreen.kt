@@ -39,8 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject.R
 import com.example.finalproject.data.model.Tarefa
-import com.example.finalproject.ui.components.TabRow
-import com.example.finalproject.ui.components.TaskCard
+import com.example.finalproject.ui.components.tasks.TabRow
+import com.example.finalproject.ui.components.tasks.TaskCard
 import com.example.finalproject.ui.theme.primaryLight
 import com.example.finalproject.ui.viewmodels.tasks.TaskManagementViewModel
 

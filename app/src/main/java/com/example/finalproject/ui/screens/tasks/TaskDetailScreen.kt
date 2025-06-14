@@ -31,9 +31,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -54,9 +52,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Analytics
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,7 +69,7 @@ import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.model.TarefaStatus
 import com.example.finalproject.data.model.User
-import com.example.finalproject.ui.components.EditTaskDialog
+import com.example.finalproject.ui.components.tasks.EditTaskDialog
 import com.example.finalproject.ui.components.tasks.AddWorkerDialog
 import com.example.finalproject.ui.components.tasks.LogWorkDialog
 import com.example.finalproject.ui.components.tasks.WorkerCardTask

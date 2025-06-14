@@ -91,7 +91,6 @@ fun ProjectsScreen(
     }
 
     if(isLanguageLoaded){
-        // Sempre que a tela for recomposicionada, recarrega os projetos
         LaunchedEffect(Unit) {
             viewModel.loadProjects()
         }
@@ -148,11 +147,8 @@ fun ProjectsScreen(
                     FloatingActionButton(
                         onClick = {
                             if (viewModel.projects.isNotEmpty()) {
-                                // Se tiver projetos, mostra o diálogo para escolher
-                                // entre adicionar projeto ou tarefa
                                 viewModel.showAddProjectDialog()
                             } else {
-                                // Se não tiver projetos, só pode adicionar projetos
                                 viewModel.showAddProjectDialog()
                             }
                         }
@@ -192,7 +188,6 @@ fun ProjectsScreen(
                                 createdAt = projeto.createdAt.toString(),
                                 projeto = projeto,
                                 onClick = { selectedProjeto ->
-                                    // Navegar para a tela de detalhes do projeto
                                     selectedProjeto.id?.let { projetoId ->
                                         onProjectClick(projetoId)
                                     }
@@ -200,7 +195,6 @@ fun ProjectsScreen(
                             )
                         }
                     } else {
-                        // Exibir mensagem quando não houver projetos
                         item {
                             Box(
                                 modifier = Modifier
