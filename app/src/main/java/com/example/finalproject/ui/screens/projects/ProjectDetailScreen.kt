@@ -486,7 +486,10 @@ fun ProjectDetailScreen(
             onAdd = { userId, isManager ->
                 scope.launch {
                     viewModel.addMemberToProject(userId, isManager)
-                    Toast.makeText(context, "Membro adicionado com sucesso", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context,
+                        // TODO: Translate hard-coded string "Membro adicionado com sucesso"
+                        "Membro adicionado com sucesso",
+                        Toast.LENGTH_SHORT).show()
                 }
             }
         )

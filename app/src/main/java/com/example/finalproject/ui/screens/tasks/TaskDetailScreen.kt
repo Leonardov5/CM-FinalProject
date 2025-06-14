@@ -208,7 +208,7 @@ fun TaskDetailScreen(
                             onClick = {
                                 showFabActions = false
                                 viewModel.showTaskAnalyticsExporterDialog()
-                            }
+                            })
                     }
                 }
                 FloatingActionButton(
@@ -238,8 +238,8 @@ fun TaskDetailScreen(
                 }
                 viewModel.task == null -> {
                     Text(
-                        // TODO: Translate hard-coded string "Tarefa não encontrada"
-                        text = "Tarefa não encontrada"
+                        // TODO: Translate hard-coded string "Tarefa não encontrada" - should use stringResource
+                        text = stringResource(id = R.string.task_not_found)
                     )
                 }
                 else -> {
