@@ -102,6 +102,73 @@ class UpdatesViewModel : ViewModel() {
         }
     }
 
+    // Lista original de notificações (para restaurar após filtro)
+    private var notificacoesOriginais = emptyList<Notificacao>()
+
+    // Filtrar notificações com base na consulta de pesquisa
+    fun filterNotificacoes(query: String) {
+        if (notificacoesOriginais.isEmpty()) {
+            notificacoesOriginais = notificacoes
+        }
+
+        if (query.isBlank()) {
+            resetFilter()
+            return
+        }
+
+        val queryLowerCase = query.lowercase(Locale.getDefault())
+        notificacoes = notificacoesOriginais.filter { notificacao ->
+            // Pesquisa no título e mensagem
+            val title = getTitleFromNotificacao(notificacao)
+            val message = getMessageFromNotificacao(notificacao)
+            val objeto = notificacao.objeto ?: ""
+
+            title.lowercase(Locale.getDefault()).contains(queryLowerCase) ||
+            message.lowercase(Locale.getDefault()).contains(queryLowerCase) ||
+            objeto.lowercase(Locale.getDefault()).contains(queryLowerCase)
+        }
+    }
+
+    // Resetar filtro e mostrar todas as notificações originais
+    fun resetFilter() {
+        if (notificacoesOriginais.isNotEmpty()) {
+            notificacoes = notificacoesOriginais
+        }
+    }
+
+    // Funções auxiliares para obter título e mensagem a partir de códigos de notificação
+    private fun getTitleFromNotificacao(notificacao: Notificacao): String {
+        return when (notificacao.mensagem) {
+            "USER_ADDED_TO_TASK" -> "Adicionado a uma tarefa"
+            "USER_ADDED_TO_PROJECT" -> "Adicionado a um projeto"
+            "PROJECT_STATUS_CHANGED_TO_ACTIVE" -> "Projeto ativado"
+            "PROJECT_STATUS_CHANGED_TO_INACTIVE" -> "Projeto desativado"
+            "PROJECT_STATUS_CHANGED_TO_COMPLETED" -> "Projeto concluído"
+            "PROJECT_STATUS_CHANGED_TO_CANCELED" -> "Projeto cancelado"
+            "TASK_STATUS_CHANGED_TO_PENDING" -> "Tarefa pendente"
+            "TASK_STATUS_CHANGED_TO_IN_PROGRESS" -> "Tarefa em andamento"
+            "TASK_STATUS_CHANGED_TO_COMPLETED" -> "Tarefa concluída"
+            "TASK_STATUS_CHANGED_TO_CANCELED" -> "Tarefa cancelada"
+            else -> "Notificação"
+        }
+    }
+
+    private fun getMessageFromNotificacao(notificacao: Notificacao): String {
+        return when (notificacao.mensagem) {
+            "USER_ADDED_TO_TASK" -> "Você foi adicionado a uma nova tarefa"
+            "USER_ADDED_TO_PROJECT" -> "Você foi adicionado a um novo projeto"
+            "PROJECT_STATUS_CHANGED_TO_ACTIVE" -> "Um projeto mudou para status ativo"
+            "PROJECT_STATUS_CHANGED_TO_INACTIVE" -> "Um projeto mudou para status inativo"
+            "PROJECT_STATUS_CHANGED_TO_COMPLETED" -> "Um projeto foi concluído"
+            "PROJECT_STATUS_CHANGED_TO_CANCELED" -> "Um projeto foi cancelado"
+            "TASK_STATUS_CHANGED_TO_PENDING" -> "Uma tarefa mudou para status pendente"
+            "TASK_STATUS_CHANGED_TO_IN_PROGRESS" -> "Uma tarefa mudou para em andamento"
+            "TASK_STATUS_CHANGED_TO_COMPLETED" -> "Uma tarefa foi concluída"
+            "TASK_STATUS_CHANGED_TO_CANCELED" -> "Uma tarefa foi cancelada"
+            else -> notificacao.mensagem
+        }
+    }
+
     init {
         loadUpdates()
     }

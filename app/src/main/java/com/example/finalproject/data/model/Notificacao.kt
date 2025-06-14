@@ -14,6 +14,9 @@ data class Notificacao(
     @SerialName("mensagem")
     val mensagem: String,
 
+    @SerialName("objeto")
+    val objeto: String? = null,
+
     @SerialName("data")
     val data: String? = null,
 

@@ -23,11 +23,14 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -35,9 +38,14 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +64,7 @@ import kotlin.math.round
 private fun getTitleFromNotificacao(notificacao: Notificacao): String {
     return when (notificacao.mensagem) {
         "USER_ADDED_TO_TASK" -> stringResource(R.string.notification_user_added_to_task_title)
+        "USER_ADDED_TO_PROJECT" -> stringResource(R.string.notification_user_added_to_project_title)
         "PROJECT_STATUS_CHANGED_TO_ACTIVE" -> stringResource(R.string.notification_project_status_active_title)
         "PROJECT_STATUS_CHANGED_TO_INACTIVE" -> stringResource(R.string.notification_project_status_inactive_title)
         "PROJECT_STATUS_CHANGED_TO_COMPLETED" -> stringResource(R.string.notification_project_status_completed_title)
@@ -72,6 +81,7 @@ private fun getTitleFromNotificacao(notificacao: Notificacao): String {
 private fun getMessageFromNotificacao(notificacao: Notificacao): String {
     return when (notificacao.mensagem) {
         "USER_ADDED_TO_TASK" -> stringResource(R.string.notification_user_added_to_task_message)
+        "USER_ADDED_TO_PROJECT" -> stringResource(R.string.notification_user_added_to_project_message)
         "PROJECT_STATUS_CHANGED_TO_ACTIVE" -> stringResource(R.string.notification_project_status_active_message)
         "PROJECT_STATUS_CHANGED_TO_INACTIVE" -> stringResource(R.string.notification_project_status_inactive_message)
         "PROJECT_STATUS_CHANGED_TO_COMPLETED" -> stringResource(R.string.notification_project_status_completed_message)
@@ -93,6 +103,8 @@ fun UpdatesScreen(
     viewModel: UpdatesViewModel = viewModel()
 ) {
     val context = LocalContext.current
+    var searchQuery by remember { mutableStateOf("") }
+
     LaunchedEffect(Unit) {
         val savedLanguage = PreferencesManager.getLanguage(context)
         updateAppLanguage(context, savedLanguage)
@@ -107,20 +119,56 @@ fun UpdatesScreen(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(0.7f),
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = {
+                                searchQuery = it
+                                viewModel.filterNotificacoes(it)
+                            },
+                            placeholder = {
+                                Text(
+                                    text = stringResource(R.string.search),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            },
+                            singleLine = true,
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = null
+                                )
+                            },
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(
+                                        onClick = {
+                                            searchQuery = ""
+                                            viewModel.resetFilter()
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = null
+                                        )
+                                    }
+                                }
+                            },
                             shape = RoundedCornerShape(25.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant
-                        ) {
-                            Text(
-                                text = stringResource(R.string.updates_title),
-                                modifier = Modifier.padding(vertical = 12.dp),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                focusedBorderColor = Color.Transparent,
+                                unfocusedBorderColor = Color.Transparent
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth(0.7f)
+                                .padding(0.dp),
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                textAlign = TextAlign.Center
                             )
-                        }
+                        )
                     }
                 },
                 navigationIcon = {
@@ -291,6 +339,30 @@ fun UpdateCard(
                         else MaterialTheme.colorScheme.onSurface
                     )
 
+                    notificacao.objeto?.let { objeto ->
+                        if (objeto.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = if (!notificacao.vista)
+                                    MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f)
+                                else
+                                    MaterialTheme.colorScheme.surfaceContainerHighest
+                            ) {
+                                Text(
+                                    text = objeto,
+                                    fontSize = 13.sp,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    color = if (!notificacao.vista)
+                                        MaterialTheme.colorScheme.onTertiaryContainer
+                                    else
+                                        MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
@@ -300,6 +372,7 @@ fun UpdateCard(
                         else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                 }
+
             }
         }
     }

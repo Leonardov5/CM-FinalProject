@@ -181,19 +181,21 @@ fun WorkerTaskDetailDialog(
                         Spacer(modifier = Modifier.height(32.dp))
 
                         // Botão para remover da tarefa
-                        Button(
-                            onClick = { showRemoveConfirmation = true },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.onErrorContainer
-                            ),
-                            modifier = Modifier.fillMaxWidth(0.8f)
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.remove),
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
+                        if (viewModel.isAdmin || viewModel.isManager){
+                            Button(
+                                onClick = { showRemoveConfirmation = true },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                                ),
+                                modifier = Modifier.fillMaxWidth(0.8f)
+                            ) {
+                                Text(
+                                    text = stringResource(id = R.string.remove),
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
+                            }
                         }
                     }
                 }

@@ -600,9 +600,7 @@ private fun TaskContent(
                             WorkerCardTask(
                                 worker = user,
                                 onClick = {
-                                    if (viewModel.isAdmin || viewModel.isManager){
-                                        selectedWorker = user
-                                    }
+                                    selectedWorker = user
                                 }
                             )
                         }
