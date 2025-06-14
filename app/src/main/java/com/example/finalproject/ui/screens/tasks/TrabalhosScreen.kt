@@ -99,7 +99,7 @@ fun TrabalhosScreen(
                     IconButton(onClick = onBackPressed) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Voltar"
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 },
@@ -107,13 +107,12 @@ fun TrabalhosScreen(
             )
         },
         floatingActionButton = {
-            // Só exibe o botão de adicionar trabalho se o usuário for admin, gerente ou trabalhador da tarefa
             FloatingActionButton(
                 onClick = { showLogWorkDialog = true }
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Adicionar Trabalho",
+                    contentDescription = stringResource(R.string.add_work),
                 )
             }
         },
@@ -132,7 +131,7 @@ fun TrabalhosScreen(
                 }
                 viewModel.error != null -> {
                     Text(
-                        text = viewModel.error ?: "Erro desconhecido",
+                        text = viewModel.error ?: stringResource(id = R.string.unknown_error),
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier
                             .align(Alignment.Center)
@@ -288,7 +287,7 @@ fun TrabalhoItem(
                                 )
                             } else {
                                 Text(
-                                    text = usuario?.nome ?: "Usuário desconhecido",
+                                    text = usuario?.nome ?: stringResource(id = R.string.unknown_user),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -299,7 +298,7 @@ fun TrabalhoItem(
                     // Nome do usuário e data
                     Column {
                         Text(
-                            text = usuario?.nome ?: "Usuário desconhecido",
+                            text = usuario?.nome ?: stringResource(id = R.string.unknown_user),
                             fontWeight = FontWeight.Medium,
                             fontSize = 16.sp
                         )
@@ -318,7 +317,7 @@ fun TrabalhoItem(
                     IconButton(onClick = { showDeleteConfirmation = true }) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Excluir trabalho",
+                            contentDescription = stringResource(id = R.string.delete_work),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }

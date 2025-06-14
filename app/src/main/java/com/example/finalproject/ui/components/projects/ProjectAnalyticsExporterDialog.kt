@@ -9,10 +9,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
+import com.example.finalproject.R
 import com.example.finalproject.ui.viewmodels.projects.ExportFormat
 import com.example.finalproject.ui.viewmodels.projects.ProjectAnalyticsExporter
 import com.example.finalproject.ui.viewmodels.projects.ProjectDetailViewModel
@@ -32,8 +34,17 @@ fun ProjectAnalyticsExporterDialog(
     val context = LocalContext.current
     val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
+    // Obter strings traduzidas no contexto composable
+    val fileSavedToText = stringResource(R.string.file_saved_to)
+    val fileSavedSuccessToastText = stringResource(R.string.file_saved_success_toast)
+    val fileExportedText = stringResource(R.string.file_exported)
+    val closeText = stringResource(R.string.close)
+    val cancelText = stringResource(R.string.cancel)
+    val exportText = stringResource(R.string.export)
+
     // Get the project name from the viewModel
     val viewModel = remember { ProjectDetailViewModel() }
+
 
     // Load project data if not already loaded
     LaunchedEffect(projetoId) {
@@ -80,12 +91,12 @@ fun ProjectAnalyticsExporterDialog(
                     "App Files/project_analytics"
                 }
 
-                fileSaved = "File saved to:\n$appStoragePath/${fileName}"
+                fileSaved = "$fileSavedToText\n$appStoragePath/${fileName}"
 
                 // Show a toast message that the file was saved successfully
                 Toast.makeText(
                     context,
-                    "File saved successfully!",
+                    fileSavedSuccessToastText,
                     Toast.LENGTH_SHORT
                 ).show()
 
@@ -110,7 +121,7 @@ fun ProjectAnalyticsExporterDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Export Project Analytics",
+                    text = stringResource(R.string.export_project_analytics),
                     style = MaterialTheme.typography.headlineSmall,
                     textAlign = TextAlign.Center
                 )
@@ -119,7 +130,7 @@ fun ProjectAnalyticsExporterDialog(
 
                 // Format selection
                 Text(
-                    text = "Select Format:",
+                    text = stringResource(R.string.select_format),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.align(Alignment.Start)
                 )
@@ -141,7 +152,7 @@ fun ProjectAnalyticsExporterDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "File will be saved as:",
+                    text = stringResource(R.string.file_will_be_saved_as),
                     style = MaterialTheme.typography.bodyMedium
                 )
 
@@ -170,7 +181,7 @@ fun ProjectAnalyticsExporterDialog(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "✓ File Saved Successfully!",
+                                text = stringResource(R.string.file_saved_successfully),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                             )
@@ -184,7 +195,7 @@ fun ProjectAnalyticsExporterDialog(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
-                                text = "You can access it through your device's file manager",
+                                text = stringResource(R.string.access_file_through_manager),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                                 textAlign = TextAlign.Center
@@ -215,7 +226,7 @@ fun ProjectAnalyticsExporterDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text(if (exportSuccess) "Close" else "Cancel")
+                        Text(if (exportSuccess) stringResource(R.string.close) else stringResource(R.string.cancel))
                     }
 
                     if (!exportSuccess) {
@@ -225,13 +236,13 @@ fun ProjectAnalyticsExporterDialog(
 
                                 Toast.makeText(
                                     context,
-                                    "File Exported...",
+                                    fileExportedText,
                                     Toast.LENGTH_SHORT
                                 ).show()
                             },
                             enabled = !analyticsExporter.isLoading && !viewModel.isLoading
                         ) {
-                            Text("Export")
+                            Text(stringResource(R.string.export))
                         }
                     }
                 }

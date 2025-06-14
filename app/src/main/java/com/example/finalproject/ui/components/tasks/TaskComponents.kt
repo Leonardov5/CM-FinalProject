@@ -1,4 +1,4 @@
-package com.example.finalproject.ui.components
+package com.example.finalproject.ui.components.tasks
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column

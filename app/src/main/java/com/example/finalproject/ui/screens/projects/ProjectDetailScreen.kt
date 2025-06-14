@@ -114,7 +114,7 @@ fun ProjectDetailScreen(
         viewModel.loadUser(currentUser)
         viewModel.loadProject(projetoId)
         viewModel.checkIfManager(projetoId)
-        viewModel.loadMembrosProjetoCompleto(projetoId) // Usando o novo método
+        viewModel.loadMembrosProjetoCompleto(projetoId)
 
         val savedLanguage = PreferencesManager.getLanguage(context)
         print("Saved language: $savedLanguage")
@@ -133,20 +133,16 @@ fun ProjectDetailScreen(
     val addTask = stringResource(id = R.string.add_task)
     val editProject = stringResource(id = R.string.edit_project)
     val deleteProject = stringResource(id = R.string.delete_project)
-    val markAsCompleted = stringResource(id = R.string.mark_as_completed)
-    val markAsActive = stringResource(id = R.string.mark_as_active)
-    val statusUpdatedSuccess = stringResource(id = R.string.status_updated_success)
-    val statusUpdateFailed = stringResource(id = R.string.status_update_failed)
-    val statusUpdateError = stringResource(id = R.string.status_update_error)
     val closeMenu = stringResource(id = R.string.close_menu)
     val openMenu = stringResource(id = R.string.open_menu)
     val confirmDeleteTitle = stringResource(id = R.string.confirm_delete_title)
     val deleteSuccess = stringResource(id = R.string.delete_success)
-    val deleteFailed = stringResource(id = R.string.delete_failed)
     val back = stringResource(id = R.string.back)
     val notFound = stringResource(id = R.string.not_found)
     val projectUpdatedSuccess = stringResource(id = R.string.project_updated_success)
     val projectUpdateError = stringResource(id = R.string.project_update_error)
+    val memberSuccess = stringResource(id = R.string.member_added_success)
+    val workerDataUpdatedSuccess = stringResource(id = R.string.worker_data_updated_success)
 
     Scaffold(
         topBar = {
@@ -238,8 +234,7 @@ fun ProjectDetailScreen(
                         if(viewModel.isAdmin){
                             ActionButton(
                                 icon = Icons.Outlined.Analytics,
-                                // TODO: change this so it uses translation files
-                                label = "Export Analytics",
+                                label = stringResource(id = R.string.export_project_analytics),
                                 onClick = {
                                     viewModel.toggleFabActions()
                                     viewModel.showAnalyticsExporterDialog()
@@ -486,10 +481,7 @@ fun ProjectDetailScreen(
             onAdd = { userId, isManager ->
                 scope.launch {
                     viewModel.addMemberToProject(userId, isManager)
-                    Toast.makeText(context,
-                        // TODO: Translate hard-coded string "Membro adicionado com sucesso"
-                        "Membro adicionado com sucesso",
-                        Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, memberSuccess, Toast.LENGTH_SHORT).show()
                 }
             }
         )
@@ -531,11 +523,7 @@ fun ProjectDetailScreen(
             onEdit = { userId, isManager, isActive ->
                 scope.launch {
                     viewModel.updateWorkerRole(userId, isManager, isActive)
-                    Toast.makeText(context,
-                        // TODO: Translate hard-coded string "Dados do membro atualizados com sucesso"
-                        "Dados do membro atualizados com sucesso",
-                        Toast.LENGTH_SHORT).show()
-                }
+                    Toast.makeText(context, workerDataUpdatedSuccess, Toast.LENGTH_SHORT).show()                }
             },
             isAdmin = viewModel.isAdmin || viewModel.isManager
         )
