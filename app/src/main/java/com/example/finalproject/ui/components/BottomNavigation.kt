@@ -17,9 +17,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject.R
 import com.example.finalproject.Screen
 import com.example.finalproject.data.PreferencesManager
+import com.example.finalproject.ui.viewmodels.ProfileViewModel
 import com.example.finalproject.utils.updateAppLanguage
 
 @Composable
