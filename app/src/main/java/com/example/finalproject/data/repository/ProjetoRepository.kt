@@ -1,5 +1,6 @@
 package com.example.finalproject.data.repository
 
+import com.example.finalproject.data.model.ProjectAnalytics
 import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.data.model.UserProject
 import com.example.finalproject.data.service.SupabaseProvider
@@ -262,6 +263,19 @@ class ProjetoRepository {
         } catch (e: Exception) {
             e.printStackTrace()
             false
+        }
+    }
+    suspend fun getProjectAnalytics(projectId: String): ProjectAnalytics?{
+        return try {
+            withContext(Dispatchers.IO) {
+                supabase.from("vw_project_stats")
+                    .select(columns = Columns.ALL) {
+                        filter { eq("projeto_uuid", projectId.toString()) }
+                    }.decodeSingleOrNull<ProjectAnalytics>()
+            }
+        } catch (e: Exception){
+            e.printStackTrace()
+            null
         }
     }
 }

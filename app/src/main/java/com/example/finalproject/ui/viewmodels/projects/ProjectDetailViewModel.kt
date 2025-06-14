@@ -12,12 +12,19 @@ import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
 import com.example.finalproject.data.repository.UserRepository
 import com.example.finalproject.data.service.UserService
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.io.File
 
 class ProjectDetailViewModel(
     private val projetoRepository: ProjetoRepository = ProjetoRepository(),
-    private val tarefaRepository: TarefaRepository = TarefaRepository()
+    private val tarefaRepository: TarefaRepository = TarefaRepository(),
+    private val userRepository: UserRepository = UserRepository(),
+    private val analyticsExporter: ProjectAnalyticsExporter = ProjectAnalyticsExporter()
 ) : ViewModel() {
 
     // Estados UI
@@ -68,6 +75,10 @@ class ProjectDetailViewModel(
         private set
 
     var selectedWorker by mutableStateOf<UserProject?>(null)
+        private set
+
+    // Analytics exporter dialog state
+    var showAnalyticsExporterDialog by mutableStateOf(false)
         private set
 
     fun showAddMemberDialog() { showAddMemberDialog = true }
@@ -284,6 +295,62 @@ class ProjectDetailViewModel(
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    // Methods for analytics exporter dialog
+    fun showAnalyticsExporterDialog() {
+        showAnalyticsExporterDialog = true
+        // Preload analytics data for the current project
+        projeto?.id?.toString()?.let { projectId ->
+            analyticsExporter.loadAnalytics(projectId)
+        }
+    }
+
+    fun hideAnalyticsExporterDialog() {
+        showAnalyticsExporterDialog = false
+        analyticsExporter.resetExportState()
+    }
+
+    fun exportProjectAnalytics(format: ExportFormat, context: android.content.Context? = null) {
+        projeto?.id?.toString()?.let { projectId ->
+            viewModelScope.launch {
+                try {
+                    // Get the app's external files directory (doesn't require special permissions)
+                    val externalFilesDir = context?.getExternalFilesDir(null)
+
+                    if (externalFilesDir != null) {
+                        // Create directory for exports
+                        val exportDir = File(externalFilesDir, "project_analytics")
+                        if (!exportDir.exists()) {
+                            exportDir.mkdirs()
+                        }
+
+                        // Create filename from project name and date
+                        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                        val projectName = projeto?.nome?.replace(" ", "_") ?: "project"
+                        val baseFileName = "${projectName}_analytics_$currentDate"
+
+                        val filePath = File(exportDir, baseFileName).absolutePath
+
+                        // Export the analytics data
+                        analyticsExporter.exportAnalytics(projectId, filePath, format)
+
+                        // Add debug log to verify file creation
+                        val finalFile = if (filePath.endsWith(format.extension)) {
+                            File(filePath)
+                        } else {
+                            File("$filePath${format.extension}")
+                        }
+                        println("File saved at: ${finalFile.absolutePath}, exists: ${finalFile.exists()}")
+                    } else {
+                        analyticsExporter.setError("External storage not available")
+                    }
+                } catch (e: Exception) {
+                    analyticsExporter.setError(e.message ?: "Failed to export analytics")
+                    e.printStackTrace()
+                }
+            }
         }
     }
 }

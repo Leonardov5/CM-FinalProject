@@ -141,4 +141,27 @@ class TarefaRepository {
             emptyList()
         }
     }
+
+    /**
+     * Get analytics data for a specific task
+     */
+    suspend fun getTaskAnalytics(taskId: String): com.example.finalproject.data.model.TaskAnalytics? {
+        return try {
+            // Query the view_task_analytics view for the specific task
+            val result = supabase.from("view_task_analytics")
+                .select {
+                    filter {
+                        eq("tarefa_uuid", taskId)
+                    }
+                }
+                .decodeSingleOrNull<com.example.finalproject.data.model.TaskAnalytics>()
+
+            println("DEBUG - Task analytics loaded for task: $taskId")
+            result
+        } catch (e: Exception) {
+            println("DEBUG - Error fetching task analytics: ${e.message}")
+            e.printStackTrace()
+            null
+        }
+    }
 }

@@ -52,6 +52,9 @@ class TaskDetailViewModel(
     var filtredMembros by mutableStateOf<List<User>>(emptyList())
         private set
 
+    var showTaskAnalyticsExporterDialog by mutableStateOf(false)
+        private set
+
     fun checkUser(currentUser: User? = null) {
         viewModelScope.launch {
             try {
@@ -155,6 +158,47 @@ class TaskDetailViewModel(
                 println("Error reloading task: ${e.message}")
             } finally {
                 isLoading = false
+            }
+        }
+    }
+
+    // Methods for task analytics exporter dialog
+    fun showTaskAnalyticsExporterDialog() {
+        showTaskAnalyticsExporterDialog = true
+    }
+
+    fun hideTaskAnalyticsExporterDialog() {
+        showTaskAnalyticsExporterDialog = false
+    }
+
+    fun exportTaskAnalytics(format: TaskExportFormat, context: android.content.Context? = null) {
+        task?.id?.let { taskId ->
+            viewModelScope.launch {
+                try {
+                    // Get the app's external files directory
+                    val externalFilesDir = context?.getExternalFilesDir(null)
+
+                    if (externalFilesDir != null) {
+                        // Create directory for exports
+                        val exportDir = java.io.File(externalFilesDir, "task_analytics")
+                        if (!exportDir.exists()) {
+                            exportDir.mkdirs()
+                        }
+
+                        // Create filename from task name and date
+                        val currentDate = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+                        val taskName = task?.nome?.replace(" ", "_") ?: "task"
+                        val baseFileName = "${taskName}_analytics_$currentDate"
+
+                        val filePath = java.io.File(exportDir, baseFileName).absolutePath
+
+                        // Export the analytics data
+                        val taskAnalyticsExporter = TaskAnalyticsExporter()
+                        taskAnalyticsExporter.exportAnalytics(taskId, filePath, format)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }

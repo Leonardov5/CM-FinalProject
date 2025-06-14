@@ -72,11 +72,13 @@ import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.data.model.User
 import com.example.finalproject.ui.components.projects.AddTaskDialog
 import com.example.finalproject.ui.components.projects.EditProjectDialog
+import com.example.finalproject.ui.components.projects.ProjectAnalyticsExporterDialog
 import com.example.finalproject.ui.components.projects.WorkerDetailDialog
 import com.example.finalproject.ui.components.projects.WorkersListProject
 import com.example.finalproject.ui.theme.onSurfaceVariantLight
 import com.example.finalproject.ui.theme.primaryLight
 import com.example.finalproject.ui.theme.surfaceVariantLight
+import com.example.finalproject.ui.viewmodels.projects.ProjectAnalyticsExporter
 import com.example.finalproject.ui.viewmodels.projects.ProjectDetailViewModel
 import com.example.finalproject.utils.updateAppLanguage
 import kotlinx.coroutines.launch
@@ -239,7 +241,10 @@ fun ProjectDetailScreen(
                                 icon = Icons.Outlined.Analytics,
                                 // TODO: change this so it uses translation files
                                 label = "Export Analytics",
-                                onClick = {}
+                                onClick = {
+                                    viewModel.toggleFabActions()
+                                    viewModel.showAnalyticsExporterDialog()
+                                }
                             )
                         }
                     }
@@ -524,10 +529,27 @@ fun ProjectDetailScreen(
             onEdit = { userId, isManager, isActive ->
                 scope.launch {
                     viewModel.updateWorkerRole(userId, isManager, isActive)
-                    Toast.makeText(context, "Dados do membro atualizados com sucesso", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context,
+                        // TODO: Translate hard-coded string "Dados do membro atualizados com sucesso"
+                        "Dados do membro atualizados com sucesso",
+                        Toast.LENGTH_SHORT).show()
                 }
             },
             isAdmin = viewModel.isAdmin || viewModel.isManager
+        )
+    }
+
+    // Diálogo para exportar análises do projeto
+    if (viewModel.showAnalyticsExporterDialog) {
+        ProjectAnalyticsExporterDialog(
+            show = true,
+            projetoId = projetoId,
+            onDismiss = { viewModel.hideAnalyticsExporterDialog() },
+            onExport = { format ->
+                scope.launch {
+                    viewModel.exportProjectAnalytics(format, context)
+                }
+            }
         )
     }
 }

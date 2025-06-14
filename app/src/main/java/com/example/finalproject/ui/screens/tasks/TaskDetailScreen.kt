@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -44,6 +45,7 @@ import com.example.finalproject.ui.theme.*
 import com.example.finalproject.ui.viewmodels.tasks.TaskDetailViewModel
 import com.example.finalproject.ui.viewmodels.tasks.TaskManagementViewModel
 import com.example.finalproject.utils.updateAppLanguage
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
 fun formatDate(iso: String?): String? {
@@ -68,6 +70,7 @@ fun TaskDetailScreen(
     viewModel: TaskDetailViewModel = viewModel()
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var showLogWorkDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = true) {
@@ -103,6 +106,7 @@ fun TaskDetailScreen(
             TopAppBar(
                 title = {
                     Text(
+                        // TODO: Translate hard-coded string "Detalhes da Task"
                         text = "Detalhes da Task",
                         fontWeight = FontWeight.Medium
                     )
@@ -111,6 +115,7 @@ fun TaskDetailScreen(
                     IconButton(onClick = onBackPressed) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
+                            // TODO: Translate hard-coded string "Voltar"
                             contentDescription = "Voltar"
                         )
                     }
@@ -161,10 +166,20 @@ fun TaskDetailScreen(
                             )
                             ActionButton(
                                 icon = Icons.Default.Work,
+                                // TODO: Translate hard-coded string "Log Work"
                                 label = "Log Work",
                                 onClick = {
                                     showFabActions = false
                                     showLogWorkDialog = true
+                                }
+                            )
+                            ActionButton(
+                                icon = Icons.Outlined.Analytics,
+                                // TODO: Translate hard-coded string "Export Analytics"
+                                label = "Export Analytics",
+                                onClick = {
+                                    showFabActions = false
+                                    viewModel.showTaskAnalyticsExporterDialog()
                                 }
                             )
                             if( viewModel.isAdmin) {
@@ -207,6 +222,7 @@ fun TaskDetailScreen(
                 }
                 viewModel.task == null -> {
                     Text(
+                        // TODO: Translate hard-coded string "Tarefa não encontrada"
                         text = "Tarefa não encontrada"
                     )
                 }
@@ -249,6 +265,21 @@ fun TaskDetailScreen(
             onSuccess = {
                 // Apenas recarregar a tarefa para mostrar possíveis atualizações
                 viewModel.reloadTaskAfterLogWork(taskId)
+            }
+        )
+    }
+
+    // Task Analytics Exporter Dialog
+    if (viewModel.showTaskAnalyticsExporterDialog) {
+        com.example.finalproject.ui.components.tasks.TaskAnalyticsExporterDialog(
+            show = true,
+            taskId = taskId,
+            taskName = viewModel.task?.nome,
+            onDismiss = { viewModel.hideTaskAnalyticsExporterDialog() },
+            onExport = { format ->
+                scope.launch {
+                    viewModel.exportTaskAnalytics(format, context)
+                }
             }
         )
     }
