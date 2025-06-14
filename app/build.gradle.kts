@@ -83,4 +83,9 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     kapt(libs.artifactid)
     implementation(libs.androidx.work.runtime.ktx)
+    androidTestImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.ui.test.junit4)
+    androidTestImplementation(libs.core)
+    androidTestImplementation(libs.androidx.junit.v115)
+    androidTestImplementation(libs.androidx.runner)
 }
