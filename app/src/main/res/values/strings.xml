@@ -223,4 +223,24 @@
     <string name="priority_medium">Medium</string>
     <string name="priority_high">High</string>
     <string name="priority_critical">Critical</string>
+    <string name="notification_default_title">Notification</string>
+    <string name="notification_user_added_to_task_title">New Task</string>
+    <string name="notification_project_status_active_title">Project Status Changed</string>
+    <string name="notification_project_status_inactive_title">Project Status Changed</string>
+    <string name="notification_project_status_completed_title">Project Completed</string>
+    <string name="notification_project_status_canceled_title">Project Canceled</string>
+    <string name="notification_task_status_pending_title">Task Status Changed</string>
+    <string name="notification_task_status_in_progress_title">Task In Progress</string>
+    <string name="notification_task_status_completed_title">Task Completed</string>
+    <string name="notification_task_status_canceled_title">Task Canceled</string>
+    <string name="notification_user_added_to_task_message">You have been added to a new task</string>
+    <string name="notification_project_status_active_message">A project has been activated</string>
+    <string name="notification_project_status_inactive_message">A project has been deactivated</string>
+    <string name="notification_project_status_completed_message">A project has been marked as completed</string>
+    <string name="notification_project_status_canceled_message">A project has been canceled</string>
+    <string name="notification_task_status_pending_message">A task has been marked as pending</string>
+    <string name="notification_task_status_in_progress_message">A task has been started</string>
+    <string name="notification_task_status_completed_message">A task has been completed</string>
+    <string name="notification_task_status_canceled_message">A task has been canceled</string>
+    <string name="updates_title">Updates</string>
 </resources>
