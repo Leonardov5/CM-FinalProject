@@ -4,24 +4,18 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Trabalho(
-    @SerialName("trabalho_uuid")
+data class Observacao(
+    @SerialName("observacao_uuid")
     val id: String? = null,
 
     @SerialName("tarefa_uuid")
     val tarefaId: String,
 
-    @SerialName("data")
-    val data: String,
+    @SerialName("observacao")
+    val observacao: String,
 
-    @SerialName("local")
-    val local: String? = null,
-
-    @SerialName("contribuicao")
-    val contribuicao: Double,
-
-    @SerialName("tempo_dispensado")
-    val tempoDispensado: Int,
+    @SerialName("anexos")
+    val anexos: List<String> = emptyList(),
 
     @SerialName("created_by")
     val createdBy: String? = null,
