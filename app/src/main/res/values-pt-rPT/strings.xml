@@ -67,7 +67,7 @@
     <string name="profile_image_update_error">Não foi possível atualizar a foto do perfil</string>
     <string name="hide_password">Ocultar senha</string>
     <string name="show_password">Mostrar senha</string>
-    <string name="projects_title">Meus Projetos</string>
+    <string name="projects_title">Os meus Projetos</string>
     <string name="menu">Menu</string>
     <string name="profile">Perfil</string>
     <string name="add_project">Adicionar Projeto</string>
@@ -223,4 +223,24 @@
     <string name="priority_medium">Média</string>
     <string name="priority_high">Alta</string>
     <string name="priority_critical">Critica</string>
+    <string name="notification_default_title">Notificação</string>
+    <string name="notification_user_added_to_task_title">Nova tarefa</string>
+    <string name="notification_project_status_active_title">Status de projeto alterado</string>
+    <string name="notification_project_status_inactive_title">Status de projeto alterado</string>
+    <string name="notification_project_status_completed_title">Projeto concluído</string>
+    <string name="notification_project_status_canceled_title">Projeto cancelado</string>
+    <string name="notification_task_status_pending_title">Status de tarefa alterado</string>
+    <string name="notification_task_status_in_progress_title">Tarefa em andamento</string>
+    <string name="notification_task_status_completed_title">Tarefa concluída</string>
+    <string name="notification_task_status_canceled_title">Tarefa cancelada</string>
+    <string name="notification_user_added_to_task_message">Você foi adicionado a uma nova tarefa</string>
+    <string name="notification_project_status_active_message">Um projeto foi ativado</string>
+    <string name="notification_project_status_inactive_message">Um projeto foi desativado</string>
+    <string name="notification_project_status_completed_message">Um projeto foi marcado como concluído</string>
+    <string name="notification_project_status_canceled_message">Um projeto foi cancelado</string>
+    <string name="notification_task_status_pending_message">Uma tarefa foi marcada como pendente</string>
+    <string name="notification_task_status_in_progress_message">Uma tarefa foi iniciada</string>
+    <string name="notification_task_status_completed_message">Uma tarefa foi concluída</string>
+    <string name="notification_task_status_canceled_message">Uma tarefa foi cancelada</string>
+    <string name="updates_title">Notificações</string>
 </resources>

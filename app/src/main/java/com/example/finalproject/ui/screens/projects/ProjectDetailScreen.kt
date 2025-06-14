@@ -215,7 +215,7 @@ fun ProjectDetailScreen(
                                 }
                             )
                         }
-                        if( viewModel.isAdmin) {
+                        if( viewModel.isAdmin || viewModel.isManager) {
                             ActionButton(
                                 icon = Icons.Default.Edit,
                                 label = editProject,
