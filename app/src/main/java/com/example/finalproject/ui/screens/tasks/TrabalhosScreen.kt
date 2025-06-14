@@ -174,7 +174,7 @@ fun TrabalhosScreen(
 
                                         // Progresso da tarefa
                                         LinearProgressIndicator(
-                                            progress = tarefa.taxaConclusao.toFloat().coerceIn(0f, 1f),
+                                            progress = (tarefa.taxaConclusao / 100).toFloat().coerceIn(0f, 1f),
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .height(8.dp)

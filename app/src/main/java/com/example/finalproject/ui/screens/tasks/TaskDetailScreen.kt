@@ -369,7 +369,7 @@ private fun TaskContent(
             title = stringResource(id = R.string.progress),
             content = {
                 LinearProgressIndicator(
-                    progress = task.taxaConclusao.toFloat().coerceIn(0f, 1f),
+                    progress = (task.taxaConclusao / 100).toFloat().coerceIn(0f, 1f),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp)
