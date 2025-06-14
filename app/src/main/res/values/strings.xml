@@ -158,6 +158,16 @@
     <string name="joined_project_at">Joined project at</string>
     <string name="remove">Remove</string>
     <string name="remove_from_task_confirm">Are you sure you want to remove this user from the task?</string>
+    <string name="bottom_nav_users">Users</string>
+    <string name="user_management_title">User Management</string>
+    <string name="no_users_found">No users found.</string>
+    <string name="add_user">Add User</string>
+    <string name="edit_user">Edit</string>
+    <string name="delete_user">Delete</string>
+    <string name="admin_label">Administrator</string>
+    <string name="delete_user_dialog_title">Delete user</string>
+    <string name="delete_user_dialog_text">Are you sure you want to delete the user &quot;%1$s&quot;?</string>
+    <string name="create_user_title">Create New User</string>
     <string name="LogWork">Log Work</string>
     <string name="date">Date</string>
     <string name="hour">Hour</string>
@@ -188,4 +198,7 @@
     <string name="confirm_delete_work_text">Are you sure you want to delete this work record? This action cannot be undone.</string>
     <string name="time">Time</string>
     <string name="minutes">Minutes</string>
+    <string name="admin_password_dialog_title">Confirm Admin Password</string>
+    <string name="delete_task_dialog_title">Confirm Task Deletion</string>
+    <string name="delete_task_dialog_text">Are you sure you want to delete the task &quot;%1$s&quot;? This action cannot be undone.</string>
 </resources>

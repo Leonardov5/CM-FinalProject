@@ -2,6 +2,8 @@ package com.example.finalproject
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.example.finalproject.ui.screens.tasks.TaskDetailScreen
+import com.example.finalproject.ui.screens.tasks.ObservacoesScreen
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,6 +28,8 @@ import com.example.finalproject.ui.screens.ProfileScreen
 import com.example.finalproject.ui.screens.UpdatesScreen
 import com.example.finalproject.ui.screens.auth.LoginScreen
 import com.example.finalproject.ui.screens.auth.RegisterScreen
+import com.example.finalproject.ui.screens.tasks.TaskManagementScreen
+import com.example.finalproject.ui.screens.ProfileScreen
 import com.example.finalproject.ui.screens.projects.ProjectDetailScreen
 import com.example.finalproject.ui.screens.projects.ProjectsScreen
 import com.example.finalproject.ui.screens.tasks.ObservacoesScreen
@@ -34,6 +38,10 @@ import com.example.finalproject.ui.screens.tasks.TaskManagementScreen
 import com.example.finalproject.ui.screens.tasks.TrabalhosScreen
 import com.example.finalproject.ui.viewmodels.tasks.TaskDetailViewModel
 import kotlinx.coroutines.launch
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.finalproject.ui.screens.users.UserManagementScreen
+import com.example.finalproject.ui.viewmodels.users.UserManagementViewModel
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")
@@ -57,6 +65,7 @@ sealed class Screen(val route: String) {
     object Trabalhos : Screen("trabalhos/{tarefaId}") {
         fun createRoute(tarefaId: String) = "trabalhos/$tarefaId"
     }
+    object UserManagement : Screen("user_management")
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -266,6 +275,17 @@ fun AppNavigation(
                     onBackPressed = {
                         navController.popBackStack()
                     }
+                )
+            }
+
+            composable(route = Screen.UserManagement.route) {
+                val userManagementViewModel: UserManagementViewModel = viewModel()
+                UserManagementScreen(
+                    onProfileClick = {
+                        navController.navigate(Screen.Profile.route)
+                    },
+                    viewModel = userManagementViewModel,
+                    onAddUser = { /* navegação para tela de adicionar usuário */ },
                 )
             }
 

@@ -70,4 +70,35 @@ class UserRepository {
             emptyList()
         }
     }
+
+    suspend fun deletarUsuario(userId: String): Boolean {
+        return try {
+            SupabaseProvider.client.from("utilizador")
+                .delete{
+                    filter { eq("utilizador_uuid", userId) }
+                }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    suspend fun atualizarUsuario(userId: String, nome: String, username: String): Boolean {
+        return try {
+            SupabaseProvider.client.from("utilizador")
+                .update(
+                    mapOf(
+                        "nome" to nome,
+                        "username" to username,
+                    )
+                ) {
+                    filter { eq("utilizador_uuid", userId) }
+                }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
 }

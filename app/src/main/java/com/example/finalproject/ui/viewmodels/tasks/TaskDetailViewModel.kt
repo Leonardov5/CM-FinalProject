@@ -52,6 +52,14 @@ class TaskDetailViewModel(
     var navigateToObservacoesEvent by mutableStateOf<String?>(null)
         private set
 
+
+    var showDeleteTaskDialog by mutableStateOf(false)
+        private set
+
+    fun toggleDeleteTaskDialog() {
+        showDeleteTaskDialog = !showDeleteTaskDialog
+    }
+
     // Evento de navegação para tela de trabalhos
     var navigateToTrabalhosEvent by mutableStateOf<String?>(null)
         private set
@@ -128,7 +136,8 @@ class TaskDetailViewModel(
             val result = taskRepository.adicionarUsuarioATarefa(userId, tarefaId)
             onResult(result)
             if (result) {
-                loadTask(tarefaId) // Atualiza a tarefa para refletir os trabalhadores
+                loadTask(tarefaId)
+                loadTrabalhadoresTarefa(tarefaId)
             }
         }
     }
@@ -181,5 +190,14 @@ class TaskDetailViewModel(
     // Função para limpar o evento de navegação de trabalhos após consumido
     fun onTrabalhosNavigated() {
         navigateToTrabalhosEvent = null
+    }
+
+    fun deletarTarefa(taskId: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            isLoading = true
+            val sucesso = taskRepository.deletarTarefaPorId(taskId)
+            isLoading = false
+            onResult(sucesso)
+        }
     }
 }

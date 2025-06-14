@@ -3,8 +3,10 @@ package com.example.finalproject.data.repository
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.service.AuthService
 import com.example.finalproject.data.service.SupabaseProvider
+import com.example.finalproject.data.service.UserService
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Order
+import java.nio.file.Files.exists
 
 class TarefaRepository {
 
@@ -130,15 +132,78 @@ class TarefaRepository {
 
     suspend fun listarTarefas(): List<Tarefa> {
         return try {
-            val tarefas = supabase.from("tarefa")
-                .select()
-                .decodeList<Tarefa>()
+            val currentUser = UserService.getCurrentUserData()
+            if (currentUser == null) {
+                println("DEBUG - Usuário atual não encontrado")
+                return emptyList()
+            }
 
-            println("DEBUG - Tarefas carregadas: ${tarefas.size}")
+            if(currentUser.admin){
+                println("DEBUG - Usuário é administrador, retornando todas as tarefas")
+                return supabase.from("tarefa")
+                    .select()
+                    .decodeList<Tarefa>()
+            }
+            val userId = currentUser.id
+
+            val tarefaIds = supabase.from("utilizador_tarefa")
+                .select {
+                    filter { eq("utilizador_uuid", userId) }
+                }
+                .decodeList<Map<String, String>>()
+                .mapNotNull { it["tarefa_uuid"] }
+
+            val projetoIds = supabase.from("utilizador_projeto")
+                .select {
+                    filter { eq("utilizador_uuid", userId); eq("e_gestor", true) }
+                }
+                .decodeList<Map<String, String>>()
+                .mapNotNull { it["projeto_uuid"] }
+
+            val tarefasDiretas = if (tarefaIds.isNotEmpty()) {
+                supabase.from("tarefa")
+                    .select {
+                        filter {
+                            tarefaIds.forEach { id ->
+                                or { eq("tarefa_uuid", id) }
+                            }
+                        }
+                    }
+                    .decodeList<Tarefa>()
+            } else emptyList()
+
+            val tarefasGestor = if (projetoIds.isNotEmpty()) {
+                supabase.from("tarefa")
+                    .select {
+                        filter {
+                            projetoIds.forEach { id ->
+                                or { eq("projeto_uuid", id) }
+                            }
+                        }
+                    }
+                    .decodeList<Tarefa>()
+            } else emptyList()
+
+            val tarefas = (tarefasDiretas + tarefasGestor).distinctBy { it.id }
+
+            println("DEBUG - Tarefas filtradas: ${tarefas.size}")
             tarefas
         } catch (e: Exception) {
             println("DEBUG - Erro ao listar tarefas: ${e.message}")
             emptyList()
+        }
+    }
+
+    suspend fun deletarTarefaPorId(taskId: String): Boolean {
+        return try {
+            supabase.from("tarefa")
+                .delete {
+                    filter { eq("tarefa_uuid", taskId) }
+                }
+            true
+        } catch (e: Exception) {
+            println("DEBUG - Erro ao deletar tarefa: ${e.message}")
+            false
         }
     }
 }

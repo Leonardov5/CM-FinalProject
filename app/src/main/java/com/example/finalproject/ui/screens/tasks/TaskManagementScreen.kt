@@ -62,6 +62,7 @@ fun TaskManagementScreen(
                 viewModel.selectProject(projeto)
             }
         }
+        viewModel.checkUser()
     }
 
     Scaffold(
@@ -125,9 +126,11 @@ fun TaskManagementScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                TabRow(viewModel.selectedTab) { tab ->
-                    viewModel.selectTab(tab)
-                }
+                TabRow(
+                    selectedTab = viewModel.selectedTab,
+                    onTabSelected = { tab -> viewModel.selectTab(tab) },
+                    isAdmin = viewModel.isAdmin
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 

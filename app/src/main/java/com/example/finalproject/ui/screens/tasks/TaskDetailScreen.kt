@@ -193,7 +193,7 @@ fun TaskDetailScreen(
                                     label = stringResource(id = R.string.delete_task),
                                     onClick = {
                                         showFabActions = false
-                                        onDeleteTask()
+                                        viewModel.toggleDeleteTaskDialog()
                                     }
                                 )
                             }
@@ -234,7 +234,9 @@ fun TaskDetailScreen(
                     TaskContent(
                         task = viewModel.task!!,
                         onStatusChange = onStatusChange,
-                        onDeleteTask = onDeleteTask,
+                        onDeleteTask = {
+                            viewModel.toggleDeleteTaskDialog()
+                        },
                         onAddWorker = onAddWorker,
                         viewModel = viewModel,
                         onLogWork = { hours, description ->
@@ -278,6 +280,31 @@ fun TaskDetailScreen(
             onSuccess = {
                 // Apenas recarregar a tarefa para mostrar possíveis atualizações
                 viewModel.reloadTaskAfterLogWork(taskId)
+            }
+        )
+    }
+
+    if (viewModel.showDeleteTaskDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.toggleDeleteTaskDialog() },
+            title = { Text(stringResource(id = R.string.delete_task_dialog_title)) },
+            text = { Text(stringResource(id = R.string.delete_task_dialog_text, viewModel.task?.nome ?: "")) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deletarTarefa(taskId) { sucesso ->
+                        viewModel.toggleDeleteTaskDialog()
+                        if (sucesso) {
+                            onBackPressed()
+                        }
+                    }
+                }) {
+                    Text(stringResource(id = R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.toggleDeleteTaskDialog() }) {
+                    Text(stringResource(id = R.string.cancel))
+                }
             }
         )
     }
