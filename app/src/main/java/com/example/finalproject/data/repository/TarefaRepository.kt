@@ -230,4 +230,44 @@ class TarefaRepository {
             false
         }
     }
+
+    suspend fun atualizarTarefa(
+        tarefaId: String,
+        nome: String,
+        descricao: String,
+        prioridade: String,
+        status: String,
+        dataInicio: String?,
+        dataFim: String?,
+        taxaConclusao: Double
+    ): Boolean {
+        return try {
+            val currentUserUUID = AuthService.getCurrentUserId()
+            println("DEBUG - Atualizando tarefa: $tarefaId")
+
+            // Criar timestamp ISO 8601 para o campo updated_at
+            val currentTimestamp = java.time.OffsetDateTime.now().toString()
+
+            supabase.from("tarefa")
+                .update({
+                    set("nome", nome)
+                    set("descricao", descricao)
+                    set("prioridade", prioridade)
+                    set("status", status)
+                    set("data_inicio", dataInicio)
+                    set("data_fim", dataFim)
+                    set("taxa_conclusao", taxaConclusao)
+                    set("modified_by", currentUserUUID)
+                    set("updated_at", currentTimestamp)
+                }) {
+                    filter { eq("tarefa_uuid", tarefaId) }
+                }
+
+            println("DEBUG - Tarefa atualizada com sucesso: $tarefaId")
+            true
+        } catch (e: Exception) {
+            println("DEBUG - Erro ao atualizar tarefa: ${e.message}")
+            false
+        }
+    }
 }

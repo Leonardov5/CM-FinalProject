@@ -140,6 +140,7 @@
     <string name="mark_as_in_progress_task">Mark as In Progress</string>
     <string name="add_worker">Add Worker</string>
     <string name="delete_task">Delete Task</string>
+    <string name="edit_task">Edit Task</string>
     <string name="task_not_found">Task not found</string>
     <string name="to_do">To Do</string>
     <string name="on_going">On Going</string>
@@ -203,4 +204,23 @@
     <string name="delete_task_dialog_text">Are you sure you want to delete the task &quot;%1$s&quot;? This action cannot be undone.</string>
     <string name="select_workers_to_add">Select members to add</string>
     <string name="options">Options</string>
+    <string name="name">Name</string>
+    <string name="name_required">Name is required</string>
+    <string name="description_required">Description is required</string>
+    <string name="priority_required">Priority is required</string>
+    <string name="status_required">Status is required</string>
+    <string name="start_date_time">Start Date/Time</string>
+    <string name="start_date_required">Start date is required</string>
+    <string name="end_date_time">End Date/Time</string>
+    <string name="end_date_required">End date is required</string>
+    <string name="task_updated_successfully">Task updated successfully</string>
+    <string name="task_update_failed">Failed to update task</string>
+    <string name="status_pending">Pending</string>
+    <string name="status_in_progress">In Progress</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_cancelled">Cancelled</string>
+    <string name="priority_low">Low</string>
+    <string name="priority_medium">Medium</string>
+    <string name="priority_high">High</string>
+    <string name="priority_critical">Critical</string>
 </resources>

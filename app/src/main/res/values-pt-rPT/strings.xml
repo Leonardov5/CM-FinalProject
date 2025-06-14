@@ -203,4 +203,24 @@
     <string name="delete_task_dialog_text">Tens certeza que desejas excluir a tarefa &quot;%1$s&quot;? Esta ação não pode ser desfeita.</string>
     <string name="select_workers_to_add">Selecione os membros</string>
     <string name="options">Opções</string>
+    <string name="edit_task">Editar Tarefa</string>
+    <string name="name">Nome</string>
+    <string name="name_required">Nome é obrigatório</string>
+    <string name="description_required">Descrição é obrigatória</string>
+    <string name="priority_required">Prioridade é obrigatória</string>
+    <string name="status_required">Status é obrigatório</string>
+    <string name="start_date_time">Data/Hora de Início</string>
+    <string name="start_date_required">Data de início é obrigatória</string>
+    <string name="end_date_time">Data/Hora de Fim</string>
+    <string name="end_date_required">Data de fim é obrigatória</string>
+    <string name="task_updated_successfully">Tarefa atualizada com sucesso</string>
+    <string name="task_update_failed">Falha ao atualizar tarefa</string>
+    <string name="status_pending">Pendente</string>
+    <string name="status_in_progress">Em Andamento</string>
+    <string name="status_completed">Concluída</string>
+    <string name="status_cancelled">Cancelada</string>
+    <string name="priority_low">Baixa</string>
+    <string name="priority_medium">Média</string>
+    <string name="priority_high">Alta</string>
+    <string name="priority_critical">Critica</string>
 </resources>

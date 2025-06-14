@@ -1,6 +1,7 @@
 package com.example.finalproject.ui.screens.tasks
 
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -31,6 +32,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
@@ -67,6 +69,7 @@ import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.model.TarefaStatus
 import com.example.finalproject.data.model.User
+import com.example.finalproject.ui.components.EditTaskDialog
 import com.example.finalproject.ui.components.tasks.AddWorkerDialog
 import com.example.finalproject.ui.components.tasks.LogWorkDialog
 import com.example.finalproject.ui.components.tasks.WorkerCardTask
@@ -156,18 +159,10 @@ fun TaskDetailScreen(
                             modifier = Modifier.padding(bottom = 16.dp)
                         ) {
                             ActionButton(
-                                icon = Icons.Default.Done,
-                                label = stringResource(id = R.string.mark_as_completed),
+                                icon = Icons.Default.Edit,
+                                label = stringResource(id = R.string.edit_task),
                                 onClick = {
-                                    onStatusChange(TarefaStatus.concluida)
-                                    showFabActions = false
-                                }
-                            )
-                            ActionButton(
-                                icon = Icons.Default.PlayArrow,
-                                label = stringResource(id = R.string.mark_as_active),
-                                onClick = {
-                                    onStatusChange(TarefaStatus.em_andamento)
+                                    viewModel.toggleEditTaskDialog()
                                     showFabActions = false
                                 }
                             )
@@ -280,7 +275,6 @@ fun TaskDetailScreen(
             tarefaId = taskId,
             onDismiss = { showLogWorkDialog = false },
             onSuccess = {
-                // Apenas recarregar a tarefa para mostrar possíveis atualizações
                 viewModel.reloadTaskAfterLogWork(taskId)
             }
         )
@@ -306,6 +300,40 @@ fun TaskDetailScreen(
             dismissButton = {
                 TextButton(onClick = { viewModel.toggleDeleteTaskDialog() }) {
                     Text(stringResource(id = R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (viewModel.showEditTaskDialog && viewModel.task != null) {
+        EditTaskDialog(
+            show = true,
+            tarefa = viewModel.task!!,
+            onDismiss = { viewModel.toggleEditTaskDialog() },
+            onSave = { id, nome, descricao, prioridade, status, dataInicio, dataFim, taxaConclusao ->
+                viewModel.editarTarefa(
+                    tarefaId = id,
+                    nome = nome,
+                    descricao = descricao,
+                    prioridade = prioridade,
+                    status = status,
+                    dataInicio = dataInicio,
+                    dataFim = dataFim,
+                    taxaConclusao = taxaConclusao
+                ) { sucesso ->
+                    if (sucesso) {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.task_updated_successfully),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.task_update_failed),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
             }
         )
@@ -416,12 +444,21 @@ private fun TaskContent(
         }
 
         // Seção de prioridade
+// Seção de prioridade
         task.prioridade?.let {
             TaskInfoSection(
                 title = stringResource(id = R.string.priority),
                 content = {
+                    // Usar a string traduzida baseada no valor atual
+                    val prioridadeTexto = when(it) {
+                        "baixa" -> stringResource(id = R.string.priority_low)
+                        "media" -> stringResource(id = R.string.priority_medium)
+                        "alta" -> stringResource(id = R.string.priority_high)
+                        else -> it
+                    }
+
                     Text(
-                        text = "$it",
+                        text = prioridadeTexto,
                         fontSize = 16.sp,
                     )
                 }

@@ -56,6 +56,13 @@ class TaskDetailViewModel(
     var showDeleteTaskDialog by mutableStateOf(false)
         private set
 
+    var showEditTaskDialog by mutableStateOf(false)
+        private set
+
+    fun toggleEditTaskDialog() {
+        showEditTaskDialog = !showEditTaskDialog
+    }
+
     fun toggleDeleteTaskDialog() {
         showDeleteTaskDialog = !showDeleteTaskDialog
     }
@@ -231,6 +238,40 @@ class TaskDetailViewModel(
             val sucesso = taskRepository.deletarTarefaPorId(taskId)
             isLoading = false
             onResult(sucesso)
+        }
+    }
+
+    fun editarTarefa(
+        tarefaId: String,
+        nome: String,
+        descricao: String,
+        prioridade: String,
+        status: String,
+        dataInicio: String?,
+        dataFim: String?,
+        taxaConclusao: Double,
+        onComplete: (Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            isLoading = true
+            val sucesso = taskRepository.atualizarTarefa(
+                tarefaId = tarefaId,
+                nome = nome,
+                descricao = descricao,
+                prioridade = prioridade,
+                status = status,
+                dataInicio = dataInicio,
+                dataFim = dataFim,
+                taxaConclusao = taxaConclusao
+            )
+
+            if (sucesso) {
+                // Recarregar a tarefa para atualizar a UI
+                loadTask(tarefaId)
+            }
+
+            isLoading = false
+            onComplete(sucesso)
         }
     }
 }
