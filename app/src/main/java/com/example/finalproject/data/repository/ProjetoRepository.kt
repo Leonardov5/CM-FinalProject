@@ -4,9 +4,7 @@ import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.data.model.UserProject
 import com.example.finalproject.data.service.SupabaseProvider
 import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
-import io.github.jan.supabase.postgrest.rpc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.buildJsonObject

@@ -41,8 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject.R
 import com.example.finalproject.data.PreferencesManager
-import com.example.finalproject.utils.updateAppLanguage
 import com.example.finalproject.ui.viewmodels.auth.RegisterViewModel
+import com.example.finalproject.utils.updateAppLanguage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

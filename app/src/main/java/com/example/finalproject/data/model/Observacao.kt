@@ -1,7 +1,7 @@
 package com.example.finalproject.data.model
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class Observacao(

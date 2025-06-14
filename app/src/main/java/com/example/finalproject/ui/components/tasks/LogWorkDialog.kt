@@ -32,8 +32,6 @@ import com.example.finalproject.R
 import com.example.finalproject.ui.components.datetime.DateTimePickerDialog
 import com.example.finalproject.ui.components.datetime.DateTimePickerField
 import com.example.finalproject.ui.components.datetime.DateTimePickerViewModel
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -45,6 +43,13 @@ fun LogWorkDialog(
     viewModel: LogWorkViewModel = viewModel(),
     dateTimePickerViewModel: DateTimePickerViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    // Carregar a taxa de conclusão atual da tarefa quando o diálogo é aberto
+    LaunchedEffect(show) {
+        if (show) {
+            viewModel.carregarTaxaConclusaoAtual(tarefaId)
+        }
+    }
+
     if (!show) return
 
     // Limpar os campos ao iniciar o diálogo
@@ -56,6 +61,8 @@ fun LogWorkDialog(
 
     var showDateTimePicker by remember { mutableStateOf(false) }
     val formattedDateTime = dateTimePickerViewModel.formatDateTime(viewModel.data)
+    val contributionMaxError = stringResource(id = R.string.contribution_max_error)
+    val contributionMaxError2 = stringResource(id = R.string.contribution_max_error2)
 
     Dialog(onDismissRequest = {
         viewModel.resetForm()
@@ -104,20 +111,20 @@ fun LogWorkDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Campo de taxa de conclusão
+                // Campo de contribuição
                 OutlinedTextField(
-                    value = viewModel.taxaConclusao,
+                    value = viewModel.contribuicao,
                     onValueChange = {
                         // Aceitar apenas números e pontos
                         if (it.isEmpty() || it.matches(Regex("^\\d*(\\.\\d*)?$"))) {
-                            viewModel.taxaConclusao = it
+                            viewModel.contribuicao = it
                         }
                     },
-                    label = { Text(stringResource(id = R.string.completion_rate) + " (%)") },
+                    label = { Text(stringResource(id = R.string.contribution) + " (%)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    isError = viewModel.taxaConclusaoError,
-                    supportingText = if (viewModel.taxaConclusaoError) {
-                        { Text(stringResource(id = R.string.completion_rate_error)) }
+                    isError = viewModel.contribuicaoError,
+                    supportingText = if (viewModel.contribuicaoError) {
+                        { Text(stringResource(id = R.string.contribution_error)) }
                     } else null,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -159,6 +166,8 @@ fun LogWorkDialog(
                     onClick = {
                         viewModel.saveTrabalho(
                             tarefaId = tarefaId,
+                            contributionMaxError = contributionMaxError,
+                            contributionMaxError2 = contributionMaxError2,
                             onSuccess = {
                                 viewModel.resetForm()
                                 onSuccess()

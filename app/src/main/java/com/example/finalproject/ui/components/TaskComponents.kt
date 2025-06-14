@@ -1,14 +1,25 @@
 package com.example.finalproject.ui.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
-import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -20,7 +31,6 @@ import androidx.compose.ui.unit.sp
 import com.example.finalproject.R
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.model.TarefaStatus
-import com.example.finalproject.ui.theme.*
 
 fun formatDate(iso: String?): String? {
     return try {
@@ -93,10 +103,7 @@ fun TaskCard(task: Tarefa, onClick: () -> Unit = {}) {
                 )
 
                 Text(
-                    text = stringResource(
-                        id = R.string.created_at,
-                        formatDate(task.createdAt) ?: stringResource(id = R.string.unknown_creation_date)
-                    ),
+                    text = stringResource(id = R.string.created_at) + " " + formatDate(task.createdAt),
                     fontSize = 12.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

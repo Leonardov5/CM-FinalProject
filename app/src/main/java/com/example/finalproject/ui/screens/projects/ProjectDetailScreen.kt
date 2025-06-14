@@ -72,9 +72,7 @@ import com.example.finalproject.ui.components.projects.AddTaskDialog
 import com.example.finalproject.ui.components.projects.EditProjectDialog
 import com.example.finalproject.ui.components.projects.WorkerDetailDialog
 import com.example.finalproject.ui.components.projects.WorkersListProject
-import com.example.finalproject.ui.theme.onSurfaceVariantLight
 import com.example.finalproject.ui.theme.primaryLight
-import com.example.finalproject.ui.theme.surfaceVariantLight
 import com.example.finalproject.ui.viewmodels.projects.ProjectDetailViewModel
 import com.example.finalproject.utils.updateAppLanguage
 import kotlinx.coroutines.launch
@@ -323,11 +321,11 @@ fun ProjectDetailScreen(
                             val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
 
                             val createdDate = viewModel.projeto!!.createdAt?.let {
-                                stringResource(id = R.string.created_at, formatDate(it) ?: it)
+                                stringResource(id = R.string.created_at) + "\n" + formatDate(it)
                             } ?: stringResource(id = R.string.unknown_creation_date)
 
                             val updatedDate = viewModel.projeto!!.updatedAt?.let {
-                                stringResource(id = R.string.updated_at, formatDate(it) ?: it)
+                                stringResource(id = R.string.updated_at) + "\n" + formatDate(it)
                             } ?: stringResource(id = R.string.unknown_update_date)
 
 

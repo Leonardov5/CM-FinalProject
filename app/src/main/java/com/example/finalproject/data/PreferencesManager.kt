@@ -1,7 +1,6 @@
 package com.example.finalproject.data
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.core.content.edit
 
 object PreferencesManager {

@@ -9,21 +9,50 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Work
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -40,21 +69,9 @@ import com.example.finalproject.ui.components.tasks.AddWorkerDialog
 import com.example.finalproject.ui.components.tasks.LogWorkDialog
 import com.example.finalproject.ui.components.tasks.WorkerCardTask
 import com.example.finalproject.ui.components.tasks.WorkerTaskDetailDialog
-import com.example.finalproject.ui.theme.*
 import com.example.finalproject.ui.viewmodels.tasks.TaskDetailViewModel
-import com.example.finalproject.ui.viewmodels.tasks.TaskManagementViewModel
+import com.example.finalproject.utils.formatDate
 import com.example.finalproject.utils.updateAppLanguage
-import java.time.LocalDateTime
-
-fun formatDate(iso: String?): String? {
-    return try {
-        val isoFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault())
-        val dateFormat = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
-        iso?.let { dateFormat.format(isoFormat.parse(it)) }
-    } catch (e: Exception) {
-        iso
-    }
-}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,6 +82,7 @@ fun TaskDetailScreen(
     onStatusChange: (TarefaStatus) -> Unit = {},
     onDeleteTask: () -> Unit = {},
     onAddWorker: () -> Unit = {},
+    onNavigateToTrabalhos: (String) -> Unit,
     viewModel: TaskDetailViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -230,6 +248,15 @@ fun TaskDetailScreen(
         }
     }
 
+    // Monitorar o evento de navegação para trabalhos
+    LaunchedEffect(viewModel.navigateToTrabalhosEvent) {
+        viewModel.navigateToTrabalhosEvent?.let { tarefaId ->
+            // Navegar para a tela de trabalhos
+            onNavigateToTrabalhos(tarefaId)
+            viewModel.onTrabalhosNavigated()
+        }
+    }
+
     if (viewModel.showAddWorkerDialog) {
         AddWorkerDialog(
             users = viewModel.filtredMembros,
@@ -269,7 +296,6 @@ private fun TaskContent(
     var selectedWorker by remember { mutableStateOf<User?>(null) }
     var showWorkerDialog by remember { mutableStateOf(false) }
 
-    StatusChip(status = statusEnum)
 
     Column(
         modifier = Modifier
@@ -303,7 +329,7 @@ private fun TaskContent(
                 )
 
                 Text(
-                    text = "${(task.taxaConclusao * 100).toInt()}%",
+                    text = "${(task.taxaConclusao).toInt()}%",
                     fontSize = 14.sp,
                     modifier = Modifier.padding(top = 4.dp)
                 )
@@ -327,7 +353,6 @@ private fun TaskContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Seção de data de criação
         task.createdAt?.let {
             TaskInfoSection(
                 title = stringResource(id = R.string.created_at),
@@ -385,6 +410,10 @@ private fun TaskContent(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
+                            Icon(
+                                imageVector = Icons.Default.Description,
+                                contentDescription = null,
+                            )
                             Text(
                                 text = stringResource(id = R.string.see_observations),
                                 fontSize = 16.sp
@@ -393,6 +422,54 @@ private fun TaskContent(
                         Icon(
                             imageVector = Icons.Default.ChevronRight,
                             contentDescription = "See Observations",
+                        )
+                    }
+                }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Seção de trabalhos
+        TaskInfoSection(
+            title = stringResource(id = R.string.works),
+            content = {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            // Navegar para a tela de trabalhos da tarefa
+                            if (viewModel.task != null) {
+                                viewModel.navigateToTrabalhos(viewModel.task!!.id ?: "")
+                            }
+                        },
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    tonalElevation = 2.dp
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Work,
+                                contentDescription = null,
+                            )
+                            Text(
+                                text = stringResource(id = R.string.see_works),
+                                fontSize = 16.sp
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = "Ver Trabalhos",
                         )
                     }
                 }
@@ -497,7 +574,7 @@ private fun ActionButton(
         modifier = Modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(24.dp),
         shadowElevation = 2.dp,
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        color = MaterialTheme.colorScheme.primaryContainer,
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -514,3 +591,4 @@ private fun ActionButton(
         }
     }
 }
+

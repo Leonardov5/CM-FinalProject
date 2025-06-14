@@ -10,7 +10,6 @@ import kotlinx.serialization.json.put
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.text.get
 
 object UserService {
     private val supabase = SupabaseProvider.client
