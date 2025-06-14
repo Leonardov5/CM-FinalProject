@@ -131,26 +131,45 @@ fun AddMemberDialog(
 
                 Spacer(Modifier.height(16.dp))
                 if (isAdmin) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
-                            .clickable { isManager = !isManager }
                     ) {
-                        Checkbox(
-                            checked = isManager,
-                            onCheckedChange = { isManager = it }
+                        Text(
+                            text = stringResource(id = R.string.options),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Column {
-                            Text(
-                                text = stringResource(id = R.string.manager),
-                                fontWeight = FontWeight.Medium
+
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = androidx.compose.material3.CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                             )
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { isManager = !isManager }
+                                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                            ) {
+                                Checkbox(
+                                    checked = isManager,
+                                    onCheckedChange = { isManager = it }
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Text(
+                                        text = stringResource(id = R.string.manager),
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -166,6 +185,16 @@ fun AddMemberDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(id = R.string.cancel)) }
         }
     )
+}
+
+@Composable
+fun Colors(
+    containerColor: Color,
+    contentColor: Color,
+    disabledContainerColor: Color,
+    disabledContentColor: Color
+) {
+    TODO("Not yet implemented")
 }
 
 @Composable
@@ -258,3 +287,4 @@ private fun MemberCard(
         }
     }
 }
+

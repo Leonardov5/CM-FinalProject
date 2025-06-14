@@ -202,4 +202,5 @@
     <string name="delete_task_dialog_title">Confirmar Exclusão da Tarefa</string>
     <string name="delete_task_dialog_text">Tens certeza que desejas excluir a tarefa &quot;%1$s&quot;? Esta ação não pode ser desfeita.</string>
     <string name="select_workers_to_add">Selecione os membros</string>
+    <string name="options">Opções</string>
 </resources>
