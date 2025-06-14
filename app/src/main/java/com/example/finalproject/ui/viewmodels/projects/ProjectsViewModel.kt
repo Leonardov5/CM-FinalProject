@@ -21,6 +21,9 @@ class ProjectsViewModel(
     var projects by mutableStateOf<List<Projeto>>(emptyList())
         private set
 
+    // Lista original para armazenar todos os projetos sem filtro
+    private var allProjects = listOf<Projeto>()
+
     var isLoading by mutableStateOf(false)
         private set
 
@@ -32,7 +35,6 @@ class ProjectsViewModel(
 
     var showAddDialog by mutableStateOf(false)
         private set
-
 
     var selectedProjectUuid by mutableStateOf<String?>(null)
         private set
@@ -83,7 +85,8 @@ class ProjectsViewModel(
             try {
                 isLoading = true
                 println("DEBUG - Carregando projetos com repositório: $projetoRepository")
-                projects = projetoRepository.listarProjetos()
+                allProjects = projetoRepository.listarProjetos()
+                projects = allProjects
                 println("DEBUG - Projetos carregados: ${projects.size}")
             } catch (e: Exception) {
                 println("DEBUG - Erro ao carregar projetos: ${e.message}")
@@ -91,6 +94,26 @@ class ProjectsViewModel(
                 isLoading = false
             }
         }
+    }
+
+    // Filtrar projetos com base na consulta de pesquisa
+    fun filterProjects(query: String) {
+        if (query.isBlank()) {
+            projects = allProjects
+            return
+        }
+
+        val filteredList = allProjects.filter { projeto ->
+            projeto.nome.contains(query, ignoreCase = true) ||
+                    (projeto.descricao?.contains(query, ignoreCase = true) ?: false)
+        }
+
+        projects = filteredList
+    }
+
+    // Resetar filtro e mostrar todos os projetos
+    fun resetFilter() {
+        projects = allProjects
     }
 
     // Criar um novo projeto
@@ -110,7 +133,8 @@ class ProjectsViewModel(
 
                 if (novoProjeto != null) {
                     // Atualiza a lista de projetos
-                    projects = projetoRepository.listarProjetos()
+                    allProjects = projetoRepository.listarProjetos()
+                    projects = allProjects
                     hideAddProjectDialog()
                     onSuccess()
                 } else {

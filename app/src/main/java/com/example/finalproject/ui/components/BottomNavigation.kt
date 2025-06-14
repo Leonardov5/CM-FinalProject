@@ -59,7 +59,7 @@ fun BottomNavigation(
         NavigationItem(
             route = Screen.Updates.route,
             icon = Icons.Default.Notifications,
-            label = stringResource(R.string.bottom_nav_updates)
+            label = stringResource(R.string.updates_title)
         )
     )
     if (profileViewModel.isAdmin) {

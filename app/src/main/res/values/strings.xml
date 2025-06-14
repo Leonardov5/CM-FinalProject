@@ -243,4 +243,7 @@
     <string name="notification_task_status_completed_message">A task has been completed</string>
     <string name="notification_task_status_canceled_message">A task has been canceled</string>
     <string name="updates_title">Updates</string>
+    <string name="notification_user_added_to_project_title">Added to a project</string>
+    <string name="notification_user_added_to_project_message">You have been added to a project</string>
+    <string name="search">Search</string>
 </resources>
