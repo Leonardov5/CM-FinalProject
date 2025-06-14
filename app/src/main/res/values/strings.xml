@@ -187,6 +187,17 @@
     <string name="edit_observation">Edit observation</string>
     <string name="existing_images">Existing images</string>
     <string name="new_images">New images</string>
+    <string name="works">Works</string>
+    <string name="see_works">See works</string>
+    <string name="no_work_logs">No works founded</string>
+    <string name="contribution">Contribution</string>
+    <string name="contribution_error">Contribution is mandatory</string>
+    <string name="contribution_max_error">Contribution cannot exceed</string>
+    <string name="contribution_max_error2">(the remaining to complete the task)</string>
+    <string name="confirm_delete_work_title">Confirm deletion</string>
+    <string name="confirm_delete_work_text">Are you sure you want to delete this work record? This action cannot be undone.</string>
+    <string name="time">Time</string>
+    <string name="minutes">Minutes</string>
     <string name="admin_password_dialog_title">Confirm Admin Password</string>
     <string name="delete_task_dialog_title">Confirm Task Deletion</string>
     <string name="delete_task_dialog_text">Are you sure you want to delete the task &quot;%1$s&quot;? This action cannot be undone.</string>

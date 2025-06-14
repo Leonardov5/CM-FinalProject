@@ -3,21 +3,17 @@ package com.example.finalproject.ui.viewmodels.tasks
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.example.finalproject.data.model.TarefaStatus
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.model.Tarefa
+import com.example.finalproject.data.model.TarefaStatus
 import com.example.finalproject.data.model.User
 import com.example.finalproject.data.model.UserProject
 import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
 import com.example.finalproject.data.repository.UserRepository
-import com.example.finalproject.data.service.AuthService
 import com.example.finalproject.data.service.UserService
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.time.LocalDateTime
 
 class TaskDetailViewModel(
     private val taskRepository: TarefaRepository = TarefaRepository(),
@@ -63,6 +59,10 @@ class TaskDetailViewModel(
     fun toggleDeleteTaskDialog() {
         showDeleteTaskDialog = !showDeleteTaskDialog
     }
+
+    // Evento de navegação para tela de trabalhos
+    var navigateToTrabalhosEvent by mutableStateOf<String?>(null)
+        private set
 
     fun checkUser(currentUser: User? = null) {
         viewModelScope.launch {
@@ -180,6 +180,16 @@ class TaskDetailViewModel(
     // Função para limpar o evento de navegação após consumido
     fun onObservacoesNavigated() {
         navigateToObservacoesEvent = null
+    }
+
+    // Função para navegar para a tela de trabalhos
+    fun navigateToTrabalhos(tarefaId: String) {
+        navigateToTrabalhosEvent = tarefaId
+    }
+
+    // Função para limpar o evento de navegação de trabalhos após consumido
+    fun onTrabalhosNavigated() {
+        navigateToTrabalhosEvent = null
     }
 
     fun deletarTarefa(taskId: String, onResult: (Boolean) -> Unit) {

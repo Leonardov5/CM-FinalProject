@@ -1,7 +1,7 @@
 package com.example.finalproject.data.model
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class Trabalho(
@@ -17,8 +17,8 @@ data class Trabalho(
     @SerialName("local")
     val local: String? = null,
 
-    @SerialName("taxa_conclusao")
-    val taxaConclusao: Double,
+    @SerialName("contribuicao")
+    val contribuicao: Double,
 
     @SerialName("tempo_dispensado")
     val tempoDispensado: Int,

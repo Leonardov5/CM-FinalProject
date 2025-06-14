@@ -14,21 +14,29 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.finalproject.data.service.AuthService
 import com.example.finalproject.ui.components.BottomNavigation
+import com.example.finalproject.ui.screens.ProfileScreen
+import com.example.finalproject.ui.screens.UpdatesScreen
 import com.example.finalproject.ui.screens.auth.LoginScreen
 import com.example.finalproject.ui.screens.auth.RegisterScreen
 import com.example.finalproject.ui.screens.tasks.TaskManagementScreen
 import com.example.finalproject.ui.screens.ProfileScreen
 import com.example.finalproject.ui.screens.projects.ProjectDetailScreen
 import com.example.finalproject.ui.screens.projects.ProjectsScreen
-import com.example.finalproject.ui.screens.UpdatesScreen
-import com.example.finalproject.data.service.AuthService
+import com.example.finalproject.ui.screens.tasks.ObservacoesScreen
+import com.example.finalproject.ui.screens.tasks.TaskDetailScreen
+import com.example.finalproject.ui.screens.tasks.TaskManagementScreen
+import com.example.finalproject.ui.screens.tasks.TrabalhosScreen
+import com.example.finalproject.ui.viewmodels.tasks.TaskDetailViewModel
 import kotlinx.coroutines.launch
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -54,6 +62,9 @@ sealed class Screen(val route: String) {
     object Observacoes : Screen("observacoes/{tarefaId}") {
         fun createRoute(tarefaId: String) = "observacoes/$tarefaId"
     }
+    object Trabalhos : Screen("trabalhos/{tarefaId}") {
+        fun createRoute(tarefaId: String) = "trabalhos/$tarefaId"
+    }
     object UserManagement : Screen("user_management")
 }
 
@@ -69,7 +80,8 @@ fun AppNavigation(
 
     val showBottomBar = when (currentDestination?.route) {
         Screen.Login.route, Screen.Register.route, Screen.Profile.route,
-        Screen.TaskDetail.route, Screen.ProjectDetail.route, Screen.Observacoes.route -> false
+        Screen.TaskDetail.route, Screen.ProjectDetail.route, Screen.Observacoes.route,
+        Screen.Trabalhos.route -> false
         else -> true
     }
 
@@ -205,7 +217,7 @@ fun AppNavigation(
                 arguments = listOf(navArgument("taskId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val taskId = backStackEntry.arguments?.getString("taskId") ?: ""
-                val scope = rememberCoroutineScope()
+                val viewModel = viewModel<TaskDetailViewModel>()
 
                 TaskDetailScreen(
                     taskId = taskId,
@@ -219,46 +231,46 @@ fun AppNavigation(
                         navController.popBackStack()
                     },
                     onAddWorker = {
-                        // Por enquanto não faz nada
-                    }
+                        // Por enquanto n��o faz nada
+                    },
+                    onNavigateToTrabalhos = { tarefaId ->
+                        navController.navigate(Screen.Trabalhos.createRoute(tarefaId))
+                    },
+                    viewModel = viewModel
                 )
 
                 // Observar o evento de navegação para observações
-                val viewModel = androidx.lifecycle.viewmodel.compose.viewModel<com.example.finalproject.ui.viewmodels.tasks.TaskDetailViewModel>()
-
-                // Quando o evento de navegação for acionado, navegar para a tela de observações
-                val navigateToObservacoesEvent = viewModel.navigateToObservacoesEvent
-                LaunchedEffect(navigateToObservacoesEvent) {
-                    navigateToObservacoesEvent?.let { tarefaId ->
+                LaunchedEffect(viewModel.navigateToObservacoesEvent) {
+                    viewModel.navigateToObservacoesEvent?.let { tarefaId ->
                         navController.navigate(Screen.Observacoes.createRoute(tarefaId))
-                        viewModel.onObservacoesNavigated() // Limpar o evento após navegar
+                        viewModel.onObservacoesNavigated()
                     }
                 }
             }
 
-            composable(
-                route = Screen.ProjectDetail.route,
-                arguments = listOf(navArgument("projectId") { type = NavType.StringType })
-            ) { backStackEntry ->
-                val projectId = backStackEntry.arguments?.getString("projectId") ?: ""
-                ProjectDetailScreen(
-                    projetoId = projectId,
-                    navController = navController, // Adicione esta linha
-                    onBackClick = {
-                        navController.popBackStack()
-                    },
-                    onAddTaskClick = {
-                        // Implemente a adição de task ao projeto
-                    }
-                )
-            }
-
+            // Rota para a tela de observações de uma tarefa
             composable(
                 route = Screen.Observacoes.route,
                 arguments = listOf(navArgument("tarefaId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val tarefaId = backStackEntry.arguments?.getString("tarefaId") ?: ""
+
                 ObservacoesScreen(
+                    tarefaId = tarefaId,
+                    onBackPressed = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            // Rota para a tela de trabalhos de uma tarefa
+            composable(
+                route = Screen.Trabalhos.route,
+                arguments = listOf(navArgument("tarefaId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val tarefaId = backStackEntry.arguments?.getString("tarefaId") ?: ""
+
+                TrabalhosScreen(
                     tarefaId = tarefaId,
                     onBackPressed = {
                         navController.popBackStack()
@@ -274,6 +286,22 @@ fun AppNavigation(
                     },
                     viewModel = userManagementViewModel,
                     onAddUser = { /* navegação para tela de adicionar usuário */ },
+                )
+            }
+
+            // Rota para a tela de detalhes do projeto
+            composable(
+                route = Screen.ProjectDetail.route,
+                arguments = listOf(navArgument("projectId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val projectId = backStackEntry.arguments?.getString("projectId") ?: ""
+
+                ProjectDetailScreen(
+                    projetoId = projectId,
+                    navController = navController,
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
                 )
             }
         }

@@ -3,7 +3,6 @@ package com.example.finalproject.data.sync
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.example.finalproject.data.sync.UserSyncManager
 
 class SyncWorker(
     context: Context,

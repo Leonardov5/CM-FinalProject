@@ -17,7 +17,7 @@ class TrabalhoRepository {
         tarefaId: String,
         data: String,
         local: String? = null,
-        taxaConclusao: Double,
+        contribuicao: Double,
         tempoDispensado: Int
     ): Trabalho? {
         return try {
@@ -29,7 +29,7 @@ class TrabalhoRepository {
                     tarefaId = tarefaId,
                     data = data,
                     local = local,
-                    taxaConclusao = taxaConclusao,
+                    contribuicao = contribuicao,
                     tempoDispensado = tempoDispensado,
                     createdBy = currentUserUUID,
                     modifiedBy = currentUserUUID
@@ -79,6 +79,24 @@ class TrabalhoRepository {
         } catch (e: Exception) {
             println("DEBUG - Erro ao buscar trabalho por id: ${e.message}")
             null
+        }
+    }
+
+    // Metodo para excluir um trabalho
+    suspend fun excluirTrabalho(trabalhoId: String): Boolean {
+        return try {
+            supabase.from("trabalho")
+                .delete {
+                    filter {
+                        eq("trabalho_uuid", trabalhoId)
+                    }
+                }
+
+            println("DEBUG - Trabalho excluído com sucesso: $trabalhoId")
+            true
+        } catch (e: Exception) {
+            println("DEBUG - Erro ao excluir trabalho: ${e.message}")
+            false
         }
     }
 
