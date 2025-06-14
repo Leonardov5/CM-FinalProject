@@ -4,7 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import com.example.finalproject.ui.screens.tasks.TaskDetailScreen
-import com.example.finalproject.ui.screens.tasks.formatDate
+import com.example.finalproject.utils.formatDate
 import com.example.finalproject.ui.viewmodels.tasks.TaskDetailViewModel
 import org.junit.Rule
 import org.junit.Test
@@ -20,7 +20,8 @@ class TaskDetailTest {
             TaskDetailScreen(
                 taskId = "task1",
                 onBackPressed = {},
-                viewModel = TaskDetailViewModel()
+                viewModel = TaskDetailViewModel(),
+                onNavigateToTrabalhos = {} // Added missing parameter
             )
         }
 

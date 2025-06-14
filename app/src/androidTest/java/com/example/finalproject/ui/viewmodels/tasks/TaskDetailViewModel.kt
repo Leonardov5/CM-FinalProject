@@ -32,6 +32,32 @@ class TaskDetailViewModel : ViewModel() {
     var showAddWorkerDialog by mutableStateOf(false)
         private set
 
+    // Following the original ViewModel implementation style
+    var showDeleteTaskDialog by mutableStateOf(false)
+        private set
+
+    var showEditTaskDialog by mutableStateOf(false)
+        private set
+
+    var isAdmin by mutableStateOf(false)
+        private set
+
+    var isManager by mutableStateOf(false)
+        private set
+
+    // Navigation events
+    var navigateToObservacoesEvent by mutableStateOf<String?>(null)
+        private set
+
+    var navigateToTrabalhosEvent by mutableStateOf<String?>(null)
+        private set
+
+    var workerJoinDate by mutableStateOf<String?>(null)
+        private set
+
+    var showTaskAnalyticsExporterDialog by mutableStateOf(false)
+        private set
+
     var trabalhadoresTarefa by mutableStateOf<List<String>>(listOf("user1", "user2"))
         private set
 
@@ -53,6 +79,57 @@ class TaskDetailViewModel : ViewModel() {
 
     var filtredMembros by mutableStateOf<List<User>>(emptyList())
         private set
+
+    // Methods from original ViewModel
+    fun toggleEditTaskDialog() {
+        showEditTaskDialog = !showEditTaskDialog
+    }
+
+    fun toggleDeleteTaskDialog() {
+        showDeleteTaskDialog = !showDeleteTaskDialog
+    }
+
+    fun fetchWorkerJoinedDate(userId: String) {
+        workerJoinDate = "2025-01-01T00:00:00Z" // Mock date
+    }
+
+    fun updateWorkerJoinDate(date: String?) {
+        workerJoinDate = date
+    }
+
+    fun checkUser(currentUser: User? = null) {
+        // Mock implementation
+        isAdmin = true
+        isManager = true
+    }
+
+    fun navigateToObservacoes(tarefaId: String) {
+        navigateToObservacoesEvent = tarefaId
+    }
+
+    fun onObservacoesNavigated() {
+        navigateToObservacoesEvent = null
+    }
+
+    fun navigateToTrabalhos(tarefaId: String) {
+        navigateToTrabalhosEvent = tarefaId
+    }
+
+    fun onTrabalhosNavigated() {
+        navigateToTrabalhosEvent = null
+    }
+
+    fun showTaskAnalyticsExporterDialog() {
+        showTaskAnalyticsExporterDialog = true
+    }
+
+    fun hideTaskAnalyticsExporterDialog() {
+        showTaskAnalyticsExporterDialog = false
+    }
+
+    fun exportTaskAnalytics(format: Any, context: android.content.Context? = null) {
+        // Mock implementation
+    }
 
     fun loadTrabalhadoresTarefa(tarefaId: String) {
         // Mock implementation does nothing or sets predefined data
@@ -79,5 +156,31 @@ class TaskDetailViewModel : ViewModel() {
 
     fun addWorkerToTask(userId: String, tarefaId: String, onResult: (Boolean) -> Unit) {
         onResult(true)
+    }
+
+    fun removeWorkerFromTask(userId: String, tarefaId: String, onResult: (Boolean) -> Unit) {
+        onResult(true)
+    }
+
+    fun reloadTaskAfterLogWork(tarefaId: String, onComplete: () -> Unit = {}) {
+        onComplete()
+    }
+
+    fun deletarTarefa(taskId: String, onResult: (Boolean) -> Unit) {
+        onResult(true)
+    }
+
+    fun editarTarefa(
+        tarefaId: String,
+        nome: String,
+        descricao: String,
+        prioridade: String,
+        status: String,
+        dataInicio: String?,
+        dataFim: String?,
+        taxaConclusao: Double,
+        onComplete: (Boolean) -> Unit
+    ) {
+        onComplete(true)
     }
 }
