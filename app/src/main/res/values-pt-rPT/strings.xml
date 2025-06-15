@@ -288,4 +288,7 @@
     <string name="logout_success">Sessão terminada com sucesso</string>
     <string name="notification_user_added_as_manager_title">Adicionado como Gestor</string>
     <string name="notification_user_added_as_manager_message">Foi adicionado como gestor a um projeto</string>
+    <string name="performance">Performance</string>
+    <string name="no_rating_yet">No rating yet\n</string>
+    <string name="clear_rating">Clear rating</string>
 </resources>

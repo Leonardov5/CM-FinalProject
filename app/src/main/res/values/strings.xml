@@ -288,4 +288,7 @@
     <string name="logout_success">Logged out successfully</string>
     <string name="notification_user_added_as_manager_title">Added as Manager</string>
     <string name="notification_user_added_as_manager_message">You have been added as a manager to a project</string>
+    <string name="performance">Performance</string>
+    <string name="no_rating_yet">No rating yet\n</string>
+    <string name="clear_rating">Clear rating</string>
 </resources>

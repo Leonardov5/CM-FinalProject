@@ -27,6 +27,8 @@ data class UserProject(
     val isManager: Boolean = false,
     @SerialName("created_at")
     val createdAt: String = "",
+    @SerialName("performance")
+    val performance: Int = 0,
 
     @SerialName("utilizador")
     val utilizador: UtilizadorInfo? = null

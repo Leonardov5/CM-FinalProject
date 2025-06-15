@@ -249,13 +249,14 @@ class ProjectDetailViewModel(
         selectedWorker = null
     }
 
-    fun updateWorkerRole(userId: String, isManager: Boolean, isActive: Boolean) = viewModelScope.launch {
+    fun updateWorkerRole(userId: String, isManager: Boolean, isActive: Boolean, performance: Int) = viewModelScope.launch {
         try {
             val success = projetoRepository.atualizarMembroDoProjeto(
                 userId = userId,
                 projectId = projeto?.id.toString(),
                 isManager = isManager,
-                isActive = isActive
+                isActive = isActive,
+                performance = performance
             )
 
             if (success) {
