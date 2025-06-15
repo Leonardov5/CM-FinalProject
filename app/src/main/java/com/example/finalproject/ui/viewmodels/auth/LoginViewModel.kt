@@ -1,14 +1,16 @@
 package com.example.finalproject.ui.viewmodels.auth
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.finalproject.R
 import com.example.finalproject.data.repository.UtilizadorRepository
 import kotlinx.coroutines.launch
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     private val utilizadorRepository = UtilizadorRepository()
 
@@ -50,7 +52,7 @@ class LoginViewModel : ViewModel() {
 
     fun login() {
         if (email.isBlank() || password.isBlank()) {
-            errorMessage = "Fill all fields"
+            errorMessage = getApplication<Application>().getString(R.string.fill_all_fields)
             return
         }
 
@@ -65,10 +67,10 @@ class LoginViewModel : ViewModel() {
                     isLoginSuccessful = true
                     clearFieldsAfterSuccess()
                 } else {
-                    errorMessage = "Email or password is incorrect"
+                    errorMessage = getApplication<Application>().getString(R.string.invalid_credentials)
                 }
             } catch (e: Exception) {
-                errorMessage = "Error logging in: ${e.message}"
+                errorMessage = getApplication<Application>().getString(R.string.login_error, e.message)
             } finally {
                 isLoading = false
             }

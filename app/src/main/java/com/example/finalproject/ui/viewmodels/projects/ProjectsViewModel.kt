@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.finalproject.R
 import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.data.model.User
 import com.example.finalproject.data.repository.ProjetoRepository
@@ -117,14 +118,14 @@ class ProjectsViewModel(
     }
 
     // Criar um novo projeto
-    fun createProject(onSuccess: () -> Unit, onError: (String) -> Unit) {
-        if (projectName.isBlank()) {
-            onError("Nome do projeto é obrigatório")
-            return
-        }
+    fun createProject(onSuccess: () -> Unit, onError: (Int) -> Unit) {
 
         viewModelScope.launch {
             try {
+                if (projectName.isBlank()) {
+                    onError(R.string.error_project_name_empty)
+                    return@launch
+                }
                 isLoading = true
                 val novoProjeto = projetoRepository.criarProjeto(
                     nome = projectName,
@@ -138,10 +139,11 @@ class ProjectsViewModel(
                     hideAddProjectDialog()
                     onSuccess()
                 } else {
-                    onError("Erro ao criar projeto")
+                    onError(R.string.error_project_create_failed)
                 }
             } catch (e: Exception) {
-                onError("Erro: ${e.message}")
+                e.printStackTrace()
+                onError(R.string.error_project_create_failed)
             } finally {
                 isLoading = false
             }

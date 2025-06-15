@@ -3,18 +3,23 @@ package com.example.finalproject.ui.viewmodels.projects
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.finalproject.R
 import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.data.repository.ProjetoRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
+import android.app.Application
+
 
 class EditProjectViewModel(
+    application: Application,
     private val projetoRepository: ProjetoRepository = ProjetoRepository()
-) : ViewModel() {
+) : AndroidViewModel(application) {
+
 
     var nome by mutableStateOf("")
         private set
@@ -71,23 +76,24 @@ class EditProjectViewModel(
 
     private fun validate(): Boolean {
         if (nome.isBlank()) {
-            setError("O nome do projeto não pode estar vazio")
+            setError(getApplication<Application>().getString(R.string.error_project_name_empty))
             return false
         }
 
         if (taxaConclusao < 0 || taxaConclusao > 100) {
-            setError("A taxa de conclusão deve estar entre 0 e 100")
+            setError(getApplication<Application>().getString(R.string.error_completion_rate_range))
             return false
         }
 
         return true
     }
 
+
     fun saveProject(projetoId: String?) {
         if (!validate()) return
 
         if (projetoId == null) {
-            setError("ID do projeto não fornecido. Não é possível editar.")
+            setError(getApplication<Application>().getString(R.string.error_project_id_missing))
             return
         }
 
@@ -107,16 +113,17 @@ class EditProjectViewModel(
                 if (success) {
                     _events.emit(EditProjectEvent.Success(projetoId))
                 } else {
-                    setError("Não foi possível atualizar o projeto")
+                    setError(getApplication<Application>().getString(R.string.error_project_update_failed))
                 }
             } catch (e: Exception) {
-                setError("Erro ao atualizar projeto: ${e.message}")
+                setError(getApplication<Application>().getString(R.string.error_project_update_exception, e.message))
                 e.printStackTrace()
             } finally {
                 isLoading = false
             }
         }
     }
+
 
     private fun setError(message: String) {
         hasError = true

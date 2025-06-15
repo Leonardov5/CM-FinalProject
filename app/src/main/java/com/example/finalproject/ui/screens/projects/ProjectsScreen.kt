@@ -87,7 +87,7 @@ fun ProjectsScreen(
     val cancel = stringResource(id = R.string.cancel)
     val create = stringResource(id = R.string.create)
     val projectCreatedSuccess = stringResource(id = R.string.project_created_success)
-
+    var errorMessageId by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(Unit) {
         val savedLanguage = PreferencesManager.getLanguage(context)
@@ -322,13 +322,19 @@ fun ProjectsScreen(
                                                 Toast.makeText(context, projectCreatedSuccess, Toast.LENGTH_SHORT).show()
                                             },
                                             onError = { errorMessage ->
-                                                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                                errorMessageId = errorMessage
+
                                             }
                                         )
                                     },
 
                                 ) {
                                     Text(create)
+                                }
+
+                                errorMessageId?.let { msgId ->
+                                    Toast.makeText(context, stringResource(id = msgId), Toast.LENGTH_SHORT).show()
+                                    errorMessageId = null
                                 }
                             }
                         }

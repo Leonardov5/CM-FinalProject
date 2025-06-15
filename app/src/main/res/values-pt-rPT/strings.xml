@@ -223,7 +223,7 @@
     <string name="priority_low">Baixa</string>
     <string name="priority_medium">Média</string>
     <string name="priority_high">Alta</string>
-    <string name="priority_critical">Critica</string>
+    <string name="priority_critical">Crítica</string>
     <string name="notification_default_title">Notificação</string>
     <string name="notification_user_added_to_task_title">Nova tarefa</string>
     <string name="notification_project_status_active_title">Status de projeto alterado</string>
@@ -257,11 +257,22 @@
     <string name="starting_export">A iniciar exportação…</string>
     <string name="worker_data_updated_success">Dados do membro atualizados com sucesso</string>
     <string name="selected_image">Imagem Selecionada</string>
-    <string name="unknown_user">Utilizador Deconhecido</string>
+    <string name="unknown_user">Utilizador Desconhecido</string>
     <string name="delete_work">Apagar Trabalho</string>
     <string name="notification_user_added_to_project_title">Adicionado a um projeto</string>
     <string name="notification_user_added_to_project_message">Foi adicionado a um projeto</string>
     <string name="search">Pesquisar</string>
     <string name="select_option">Selecione uma opção</string>
     <string name="confirm_delete_observation">Tem a certeza que deseja apagar esta observação? Esta ação não pode ser desfeita.</string>
+    <string name="debug_loading_projects">A carregar projetos com repositório: %1$s</string>
+    <string name="debug_projects_loaded">Projetos carregados: %1$d</string>
+    <string name="debug_projects_error">Erro ao carregar projetos: %1$s</string>
+    <string name="no_search_results">Nenhum resultado encontrado para a sua pesquisa</string>
+    <string name="loading_tasks">A carregar tarefas…</string>
+    <string name="error_project_name_empty">O nome do projeto não pode estar vazio</string>
+    <string name="error_completion_rate_range">A taxa de conclusão deve estar entre 0 e 100</string>
+    <string name="error_project_id_missing">ID do projeto não fornecido. Não é possível editar.</string>
+    <string name="error_project_update_failed">Falha ao atualizar o projeto</string>
+    <string name="error_project_update_exception">Erro ao atualizar projeto: %1$s</string>
+    <string name="error_project_create_failed">Falha ao criar o projeto</string>
 </resources>
