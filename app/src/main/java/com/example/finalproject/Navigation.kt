@@ -79,21 +79,15 @@ fun AppNavigation(
     var isAuthenticated by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
 
-    // Check authentication status
     LaunchedEffect(Unit) {
         isAuthenticated = AuthService.isAuthenticated()
         isLoading = false
     }
 
-    // Determine start destination based on first launch status and authentication
     val startDestination = when {
-        // If still loading auth status, stay at login screen
         isLoading -> Screen.Login.route
-        // If it's first launch, show intro slider regardless of auth status
         PreferencesManager.isFirstLaunch(context) -> Screen.IntroSlider.route
-        // If authenticated, go directly to main screen
         isAuthenticated -> Screen.TaskManagement.route
-        // Otherwise go to login
         else -> Screen.Login.route
     }
 
@@ -321,7 +315,6 @@ fun AppNavigation(
                 )
             }
 
-            // Rota para a tela de intro (apenas na primeira execução do app)
             composable(route = Screen.IntroSlider.route) {
                 IntroSlider(navController = navController)
             }

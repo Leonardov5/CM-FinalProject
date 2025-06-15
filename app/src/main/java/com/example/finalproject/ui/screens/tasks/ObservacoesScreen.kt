@@ -3,6 +3,7 @@ package com.example.finalproject.ui.screens.tasks
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -32,6 +33,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -58,6 +60,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -71,6 +74,7 @@ import coil.request.ImageRequest
 import com.example.finalproject.R
 import com.example.finalproject.data.model.Observacao
 import com.example.finalproject.data.model.Utilizador
+import com.example.finalproject.ui.theme.primaryLight
 import com.example.finalproject.ui.viewmodels.tasks.ObservacoesViewModel
 import com.example.finalproject.utils.formatDate
 import java.io.File
@@ -275,11 +279,24 @@ fun ObservacaoItem(
                             .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = utilizador?.nome?.firstOrNull()?.toString() ?: "?",
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            fontWeight = FontWeight.Bold
-                        )
+                        if (utilizador?.fotografia != null) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(utilizador.fotografia)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = "Foto do utilizador",
+                                modifier = Modifier.size(40.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Image(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = null,
+                                colorFilter = ColorFilter.tint(primaryLight),
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
                     }
 
                     // Nome

@@ -33,9 +33,6 @@ class ProjectsViewModel(
     var showAddDialog by mutableStateOf(false)
         private set
 
-    var selectedProjectUuid by mutableStateOf<String?>(null)
-        private set
-
     var projectName by mutableStateOf("")
         private set
 
