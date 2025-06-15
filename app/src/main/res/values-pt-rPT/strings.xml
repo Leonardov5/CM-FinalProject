@@ -275,4 +275,5 @@
     <string name="error_project_update_failed">Falha ao atualizar o projeto</string>
     <string name="error_project_update_exception">Erro ao atualizar projeto: %1$s</string>
     <string name="error_project_create_failed">Falha ao criar o projeto</string>
+    <string name="logout_error">Errou ao sair da conta</string>
 </resources>

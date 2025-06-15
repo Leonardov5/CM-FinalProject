@@ -387,10 +387,10 @@ class ProfileViewModel: ViewModel() {
                 if (success) {
                     onLogoutSuccess()
                 } else {
-                    errorMessage = "Erro ao fazer logout"
+                    errorMessageRes = R.string.logout_error
                 }
             } catch (e: Exception) {
-                errorMessage = "Erro ao fazer logout: ${e.message}"
+                errorMessageRes = R.string.logout_error
             }
         }
     }
