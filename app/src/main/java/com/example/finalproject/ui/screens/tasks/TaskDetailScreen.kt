@@ -186,7 +186,6 @@ fun TaskDetailScreen(
                                 showLogWorkDialog = true
                             }
                         )
-                        // Botão para marcar a tarefa como concluída (disponível para todos os usuários)
                         if (viewModel.task?.status != TarefaStatus.concluida.name) {
                             ActionButton(
                                 icon = Icons.Default.Done,
@@ -225,8 +224,7 @@ fun TaskDetailScreen(
                         }
                         ActionButton(
                             icon = Icons.Outlined.Analytics,
-                            // TODO: Translate hard-coded string "Export Analytics"
-                            label = "Export Analytics",
+                            label = stringResource(id = R.string.export_task_analytics),
                             onClick = {
                                 showFabActions = false
                                 viewModel.showTaskAnalyticsExporterDialog()
@@ -297,6 +295,11 @@ fun TaskDetailScreen(
                     viewModel.addWorkerToTask(userId, taskId) { }
                 }
                 viewModel.toggleAddWorkerDialog()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.worker_added_to_task),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         )
     }
@@ -308,6 +311,8 @@ fun TaskDetailScreen(
             onDismiss = { showLogWorkDialog = false },
             onSuccess = {
                 viewModel.reloadTaskAfterLogWork(taskId)
+
+                Toast.makeText(context, R.string.work_logged_successfully, Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -395,11 +400,11 @@ private fun TaskContent(
     viewModel: TaskDetailViewModel = viewModel(),
     onLogWork: (hours: Int, description: String) -> Unit = { _, _ -> }
 ) {
+    val context = LocalContext.current
     val statusEnum = viewModel.statusToEnum(task.status)
     var selectedWorker by remember { mutableStateOf<Utilizador?>(null) }
     var showWorkerDialog by remember { mutableStateOf(false) }
 
-    // Buscar a data de entrada do trabalhador selecionado
     LaunchedEffect(selectedWorker) {
         if (selectedWorker != null) {
             selectedWorker?.id?.let { userId ->
@@ -412,7 +417,6 @@ private fun TaskContent(
         }
     }
 
-    // Esperar a data de entrada ser carregada para mostrar o diálogo
     LaunchedEffect(viewModel.workerJoinDate) {
         if (selectedWorker != null) {
             showWorkerDialog = true
@@ -635,6 +639,8 @@ private fun TaskContent(
                 viewModel.removeWorkerFromTask(userId, viewModel.task?.id ?: "") {
                     showWorkerDialog = false
                 }
+
+                Toast.makeText(context, context.getString(R.string.worker_removed), Toast.LENGTH_SHORT).show()
             },
             viewModel = viewModel
         )

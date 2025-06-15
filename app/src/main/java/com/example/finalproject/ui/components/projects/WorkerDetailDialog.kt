@@ -308,7 +308,6 @@ fun WorkerDetailDialog(
                                 )
                             }
                         } else {
-                            // Mostrar performance em modo de visualização para usuários normais
                             Spacer(modifier = Modifier.height(16.dp))
 
                             Text(

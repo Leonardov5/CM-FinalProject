@@ -141,7 +141,6 @@ class TaskDetailViewModel(
         }
     }
 
-
     fun toggleAddWorkerDialog() {
         showAddWorkerDialog = !showAddWorkerDialog
     }
@@ -181,12 +180,16 @@ class TaskDetailViewModel(
         viewModelScope.launch {
             val result = taskRepository.removerUtilizadorDaTarefa(userId, tarefaId)
             onResult(result)
+
+            // Delay para esperar a atualização dos dados
             if (result) {
                 loadTask(tarefaId)
                 loadTrabalhadoresTarefa(tarefaId)
                 task?.projetoId?.let { projetoId ->
                     loadMembrosProjeto(projetoId)
-                }
+                    kotlinx.coroutines.delay(300)
+                    filterMembros()
+                } ?: filterMembros()
             }
         }
     }
@@ -303,6 +306,7 @@ class TaskDetailViewModel(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun marcarTarefaComoConcluida(tarefaId: String, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
             try {

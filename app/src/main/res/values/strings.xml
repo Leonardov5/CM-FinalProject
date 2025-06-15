@@ -291,4 +291,7 @@
     <string name="performance">Performance</string>
     <string name="no_rating_yet">No rating yet\n</string>
     <string name="clear_rating">Clear rating</string>
+    <string name="worker_added_to_task">Worker added successfully</string>
+    <string name="work_logged_successfully">Work logged sucessfully</string>
+    <string name="worker_removed">Worker removed</string>
 </resources>

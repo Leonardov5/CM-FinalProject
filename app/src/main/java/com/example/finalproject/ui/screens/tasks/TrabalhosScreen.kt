@@ -1,6 +1,7 @@
 package com.example.finalproject.ui.screens.tasks
 
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -226,6 +227,8 @@ fun TrabalhosScreen(
             onSuccess = {
                 viewModel.carregarTrabalhos(tarefaId)
                 showLogWorkDialog = false
+
+                Toast.makeText(context, R.string.work_logged_successfully, Toast.LENGTH_SHORT).show()
             }
         )
     }
