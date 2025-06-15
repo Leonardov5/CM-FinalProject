@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.finalproject.R
 import com.example.finalproject.data.local.AppDatabase
 import com.example.finalproject.data.local.LocalUser
 import com.example.finalproject.data.service.AuthService
@@ -58,10 +59,10 @@ class ProfileViewModel: ViewModel() {
     var isOnline by mutableStateOf(false)
         private set
 
-    var errorMessage by mutableStateOf<String?>(null)
+    var errorMessageRes by mutableStateOf<Int?>(null)
         private set
 
-    var successMessage by mutableStateOf<String?>(null)
+    var successMessageRes by mutableStateOf<Int?>(null)
         private set
 
     var isUploadingImage by mutableStateOf(false)
@@ -189,10 +190,10 @@ class ProfileViewModel: ViewModel() {
                         }
                     }
                 } else {
-                    errorMessage = "Utilizador não autenticado."
+                    errorMessageRes = R.string.invalid_credentials
                 }
             } catch (e: Exception) {
-                errorMessage = "Erro ao carregar dados: ${e.message}"
+                errorMessageRes = R.string.profile_update_error
                 e.printStackTrace()
             } finally {
                 isLoading = false
@@ -203,8 +204,8 @@ class ProfileViewModel: ViewModel() {
     fun saveProfileWithoutEmailChange(context: Context) {
         viewModelScope.launch {
             isSaving = true
-            errorMessage = null
-            successMessage = null
+            errorMessageRes = null
+            successMessageRes = null
 
             try {
                 if (isOnline) {
@@ -214,9 +215,9 @@ class ProfileViewModel: ViewModel() {
                     )
 
                     if (success) {
-                        successMessage = "Perfil atualizado com sucesso!"
+                        successMessageRes = R.string.profile_update_success
                     } else {
-                        errorMessage = "Erro ao atualizar perfil."
+                        errorMessageRes = R.string.profile_update_error
                     }
                 } else {
                     // Salva localmente se estiver offline
@@ -234,13 +235,13 @@ class ProfileViewModel: ViewModel() {
                             updatedAt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
                         )
                         userDao.insertOrUpdate(localUser)
-                        successMessage = "Alterações salvas localmente. Serão sincronizadas quando estiver online."
+                        successMessageRes = R.string.profile_update_success
                     } else {
-                        errorMessage = "Utilizador não autenticado. Não foi possível salvar localmente."
+                        errorMessageRes = R.string.invalid_credentials
                     }
                 }
             } catch (e: Exception) {
-                errorMessage = "Erro ao atualizar perfil: ${e.message}"
+                errorMessageRes = R.string.profile_update_error
             } finally {
                 isSaving = false
             }
@@ -255,11 +256,11 @@ class ProfileViewModel: ViewModel() {
         }
     }
 
-    fun saveProfileWithEmailChange(password: String) {
+    fun saveProfileWithEmailChange(context: Context, password: String) {
         viewModelScope.launch {
             isSaving = true
-            errorMessage = null
-            successMessage = null
+            errorMessageRes = null
+            successMessageRes = null
 
             try {
                 val emailUpdateSuccess = AuthService.updateEmail(email, password)
@@ -271,17 +272,19 @@ class ProfileViewModel: ViewModel() {
                     )
 
                     if (updateInDbSuccess) {
-                        successMessage = "Perfil atualizado com sucesso! Verifique o seu email para confirmar a alteração."
-                        originalEmail = email
-                        errorMessage = "Email atualizado na autenticação, mas houve um problema ao atualizar o perfil no banco de dados."
+                        successMessageRes = R.string.profile_update_success
+                        originalEmail = email // Atualizar o email original para evitar repetir o diálogo
+                    } else {
+                        errorMessageRes = R.string.profile_update_error
                     }
                 } else {
-                    errorMessage = "Palavra-passe incorreta ou problema ao atualizar o email."
-                    email = originalEmail
+                    // Senha incorreta ou problema ao atualizar o email
+                    errorMessageRes = R.string.invalid_credentials
+                    email = originalEmail // Restaurar o email original
                 }
             } catch (e: Exception) {
-                errorMessage = "Erro ao atualizar: ${e.message}"
-                email = originalEmail
+                errorMessageRes = R.string.profile_update_error
+                email = originalEmail // Restaurar o email original em caso de erro
             } finally {
                 isSaving = false
                 passwordForEmailChange = ""
@@ -290,30 +293,30 @@ class ProfileViewModel: ViewModel() {
         }
     }
 
-    fun updatePassword() {
+    fun updatePassword(context: Context) {
         viewModelScope.launch {
             if (currentPassword.isBlank()) {
-                errorMessage = "A palavra-passe atual é obrigatória"
+                errorMessageRes = R.string.password_required_error
                 return@launch
             }
 
             if (newPassword.isBlank()) {
-                errorMessage = "A nova palavra-passe é obrigatória"
+                errorMessageRes = R.string.password_required_error
                 return@launch
             }
 
             if (newPassword != confirmPassword) {
-                errorMessage = "As palavras-passe não coincidem"
+                errorMessageRes = R.string.passwords_do_not_match_error
                 return@launch
             }
 
             if (newPassword.length < 6) {
-                errorMessage = "A palavra-passe deve ter pelo menos 6 caracteres"
+                errorMessageRes = R.string.password_too_short_error
                 return@launch
             }
 
-            errorMessage = null
-            successMessage = null
+            errorMessageRes = null
+            successMessageRes = null
 
             isSaving = true
 
@@ -321,17 +324,16 @@ class ProfileViewModel: ViewModel() {
                 val success = AuthService.updatePassword(currentPassword, newPassword)
 
                 if (success) {
-                    successMessage = "Palavra-passe atualizada com sucesso!"
-
+                    successMessageRes = R.string.password_update_success
                     currentPassword = ""
                     newPassword = ""
                     confirmPassword = ""
                     isPasswordChangeVisible = false
                 } else {
-                    errorMessage = "Não foi possível atualizar a palavra-passe. Verifique se a palavra-passe atual está correta."
+                    errorMessageRes = R.string.password_update_error
                 }
             } catch (e: Exception) {
-                errorMessage = "Erro ao atualizar a palavra-passe: ${e.message}"
+                errorMessageRes = R.string.password_update_error
             } finally {
                 isSaving = false
             }
@@ -341,14 +343,14 @@ class ProfileViewModel: ViewModel() {
     fun uploadProfileImage(context: Context, uri: Uri) {
         viewModelScope.launch {
             isUploadingImage = true
-            errorMessage = null
+            errorMessageRes = null
 
             try {
-                val userId = AuthService.getCurrentUserId() ?: throw Exception("Utilizador não autenticado")
+                val userId = AuthService.getCurrentUserId() ?: throw Exception(context.getString(R.string.invalid_credentials))
                 val fileName = "$userId.jpg"
 
                 val inputStream = context.contentResolver.openInputStream(uri)
-                    ?: throw Exception("Não foi possível abrir a imagem")
+                    ?: throw Exception(context.getString(R.string.loading_image_error))
 
                 val bytes = inputStream.readBytes()
                 inputStream.close()
@@ -365,12 +367,12 @@ class ProfileViewModel: ViewModel() {
 
                 if (success) {
                     profileImageUrl = imageUrl
-                    successMessage = "Foto de perfil atualizada com sucesso!"
+                    successMessageRes = R.string.profile_image_update_success
                 } else {
-                    errorMessage = "Não foi possível atualizar a foto no perfil"
+                    errorMessageRes = R.string.profile_image_update_error
                 }
             } catch (e: Exception) {
-                errorMessage = "Erro ao processar a imagem: ${e.message}"
+                errorMessageRes = R.string.upload_image_error
                 e.printStackTrace()
             } finally {
                 isUploadingImage = false
@@ -385,16 +387,16 @@ class ProfileViewModel: ViewModel() {
                 if (success) {
                     onLogoutSuccess()
                 } else {
-                    errorMessage = "Erro ao fazer logout"
+                    errorMessageRes = R.string.logout_error
                 }
             } catch (e: Exception) {
-                errorMessage = "Erro ao fazer logout: ${e.message}"
+                errorMessageRes = R.string.logout_error
             }
         }
     }
 
     fun clearMessages() {
-        errorMessage = null
-        successMessage = null
+        errorMessageRes = null
+        successMessageRes = null
     }
 }

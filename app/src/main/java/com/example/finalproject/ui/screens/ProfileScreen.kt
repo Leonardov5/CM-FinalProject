@@ -112,6 +112,8 @@ fun ProfileScreen(
     val savedLanguage = PreferencesManager.getLanguage(context)
     var selectedLanguage by remember { mutableStateOf("") }
     val viewModel: ProfileViewModel = viewModel()
+    var errorMessageId by remember { mutableStateOf<Int?>(null) }
+    var successMessageId by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.loadProfileData(context)
@@ -444,7 +446,7 @@ fun ProfileScreen(
 
                             // Botão para atualizar
                             Button(
-                                onClick = { viewModel.updatePassword() },
+                                onClick = { viewModel.updatePassword(context) },
                                 modifier = Modifier.align(Alignment.End),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.primary,
@@ -496,21 +498,27 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
-
-    if (viewModel.errorMessage != null) {
-        LaunchedEffect(viewModel.errorMessage) {
-            Toast.makeText(context, viewModel.errorMessage, Toast.LENGTH_LONG).show()
-            delay(3000)
+    LaunchedEffect(viewModel.errorMessageRes) {
+        if (viewModel.errorMessageRes != null) {
+            errorMessageId = viewModel.errorMessageRes
+            viewModel.clearMessages()
+        }
+    }
+    LaunchedEffect(viewModel.successMessageRes) {
+        if (viewModel.successMessageRes != null) {
+            successMessageId = viewModel.successMessageRes
             viewModel.clearMessages()
         }
     }
 
-    if (viewModel.successMessage != null) {
-        LaunchedEffect(viewModel.successMessage) {
-            Toast.makeText(context, viewModel.successMessage, Toast.LENGTH_LONG).show()
-            delay(3000)
-            viewModel.clearMessages()
-        }
+    // Toasts para mensagens de erro e sucesso
+    errorMessageId?.let { msgId ->
+        Toast.makeText(context, stringResource(id = msgId), Toast.LENGTH_LONG).show()
+        errorMessageId = null
+    }
+    successMessageId?.let { msgId ->
+        Toast.makeText(context, stringResource(id = msgId), Toast.LENGTH_LONG).show()
+        successMessageId = null
     }
 
     // Confirm password ao alterar email
@@ -560,7 +568,7 @@ fun ProfileScreen(
                 Button(
                     onClick = {
                         if (viewModel.passwordForEmailChange.isNotEmpty()) {
-                            viewModel.saveProfileWithEmailChange(viewModel.passwordForEmailChange)
+                            viewModel.saveProfileWithEmailChange(context, viewModel.passwordForEmailChange)
                         }
                     },
                     enabled = viewModel.passwordForEmailChange.isNotEmpty()
