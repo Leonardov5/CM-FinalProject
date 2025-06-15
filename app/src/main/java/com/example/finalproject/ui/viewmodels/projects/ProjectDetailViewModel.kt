@@ -90,7 +90,7 @@ class ProjectDetailViewModel(
         navigateToTasksForProject = null
     }
 
-    // Funções para manipular diálogos
+
     fun showAddTaskDialog() {
         showAddTaskDialog = true
     }

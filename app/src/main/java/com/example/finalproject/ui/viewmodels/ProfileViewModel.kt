@@ -150,17 +150,12 @@ class ProfileViewModel: ViewModel() {
         isPasswordChangeVisible = !isPasswordChangeVisible
     }
 
-    fun showEmailPasswordDialog() {
-        showEmailPasswordDialog = true
-    }
-
     fun hideEmailPasswordDialog() {
         showEmailPasswordDialog = false
         passwordForEmailChange = ""
         email = originalEmail
     }
 
-    // Carregar dados do perfil
     fun loadProfileData(context: Context) {
         viewModelScope.launch {
             isLoading = true
@@ -170,7 +165,6 @@ class ProfileViewModel: ViewModel() {
                 val userId = AuthService.getCurrentUserId()
 
                 if (userId != null) {
-                    // Carregar dados do banco de dados local primeiro
                     val localUser = userDao.getUserById(userId)
                     if (localUser != null) {
                         name = localUser.nome
@@ -180,14 +174,11 @@ class ProfileViewModel: ViewModel() {
                         profileImageUrl = localUser.fotografia
                     }
 
-                    // Verificar conectividade
                     isOnline = isOnline()
 
-                    // Se estiver online, sincronizar dados
                     if (isOnline) {
                         UserSyncManager.syncUserDataWithConflictResolution(context)
 
-                        // Atualizar os dados locais após a sincronização
                         val updatedUser = userDao.getUserById(userId)
                         if (updatedUser != null) {
                             name = updatedUser.nome
@@ -209,7 +200,6 @@ class ProfileViewModel: ViewModel() {
         }
     }
 
-    // Função para salvar o perfil sem alterar o email
     fun saveProfileWithoutEmailChange(context: Context) {
         viewModelScope.launch {
             isSaving = true
@@ -229,7 +219,7 @@ class ProfileViewModel: ViewModel() {
                         errorMessage = "Erro ao atualizar perfil."
                     }
                 } else {
-                    // Salvar localmente se estiver offline
+                    // Salva localmente se estiver offline
                     val db = AppDatabase.getInstance(context)
                     val userDao = db.userDao()
                     val userId = AuthService.getCurrentUserId()
