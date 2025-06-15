@@ -60,13 +60,7 @@ class MainActivity : ComponentActivity() {
 
 
             FinalProjectTheme(dynamicColor = false) {
-                AppNavigation(
-                    startDestination = if (isAuthenticated) {
-                        Screen.TaskManagement.route
-                    } else {
-                        Screen.Login.route
-                    }
-                )
+                AppNavigation()
             }
             scheduleSyncOnNetworkAvailable()
         }

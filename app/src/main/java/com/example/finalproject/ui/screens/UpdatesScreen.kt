@@ -1,6 +1,7 @@
 package com.example.finalproject.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,6 +58,7 @@ import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.data.model.Notificacao
 import com.example.finalproject.ui.viewmodels.UpdatesViewModel
 import com.example.finalproject.utils.updateAppLanguage
+import kotlin.math.round
 
 @Composable
 private fun getTitleFromNotificacao(notificacao: Notificacao): String {
@@ -207,7 +209,7 @@ fun UpdatesScreen(
                 CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else {
-            // Lista de notificações
+            // Lista de notificacoes
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -257,20 +259,35 @@ fun UpdateCard(
         onClick = { onClick(id) }
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            // Eliminar notificação
-            IconButton(
-                onClick = { onDelete(id) },
+            // Botao de fechar notificacao
+            Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .size(32.dp)
-                    .padding(4.dp)
+                    .padding(10.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = stringResource(R.string.delete),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(16.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .background(
+                            color = if (!notificacao.vista)
+                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+                            else
+                                MaterialTheme.colorScheme.surfaceContainerHighest,
+                            shape = RoundedCornerShape(6.dp)
+                        )
+                        .clickable { onDelete(id) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(R.string.delete),
+                        tint = if (!notificacao.vista)
+                            MaterialTheme.colorScheme.onSecondary
+                        else
+                            MaterialTheme.colorScheme.inverseSurface,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
 
             Row(
@@ -284,16 +301,16 @@ fun UpdateCard(
                         .size(40.dp)
                         .clip(CircleShape)
                         .background(
-                            if (!notificacao.vista) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f)
-                            else MaterialTheme.colorScheme.surfaceContainer
+                            if (!notificacao.vista) MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+                            else MaterialTheme.colorScheme.surfaceContainerHighest
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Notifications,
                         contentDescription = null,
-                        tint = if (!notificacao.vista) MaterialTheme.colorScheme.onTertiaryContainer
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = if (!notificacao.vista) MaterialTheme.colorScheme.onSecondary
+                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -306,8 +323,8 @@ fun UpdateCard(
                     Text(
                         text = title,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = if (!notificacao.vista) MaterialTheme.colorScheme.onTertiaryContainer
+                        fontWeight = FontWeight.Bold,
+                        color = if (!notificacao.vista) MaterialTheme.colorScheme.onSecondaryContainer
                         else MaterialTheme.colorScheme.onSurface
                     )
 
@@ -316,7 +333,7 @@ fun UpdateCard(
                     Text(
                         text = message,
                         fontSize = 14.sp,
-                        color = if (!notificacao.vista) MaterialTheme.colorScheme.onTertiaryContainer
+                        color = if (!notificacao.vista) MaterialTheme.colorScheme.onSecondaryContainer
                         else MaterialTheme.colorScheme.onSurface
                     )
 
@@ -327,7 +344,7 @@ fun UpdateCard(
                             Surface(
                                 shape = RoundedCornerShape(4.dp),
                                 color = if (!notificacao.vista)
-                                    MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f)
+                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
                                 else
                                     MaterialTheme.colorScheme.surfaceContainerHighest
                             ) {
@@ -336,7 +353,7 @@ fun UpdateCard(
                                     fontSize = 13.sp,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                     color = if (!notificacao.vista)
-                                        MaterialTheme.colorScheme.onTertiaryContainer
+                                        MaterialTheme.colorScheme.onSecondary
                                     else
                                         MaterialTheme.colorScheme.onSurface
                                 )
