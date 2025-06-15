@@ -47,13 +47,13 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.finalproject.R
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.ui.theme.primaryLight
 
 
 @Composable
 fun AddWorkerDialog(
-    users: List<User>,
+    users: List<Utilizador>,
     onDismiss: () -> Unit,
     onAdd: (List<String>) -> Unit
 ) {
@@ -124,7 +124,7 @@ fun AddWorkerDialog(
 
 @Composable
 private fun WorkerSelectionCard(
-    worker: User,
+    worker: Utilizador,
     isSelected: Boolean,
     onSelectionChange: (Boolean) -> Unit
 ) {

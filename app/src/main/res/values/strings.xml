@@ -264,4 +264,15 @@
     <string name="search">Search</string>
     <string name="select_option">Select an option</string>
     <string name="confirm_delete_observation">Are you sure you want to delete this observation? This action cannot be undone.</string>
+    <string name="debug_loading_projects">Loading projects with repository: %1$s</string>
+    <string name="debug_projects_loaded">Projects loaded: %1$d</string>
+    <string name="debug_projects_error">Error loading projects: %1$s</string>
+    <string name="no_search_results">No results found for your search</string>
+    <string name="loading_tasks">Loading tasks…</string>
+    <string name="error_project_name_empty">The project name cannot be empty</string>
+    <string name="error_completion_rate_range">The completion rate must be between 0 and 100</string>
+    <string name="error_project_id_missing">Project ID not provided. Cannot edit.</string>
+    <string name="error_project_update_failed">Failed to update the project</string>
+    <string name="error_project_update_exception">Error updating project: %1$s</string>
+    <string name="error_project_create_failed">Failed while creating the Project</string>
 </resources>

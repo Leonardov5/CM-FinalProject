@@ -1,6 +1,6 @@
 package com.example.finalproject.data.repository
 
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.data.service.AuthService
 import com.example.finalproject.data.service.SupabaseProvider
 import io.github.jan.supabase.postgrest.from
@@ -14,21 +14,21 @@ class UtilizadorRepository {
         return AuthService.login(email, password)
     }
 
-    fun getCurrentUser(): User? {
+    fun getCurrentUser(): Utilizador? {
         val userId = AuthService.getCurrentUserId() ?: return null
         val userEmail = AuthService.getCurrentUserEmail() ?: return null
 
-        return User(
+        return Utilizador(
             id = userId,
             email = userEmail
         )
     }
 
-    suspend fun listarTodosUtilizadores(): List<User> {
+    suspend fun listarTodosUtilizadores(): List<Utilizador> {
         return try {
             SupabaseProvider.client.from("utilizador")
                 .select()
-                .decodeList<User>()
+                .decodeList<Utilizador>()
         } catch (e: Exception) {
             e.printStackTrace()
             emptyList()

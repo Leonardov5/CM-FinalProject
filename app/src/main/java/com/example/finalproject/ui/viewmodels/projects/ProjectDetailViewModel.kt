@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.model.Projeto
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.data.model.UserProject
 import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
@@ -25,7 +25,6 @@ class ProjectDetailViewModel(
     private val analyticsExporter: ProjectAnalyticsExporter = ProjectAnalyticsExporter()
 ) : ViewModel() {
 
-    // Estados UI
     var projeto by mutableStateOf<Projeto?>(null)
         private set
 
@@ -35,7 +34,7 @@ class ProjectDetailViewModel(
     var isAdmin by mutableStateOf(false)
         private set
 
-    var user by mutableStateOf<User?>(null)
+    var user by mutableStateOf<Utilizador?>(null)
         private set
 
     var showFabActions by mutableStateOf(false)
@@ -59,7 +58,7 @@ class ProjectDetailViewModel(
     var showAddMemberDialog by mutableStateOf(false)
         private set
 
-    var allUsers by mutableStateOf<List<User>>(emptyList())
+    var allUsers by mutableStateOf<List<Utilizador>>(emptyList())
         private set
 
     var isManager by mutableStateOf(false)
@@ -84,7 +83,6 @@ class ProjectDetailViewModel(
     }
 
     fun onViewTasksClick() {
-        println("DEBUG - onViewTasksClick chamado com projeto: $projeto")
         navigateToTasksForProject = projeto?.id?.toString()
     }
 
@@ -121,8 +119,7 @@ class ProjectDetailViewModel(
         showDeleteConfirmDialog = false
     }
 
-    // Carregar o usuário atual
-    fun loadUser(currentUser: User? = null) {
+    fun loadUser(currentUser: Utilizador? = null) {
         viewModelScope.launch {
             try {
                 user = currentUser ?: UserService.getCurrentUserData()
@@ -133,7 +130,6 @@ class ProjectDetailViewModel(
         }
     }
 
-    // Carregar detalhes do projeto
     fun loadProject(projetoId: String) {
         viewModelScope.launch {
             isLoading = true
@@ -148,7 +144,6 @@ class ProjectDetailViewModel(
         }
     }
 
-    // Editar projeto
     fun updateProject(
         projetoId: String,
         nome: String,
@@ -174,7 +169,6 @@ class ProjectDetailViewModel(
         }
     }
 
-    // Adicionar tarefa
     fun addTask(
         projetoId: String,
         nome: String,
@@ -204,7 +198,6 @@ class ProjectDetailViewModel(
         }
     }
 
-    // Apagar projeto
     fun deleteProject(projetoId: String) = viewModelScope.launch {
         try {
             val result = projetoRepository.eliminarProjeto(UUID.fromString(projetoId))
@@ -220,7 +213,6 @@ class ProjectDetailViewModel(
         val result = projetoRepository.adicionarUtilizadorProjeto(userId, projeto?.id.toString(), isManager)
         if (result) {
             hideAddMemberDialog()
-            // Recarregar a lista de membros
             projeto?.id?.toString()?.let { loadMembrosProjetoCompleto(it) }
         }
     }
@@ -233,19 +225,11 @@ class ProjectDetailViewModel(
         }
     }
 
-    // Carregar membros do projeto com informações completas (usando JOIN)
     fun loadMembrosProjetoCompleto(projectId: String) {
         viewModelScope.launch {
             try {
-                // Obter membros do projeto com informações completas usando JOIN
                 membrosProjetoCompleto = projetoRepository.listarMembrosProjetoCompleto(projectId)
 
-                // imprimir a lista de membros para depuração
-                membrosProjetoCompleto.forEach {
-                    println("Membro: ${it}, Gestor: ${it.isManager}")
-                }
-
-                // Verifica se o usuário atual é gestor
                 isManager = membrosProjetoCompleto.any {
                     it.userId == user?.id && it.isManager
                 }
@@ -255,12 +239,6 @@ class ProjectDetailViewModel(
         }
     }
 
-    // Verifica se um usuário específico é gestor do projeto
-    fun isUserManager(userId: String): Boolean {
-        return membrosProjetoCompleto.any { it.userId == userId && it.isManager }
-    }
-
-    // Funções para manipular o diálogo de detalhes do worker
     fun showWorkerDetailDialog(worker: UserProject) {
         selectedWorker = worker
         showWorkerDetailDialog = true

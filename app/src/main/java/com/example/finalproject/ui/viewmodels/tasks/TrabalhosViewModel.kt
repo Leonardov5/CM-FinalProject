@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.model.Trabalho
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
 import com.example.finalproject.data.repository.TrabalhoRepository
@@ -17,19 +17,15 @@ import kotlinx.coroutines.launch
 
 class TrabalhosViewModel : ViewModel() {
 
-    // Dados dos trabalhos
     var trabalhos by mutableStateOf<List<Trabalho>>(emptyList())
         private set
 
-    // Usuários associados aos trabalhos
-    var usuarios by mutableStateOf<Map<String, User>>(emptyMap())
+    var utilizadores by mutableStateOf<Map<String, Utilizador>>(emptyMap())
         private set
 
-    // Informações da tarefa relacionada
     var tarefa by mutableStateOf<Tarefa?>(null)
         private set
 
-    // Estados da interface
     var isLoading by mutableStateOf(false)
         private set
 
@@ -39,8 +35,7 @@ class TrabalhosViewModel : ViewModel() {
     var tarefaId by mutableStateOf<String?>(null)
         private set
 
-    // Dados do usuário atual e permissões
-    var user by mutableStateOf<User?>(null)
+    var user by mutableStateOf<Utilizador?>(null)
         private set
 
     var isAdminUser by mutableStateOf(false)
@@ -49,13 +44,11 @@ class TrabalhosViewModel : ViewModel() {
     var isManager by mutableStateOf(false)
         private set
 
-    // Repositórios
     private val trabalhoRepository = TrabalhoRepository()
     private val tarefaRepository = TarefaRepository()
     private val utilizadorRepository = UtilizadorRepository()
     private val projetoRepository = ProjetoRepository()
 
-    // Função para carregar os trabalhos de uma tarefa
     fun carregarTrabalhos(tarefaId: String) {
         this.tarefaId = tarefaId
         isLoading = true
@@ -63,17 +56,14 @@ class TrabalhosViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                // Carregar a tarefa associada
                 tarefa = tarefaRepository.obterTarefaPorId(tarefaId)
 
-                // Carregar os trabalhos da tarefa
                 trabalhos = trabalhoRepository.listarTrabalhosPorTarefa(tarefaId)
 
-                // Carregar dados dos usuários que criaram os trabalhos
-                val usuariosIds = trabalhos.mapNotNull { it.createdBy }.distinct()
-                if (usuariosIds.isNotEmpty()) {
-                    val listaUsuarios = utilizadorRepository.listarTodosUtilizadores()
-                    usuarios = listaUsuarios.filter { it.id in usuariosIds }.associateBy { it.id ?: "" }
+                val utilizadoresIds = trabalhos.mapNotNull { it.createdBy }.distinct()
+                if (utilizadoresIds.isNotEmpty()) {
+                    val listaUtilizadores = utilizadorRepository.listarTodosUtilizadores()
+                    utilizadores = listaUtilizadores.filter { it.id in utilizadoresIds }.associateBy { it.id ?: "" }
                 }
             } catch (e: Exception) {
                 error = "Erro ao carregar trabalhos: ${e.message}"
@@ -83,14 +73,12 @@ class TrabalhosViewModel : ViewModel() {
         }
     }
 
-    // Função para obter informações do usuário
-    fun loadUser(currentUser: User? = null) {
+    fun loadUser(currentUser: Utilizador? = null) {
         viewModelScope.launch {
             try {
                 user = currentUser ?: UserService.getCurrentUserData()
                 isAdminUser = user?.admin == true
 
-                // Verificar se é gerente do projeto
                 tarefa?.projetoId?.let { projetoId ->
                     isManager = verificarGerente(projetoId, user?.id)
                 }
@@ -100,7 +88,6 @@ class TrabalhosViewModel : ViewModel() {
         }
     }
 
-    // Função para verificar se o usuário é gerente do projeto
     private suspend fun verificarGerente(projetoId: String, userId: String?): Boolean {
         if (userId == null) return false
 
@@ -112,13 +99,11 @@ class TrabalhosViewModel : ViewModel() {
         }
     }
 
-    // Função para obter um usuário pelo ID
-    fun obterUsuario(userId: String?): User? {
-        return if (userId != null) usuarios[userId] else null
+    fun obterUtilizador(userId: String?): Utilizador? {
+        return if (userId != null) utilizadores[userId] else null
     }
 
-    // Função para excluir um trabalho (apenas para admin ou gerente)
-    fun excluirTrabalho(trabalhoId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+    fun eliminarTrabalho(trabalhoId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         if (!isAdminUser && !isManager) {
             onError("Você não tem permissão para excluir trabalhos")
             return
@@ -131,7 +116,6 @@ class TrabalhosViewModel : ViewModel() {
                 val sucesso = trabalhoRepository.eliminarTrabalho(trabalhoId)
 
                 if (sucesso) {
-                    // Recarregar trabalhos se a exclusão for bem-sucedida
                     tarefaId?.let { carregarTrabalhos(it) }
                     onSuccess()
                 } else {

@@ -5,29 +5,26 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.finalproject.R
 import com.example.finalproject.data.model.Projeto
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.data.repository.ProjetoRepository
-import com.example.finalproject.data.repository.TarefaRepository
 import com.example.finalproject.data.service.UserService
 import kotlinx.coroutines.launch
 
 class ProjectsViewModel(
     private val projetoRepository: ProjetoRepository = ProjetoRepository(),
-    private val tarefaRepository: TarefaRepository = TarefaRepository()
 ) : ViewModel() {
 
-    // Estados UI
     var projects by mutableStateOf<List<Projeto>>(emptyList())
         private set
 
-    // Lista original para armazenar todos os projetos sem filtro
     private var allProjects = listOf<Projeto>()
 
     var isLoading by mutableStateOf(false)
         private set
 
-    var user by mutableStateOf<User?>(null)
+    var user by mutableStateOf<Utilizador?>(null)
         private set
 
     var isAdmin by mutableStateOf(false)
@@ -45,7 +42,6 @@ class ProjectsViewModel(
     var projectDescription by mutableStateOf("")
         private set
 
-    // Funções para manipular estados
     fun onProjectNameChange(name: String) {
         projectName = name
     }
@@ -60,43 +56,35 @@ class ProjectsViewModel(
 
     fun hideAddProjectDialog() {
         showAddDialog = false
-        // Limpar os campos quando o diálogo for fechado
         projectName = ""
         projectDescription = ""
     }
 
-    // Carregar usuário e verificar se é admin
     fun loadUser() {
         viewModelScope.launch {
             try {
                 user = UserService.getCurrentUserData()
                 isAdmin = user?.admin == true
-                println("DEBUG - Usuário carregado: $user")
-                println("DEBUG - Usuário é admin: $isAdmin")
             } catch (e: Exception) {
-                println("DEBUG - Erro ao carregar usuário: ${e.message}")
+                e.printStackTrace()
             }
         }
     }
 
-    // Carregar projetos
     fun loadProjects() {
         viewModelScope.launch {
             try {
                 isLoading = true
-                println("DEBUG - Carregando projetos com repositório: $projetoRepository")
                 allProjects = projetoRepository.listarProjetos()
                 projects = allProjects
-                println("DEBUG - Projetos carregados: ${projects.size}")
             } catch (e: Exception) {
-                println("DEBUG - Erro ao carregar projetos: ${e.message}")
+                e.printStackTrace()
             } finally {
                 isLoading = false
             }
         }
     }
 
-    // Filtrar projetos com base na consulta de pesquisa
     fun filterProjects(query: String) {
         if (query.isBlank()) {
             projects = allProjects
@@ -111,20 +99,18 @@ class ProjectsViewModel(
         projects = filteredList
     }
 
-    // Resetar filtro e mostrar todos os projetos
     fun resetFilter() {
         projects = allProjects
     }
 
-    // Criar um novo projeto
-    fun createProject(onSuccess: () -> Unit, onError: (String) -> Unit) {
-        if (projectName.isBlank()) {
-            onError("Nome do projeto é obrigatório")
-            return
-        }
+    fun createProject(onSuccess: () -> Unit, onError: (Int) -> Unit) {
 
         viewModelScope.launch {
             try {
+                if (projectName.isBlank()) {
+                    onError(R.string.error_project_name_empty)
+                    return@launch
+                }
                 isLoading = true
                 val novoProjeto = projetoRepository.criarProjeto(
                     nome = projectName,
@@ -132,16 +118,16 @@ class ProjectsViewModel(
                 )
 
                 if (novoProjeto != null) {
-                    // Atualiza a lista de projetos
                     allProjects = projetoRepository.listarProjetos()
                     projects = allProjects
                     hideAddProjectDialog()
                     onSuccess()
                 } else {
-                    onError("Erro ao criar projeto")
+                    onError(R.string.error_project_create_failed)
                 }
             } catch (e: Exception) {
-                onError("Erro: ${e.message}")
+                e.printStackTrace()
+                onError(R.string.error_project_create_failed)
             } finally {
                 isLoading = false
             }

@@ -30,12 +30,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.ui.theme.primaryLight
 
 @Composable
 fun WorkerCardTask(
-    worker: User,
+    worker: Utilizador,
     onClick: (String) -> Unit = {}
 ) {
     Card(

@@ -23,7 +23,6 @@ class TaskAnalyticsExporter(
     private val tarefaRepository: TarefaRepository = TarefaRepository()
 ) : ViewModel() {
 
-    // UI states
     var isLoading by mutableStateOf(false)
         private set
 
@@ -56,14 +55,10 @@ class TaskAnalyticsExporter(
         }
     }
 
-    /**
-     * Export analytics data to file
-     */
     fun exportAnalytics(taskId: String, filePath: String, format: TaskExportFormat = TaskExportFormat.CSV) {
         viewModelScope.launch {
             try {
                 val data = analyticsData ?: run {
-                    // Try loading data if not already loaded
                     val result = tarefaRepository.getTaskAnalytics(taskId)
                     if (result == null) {
                         setError("No data to export")
@@ -78,7 +73,6 @@ class TaskAnalyticsExporter(
                     TaskExportFormat.TXT -> generateTxtContent(data)
                 }
 
-                // Ensure the file has the correct extension
                 val finalFilePath = if (!filePath.endsWith(format.extension)) {
                     "$filePath${format.extension}"
                 } else {
@@ -94,17 +88,11 @@ class TaskAnalyticsExporter(
         }
     }
 
-    /**
-     * Set error message and update export success status
-     */
     fun setError(message: String) {
         errorMessage = message
         exportSuccess = false
     }
 
-    /**
-     * Generate CSV content
-     */
     private fun generateCsvContent(data: TaskAnalytics): String {
         return buildString {
             append("Task Analytics Report\n")
@@ -134,9 +122,6 @@ class TaskAnalyticsExporter(
         }
     }
 
-    /**
-     * Generate JSON content
-     */
     private fun generateJsonContent(data: TaskAnalytics): String {
         return buildString {
             append("{\n")
@@ -168,9 +153,6 @@ class TaskAnalyticsExporter(
         }
     }
 
-    /**
-     * Generate TXT content
-     */
     private fun generateTxtContent(data: TaskAnalytics): String {
         return buildString {
             append("Task Analytics Report\n")
@@ -201,9 +183,6 @@ class TaskAnalyticsExporter(
         }
     }
 
-    /**
-     * Reset states after export operation
-     */
     fun resetExportState() {
         exportSuccess = null
         errorMessage = null

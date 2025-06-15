@@ -134,15 +134,6 @@ fun LoginScreen(
                     }
                 )
 
-                if (viewModel.errorMessage != null) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = viewModel.errorMessage!!,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(

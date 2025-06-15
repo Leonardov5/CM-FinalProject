@@ -52,18 +52,18 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.finalproject.R
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.ui.theme.primaryLight
 
 @Composable
 fun AddMemberDialog(
     isAdmin: Boolean,
-    users: List<User>,
+    users: List<Utilizador>,
     onDismiss: () -> Unit,
     onAdd: (String, Boolean) -> Unit
 ) {
     var search by remember { mutableStateOf("") }
-    var selectedUser by remember { mutableStateOf<User?>(null) }
+    var selectedUser by remember { mutableStateOf<Utilizador?>(null) }
     var isManager by remember { mutableStateOf(false) }
 
     val filteredUsers = users.filter {
@@ -188,7 +188,7 @@ fun AddMemberDialog(
 
 @Composable
 private fun MemberCard(
-    user: User,
+    user: Utilizador,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {

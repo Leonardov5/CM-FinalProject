@@ -3,9 +3,6 @@ package com.example.finalproject.data.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/**
- * Modelo de dados para representar um projeto
- */
 @Serializable
 data class Projeto(
     @SerialName("projeto_uuid")

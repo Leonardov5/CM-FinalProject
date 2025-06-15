@@ -1,6 +1,6 @@
 package com.example.finalproject.data.service
 
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +20,7 @@ object UserService {
             val userId = AuthService.getCurrentUserId() ?: return false
             val now = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
 
-            val user = User(
+            val user = Utilizador(
                 id = userId,
                 username = username,
                 nome = nome,
@@ -39,7 +39,6 @@ object UserService {
                     put("updated_at", now)
                 }
 
-                // Usando o método upsert com o JsonObject em vez do objeto User
                 supabase.from(USERS_TABLE)
                     .upsert(userJson)
             }
@@ -51,7 +50,7 @@ object UserService {
         }
     }
 
-    suspend fun getCurrentUserData(): User? {
+    suspend fun getCurrentUserData(): Utilizador? {
         return try {
             val userId = AuthService.getCurrentUserId() ?: return null
 
@@ -63,14 +62,12 @@ object UserService {
                         }
                         limit(1)
                     }
-                    .decodeList<User>()
+                    .decodeList<Utilizador>()
 
                 val user = users.firstOrNull()
                 if (user != null) {
-                    // Obter o email atualizado diretamente do AuthService
                     val email = AuthService.getCurrentUserEmail() ?: ""
                     user.email = email
-                    println("Email do usuário: $email")
                 }
                 user
             }

@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.model.TarefaStatus
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
 import com.example.finalproject.data.service.UserService
@@ -33,7 +33,7 @@ class TaskManagementViewModel(
 
     var showProjectDialog by mutableStateOf(false)
 
-    fun checkUser(currentUser: User? = null) {
+    fun checkUser(currentUser: Utilizador? = null) {
         viewModelScope.launch {
             try {
                 val user = currentUser ?: UserService.getCurrentUserData()
@@ -51,7 +51,7 @@ class TaskManagementViewModel(
                 isLoading = true
                 tasks = taskRepository.listarTarefas()
             } catch (e: Exception) {
-                println("DEBUG - Erro ao carregar tarefas: ${e.message}")
+                e.printStackTrace()
             } finally {
                 isLoading = false
             }
@@ -65,11 +65,9 @@ class TaskManagementViewModel(
         viewModelScope.launch {
             try {
                 isLoading = true
-                println("DEBUG - Carregando projetos com repositório: $projetoRepository")
                 projects = projetoRepository.listarProjetos()
-                println("DEBUG - Projetos carregados: ${projects.size}")
             } catch (e: Exception) {
-                println("DEBUG - Erro ao carregar projetos: ${e.message}")
+                e.printStackTrace()
             } finally {
                 isLoading = false
             }
@@ -85,8 +83,6 @@ class TaskManagementViewModel(
 
     val filteredTasks: List<Tarefa>
         get() = tasks.filter {
-            println("DEBUG - Filtrando tarefa: ${it.nome}, projetoId: ${it.projetoId}, selectedProject: ${selectedProject?.id}")
-            println("Debug - status: ${it.status}, selectedTab: ${selectedTab.name}")
             it.status == selectedTab.name &&
                     (selectedProject?.id == null || it.projetoId == selectedProject?.id)
         }

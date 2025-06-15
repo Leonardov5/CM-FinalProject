@@ -1,15 +1,18 @@
 package com.example.finalproject.ui.viewmodels.auth
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.finalproject.R
 import com.example.finalproject.data.service.AuthService
 import com.example.finalproject.data.service.UserService
 import kotlinx.coroutines.launch
 
-class RegisterViewModel : ViewModel() {
+
+class RegisterViewModel(application: Application) : AndroidViewModel(application) {
 
     var name by mutableStateOf("")
         private set
@@ -93,20 +96,19 @@ class RegisterViewModel : ViewModel() {
     }
 
     fun register() {
-        // Validação
         if (name.isBlank() || username.isBlank() || email.isBlank() ||
             password.isBlank() || confirmPassword.isBlank()) {
-            errorMessage = "Todos os campos são obrigatórios"
+            errorMessage = getApplication<Application>().getString(R.string.fill_all_fields)
             return
         }
 
         if (password != confirmPassword) {
-            errorMessage = "As senhas não coincidem"
+            errorMessage = getApplication<Application>().getString(R.string.passwords_do_not_match)
             return
         }
 
         if (password.length < 6) {
-            errorMessage = "A senha deve ter pelo menos 6 caracteres"
+            errorMessage = getApplication<Application>().getString(R.string.password_too_short)
             return
         }
 
@@ -128,20 +130,23 @@ class RegisterViewModel : ViewModel() {
                         )
 
                         if (userDataSaved) {
-                            successMessage = "Registro realizado com sucesso!"
+                            successMessage = getApplication<Application>().getString(R.string.registration_success)
                             isRegistrationSuccessful = true
                         } else {
-                            warningMessage = "Usuário criado, mas houve erro ao salvar dados adicionais"
+                            warningMessage = getApplication<Application>().getString(R.string.user_data_save_error)
                             isRegistrationSuccessful = true
                         }
                     } else {
-                        errorMessage = "Falha no login automático após registro"
+                        errorMessage = getApplication<Application>().getString(R.string.auto_login_failed)
                     }
                 } else {
-                    errorMessage = "Falha no registro do usuário"
+                    errorMessage = getApplication<Application>().getString(R.string.registration_failed)
                 }
             } catch (e: Exception) {
-                errorMessage = "Erro ao registrar usuário: ${e.message ?: "Erro desconhecido"}"
+                errorMessage = getApplication<Application>().getString(
+                    R.string.registration_error,
+                    e.message ?: getApplication<Application>().getString(R.string.unknown_error)
+                )
             } finally {
                 isLoading = false
             }

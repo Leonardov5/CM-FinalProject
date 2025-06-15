@@ -198,7 +198,7 @@ class ProfileViewModel: ViewModel() {
                         }
                     }
                 } else {
-                    errorMessage = "Usuário não autenticado."
+                    errorMessage = "Utilizador não autenticado."
                 }
             } catch (e: Exception) {
                 errorMessage = "Erro ao carregar dados: ${e.message}"
@@ -244,9 +244,9 @@ class ProfileViewModel: ViewModel() {
                             updatedAt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
                         )
                         userDao.insertOrUpdate(localUser)
-                        successMessage = "Alterações salvas localmente. Serão sincronizadas quando online."
+                        successMessage = "Alterações salvas localmente. Serão sincronizadas quando estiver online."
                     } else {
-                        errorMessage = "Usuário não autenticado. Não foi possível salvar localmente."
+                        errorMessage = "Utilizador não autenticado. Não foi possível salvar localmente."
                     }
                 }
             } catch (e: Exception) {
@@ -257,7 +257,6 @@ class ProfileViewModel: ViewModel() {
         }
     }
 
-    // Função para verificar se o email foi alterado e decidir o fluxo de salvamento
     fun saveProfileChanges(context: Context) {
         if (email != originalEmail) {
             showEmailPasswordDialog = true
@@ -266,7 +265,6 @@ class ProfileViewModel: ViewModel() {
         }
     }
 
-    // Função para salvar o perfil com alteração de email (requer verificação de senha)
     fun saveProfileWithEmailChange(password: String) {
         viewModelScope.launch {
             isSaving = true
@@ -274,93 +272,82 @@ class ProfileViewModel: ViewModel() {
             successMessage = null
 
             try {
-                // Primeiro, verificar se a senha está correta e atualizar o email na autenticação
                 val emailUpdateSuccess = AuthService.updateEmail(email, password)
 
                 if (emailUpdateSuccess) {
-                    // Depois de atualizar o email na autenticação, atualizamos no banco de dados
                     val updateInDbSuccess = UserService.updateUserData(
                         username = username,
                         nome = name
                     )
 
                     if (updateInDbSuccess) {
-                        successMessage = "Perfil atualizado com sucesso! Verifique seu email para confirmar a alteração."
-                        originalEmail = email // Atualizar o email original para evitar repetir o diálogo
-                    } else {
+                        successMessage = "Perfil atualizado com sucesso! Verifique o seu email para confirmar a alteração."
+                        originalEmail = email
                         errorMessage = "Email atualizado na autenticação, mas houve um problema ao atualizar o perfil no banco de dados."
                     }
                 } else {
-                    // Senha incorreta ou problema ao atualizar o email
-                    errorMessage = "Senha incorreta ou problema ao atualizar o email."
-                    email = originalEmail // Restaurar o email original
+                    errorMessage = "Palavra-passe incorreta ou problema ao atualizar o email."
+                    email = originalEmail
                 }
             } catch (e: Exception) {
                 errorMessage = "Erro ao atualizar: ${e.message}"
-                email = originalEmail // Restaurar o email original em caso de erro
+                email = originalEmail
             } finally {
                 isSaving = false
-                passwordForEmailChange = "" // Limpar a senha por segurança
+                passwordForEmailChange = ""
                 showEmailPasswordDialog = false
             }
         }
     }
 
-    // Função para atualizar a senha
     fun updatePassword() {
         viewModelScope.launch {
-            // Validar as senhas
             if (currentPassword.isBlank()) {
-                errorMessage = "A senha atual é obrigatória"
+                errorMessage = "A palavra-passe atual é obrigatória"
                 return@launch
             }
 
             if (newPassword.isBlank()) {
-                errorMessage = "A nova senha é obrigatória"
+                errorMessage = "A nova palavra-passe é obrigatória"
                 return@launch
             }
 
             if (newPassword != confirmPassword) {
-                errorMessage = "As senhas não coincidem"
+                errorMessage = "As palavras-passe não coincidem"
                 return@launch
             }
 
             if (newPassword.length < 6) {
-                errorMessage = "A senha deve ter pelo menos 6 caracteres"
+                errorMessage = "A palavra-passe deve ter pelo menos 6 caracteres"
                 return@launch
             }
 
-            // Limpar mensagens anteriores
             errorMessage = null
             successMessage = null
 
-            // Mostrar indicador de loading
             isSaving = true
 
             try {
-                // Chamar o serviço para atualizar a senha
                 val success = AuthService.updatePassword(currentPassword, newPassword)
 
                 if (success) {
-                    successMessage = "Senha atualizada com sucesso!"
-                    // Limpar os campos de senha
+                    successMessage = "Palavra-passe atualizada com sucesso!"
+
                     currentPassword = ""
                     newPassword = ""
                     confirmPassword = ""
-                    // Fechar a seção de alteração de senha
                     isPasswordChangeVisible = false
                 } else {
-                    errorMessage = "Não foi possível atualizar a senha. Verifique se a senha atual está correta."
+                    errorMessage = "Não foi possível atualizar a palavra-passe. Verifique se a palavra-passe atual está correta."
                 }
             } catch (e: Exception) {
-                errorMessage = "Erro ao atualizar a senha: ${e.message}"
+                errorMessage = "Erro ao atualizar a palavra-passe: ${e.message}"
             } finally {
                 isSaving = false
             }
         }
     }
 
-    // Função para fazer upload da imagem de perfil
     fun uploadProfileImage(context: Context, uri: Uri) {
         viewModelScope.launch {
             isUploadingImage = true

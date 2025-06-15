@@ -50,11 +50,14 @@ android {
 }
 
 dependencies {
+
+    // Supabase
     implementation(libs.postgrest.kt)
     implementation(libs.gotrue.kt)
     implementation(libs.storage.kt)
     implementation(libs.ktor.client.android)
 
+    // Coil para carregar de imagens
     implementation(libs.coil.compose)
 
     implementation(libs.androidx.material.icons.extended)

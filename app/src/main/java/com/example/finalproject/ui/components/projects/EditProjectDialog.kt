@@ -28,16 +28,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalproject.R
 import com.example.finalproject.data.model.Projeto
 import com.example.finalproject.ui.components.dropdown.DropdownMenuBox
 import com.example.finalproject.ui.viewmodels.projects.EditProjectViewModel
+import android.app.Application
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,8 +51,20 @@ fun EditProjectDialog(
     projeto: Projeto? = null,
     onDismiss: () -> Unit,
     onSaveProject: (nome: String, descricao: String, status: String, taxaConclusao: Float) -> Unit,
-    viewModel: EditProjectViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val viewModel: EditProjectViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return EditProjectViewModel(
+                    application = context.applicationContext as Application
+                ) as T
+            }
+        }
+    )
+
+
     if (!show) return
 
     val isEditing = projeto != null
