@@ -209,7 +209,7 @@ fun UpdatesScreen(
                 CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else {
-            // Notifications list
+            // Lista de notificacoes
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -259,7 +259,7 @@ fun UpdateCard(
         onClick = { onClick(id) }
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            // Close notification button
+            // Botao de fechar notificacao
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
