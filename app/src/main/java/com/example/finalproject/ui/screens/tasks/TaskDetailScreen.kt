@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
@@ -185,6 +186,33 @@ fun TaskDetailScreen(
                                 showLogWorkDialog = true
                             }
                         )
+                        // Botão para marcar a tarefa como concluída (disponível para todos os usuários)
+                        if (viewModel.task?.status != TarefaStatus.concluida.name) {
+                            ActionButton(
+                                icon = Icons.Default.Done,
+                                label = stringResource(id = R.string.mark_as_completed_task),
+                                onClick = {
+                                    showFabActions = false
+                                    viewModel.task?.id?.let { taskId ->
+                                        viewModel.marcarTarefaComoConcluida(taskId) { sucesso ->
+                                            if (sucesso) {
+                                                Toast.makeText(
+                                                    context,
+                                                    context.getString(R.string.task_updated_successfully),
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    context.getString(R.string.task_update_failed),
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }
+                                    }
+                                }
+                            )
+                        }
                         if( viewModel.isAdmin) {
                             ActionButton(
                                 icon = Icons.Default.Delete,

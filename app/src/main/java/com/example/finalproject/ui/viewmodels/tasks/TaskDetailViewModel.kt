@@ -302,4 +302,38 @@ class TaskDetailViewModel(
             }
         }
     }
+
+    fun marcarTarefaComoConcluida(tarefaId: String, onComplete: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            try {
+                isLoading = true
+                val tarefaAtual = task
+                if (tarefaAtual != null) {
+                    val sucesso = taskRepository.atualizarTarefa(
+                        tarefaId = tarefaId,
+                        nome = tarefaAtual.nome,
+                        descricao = tarefaAtual.descricao ?: "",
+                        prioridade = tarefaAtual.prioridade,
+                        status = TarefaStatus.concluida.name,
+                        dataInicio = tarefaAtual.dataInicio,
+                        dataFim = tarefaAtual.dataFim,
+                        taxaConclusao = 100.0
+                    )
+
+                    if (sucesso) {
+                        loadTask(tarefaId)
+                    }
+
+                    onComplete(sucesso)
+                } else {
+                    onComplete(false)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                onComplete(false)
+            } finally {
+                isLoading = false
+            }
+        }
+    }
 }

@@ -286,4 +286,6 @@
     <string name="profile_email_update_error">Erro ao atualizar o email. Verifique a palavra-passe ou se o email já está em uso.</string>
     <string name="password_update_server_error">Erro ao atualizar a palavra-passe no servidor</string>
     <string name="logout_success">Sessão terminada com sucesso</string>
+    <string name="notification_user_added_as_manager_title">Adicionado como Gestor</string>
+    <string name="notification_user_added_as_manager_message">Foi adicionado como gestor a um projeto</string>
 </resources>
