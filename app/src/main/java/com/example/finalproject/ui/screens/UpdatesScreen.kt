@@ -63,6 +63,7 @@ import kotlin.math.round
 @Composable
 private fun getTitleFromNotificacao(notificacao: Notificacao): String {
     return when (notificacao.mensagem) {
+        "USER_ADDED_AS_MANAGER_TO_PROJECT" -> stringResource(R.string.notification_user_added_as_manager_title)
         "USER_ADDED_TO_TASK" -> stringResource(R.string.notification_user_added_to_task_title)
         "USER_ADDED_TO_PROJECT" -> stringResource(R.string.notification_user_added_to_project_title)
         "PROJECT_STATUS_CHANGED_TO_ACTIVE" -> stringResource(R.string.notification_project_status_active_title)
@@ -80,6 +81,7 @@ private fun getTitleFromNotificacao(notificacao: Notificacao): String {
 @Composable
 private fun getMessageFromNotificacao(notificacao: Notificacao): String {
     return when (notificacao.mensagem) {
+        "USER_ADDED_AS_MANAGER_TO_PROJECT" -> stringResource(R.string.notification_user_added_as_manager_message)
         "USER_ADDED_TO_TASK" -> stringResource(R.string.notification_user_added_to_task_message)
         "USER_ADDED_TO_PROJECT" -> stringResource(R.string.notification_user_added_to_project_message)
         "PROJECT_STATUS_CHANGED_TO_ACTIVE" -> stringResource(R.string.notification_project_status_active_message)
