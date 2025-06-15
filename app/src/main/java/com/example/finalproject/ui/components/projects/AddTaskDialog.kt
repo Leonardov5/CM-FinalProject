@@ -152,6 +152,8 @@ fun AddTaskDialog(
                     errorMessage = stringResource(R.string.priority_required)
                 )
 
+                Spacer(modifier = Modifier.height(16.dp))
+
                 DropdownMenuBox(
                     label = stringResource(R.string.status),
                     options = viewModel.statusList.map { statusDisplay(it) },
