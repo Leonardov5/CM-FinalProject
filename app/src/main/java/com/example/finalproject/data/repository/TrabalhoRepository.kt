@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter
 class TrabalhoRepository {
     private val supabase = SupabaseProvider.client
 
-    suspend fun registrarTrabalho(
+    suspend fun registarTrabalho(
         tarefaId: String,
         data: String,
         local: String? = null,
@@ -38,10 +38,9 @@ class TrabalhoRepository {
                 select()
             }.decodeSingle<Trabalho>()
 
-            println("DEBUG - Trabalho registrado: $novoTrabalho")
             novoTrabalho
         } catch (e: Exception) {
-            println("DEBUG - Erro ao registrar trabalho: ${e.message}")
+            e.printStackTrace()
             null
         }
     }
@@ -57,33 +56,14 @@ class TrabalhoRepository {
                 }
                 .decodeList<Trabalho>()
 
-            println("DEBUG - Trabalhos carregados: ${trabalhos.size}")
             trabalhos
         } catch (e: Exception) {
-            println("DEBUG - Erro ao listar trabalhos: ${e.message}")
+            e.printStackTrace()
             emptyList()
         }
     }
 
-    suspend fun getTrabalhoById(trabalhoId: String): Trabalho? {
-        return try {
-            val trabalho = supabase.from("trabalho")
-                .select {
-                    filter {
-                        eq("trabalho_uuid", trabalhoId)
-                    }
-                    limit(1)
-                }
-                .decodeSingle<Trabalho>()
-            trabalho
-        } catch (e: Exception) {
-            println("DEBUG - Erro ao buscar trabalho por id: ${e.message}")
-            null
-        }
-    }
-
-    // Metodo para excluir um trabalho
-    suspend fun excluirTrabalho(trabalhoId: String): Boolean {
+    suspend fun eliminarTrabalho(trabalhoId: String): Boolean {
         return try {
             supabase.from("trabalho")
                 .delete {
@@ -92,17 +72,15 @@ class TrabalhoRepository {
                     }
                 }
 
-            println("DEBUG - Trabalho excluído com sucesso: $trabalhoId")
             true
         } catch (e: Exception) {
-            println("DEBUG - Erro ao excluir trabalho: ${e.message}")
+            e.printStackTrace()
             false
         }
     }
 
-    // Formatar LocalDateTime para string ISO
     @RequiresApi(Build.VERSION_CODES.O)
-    fun formatarDataHora(dataHora: LocalDateTime): String {
+    fun formatarDataHoraParaISO(dataHora: LocalDateTime): String {
         val formatter = DateTimeFormatter.ISO_DATE_TIME
         return dataHora.format(formatter)
     }

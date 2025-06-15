@@ -11,7 +11,7 @@ import com.example.finalproject.data.model.User
 import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
 import com.example.finalproject.data.repository.TrabalhoRepository
-import com.example.finalproject.data.repository.UserRepository
+import com.example.finalproject.data.repository.UtilizadorRepository
 import com.example.finalproject.data.service.UserService
 import kotlinx.coroutines.launch
 
@@ -52,7 +52,7 @@ class TrabalhosViewModel : ViewModel() {
     // Repositórios
     private val trabalhoRepository = TrabalhoRepository()
     private val tarefaRepository = TarefaRepository()
-    private val userRepository = UserRepository()
+    private val utilizadorRepository = UtilizadorRepository()
     private val projetoRepository = ProjetoRepository()
 
     // Função para carregar os trabalhos de uma tarefa
@@ -64,7 +64,7 @@ class TrabalhosViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 // Carregar a tarefa associada
-                tarefa = tarefaRepository.getTarefaById(tarefaId)
+                tarefa = tarefaRepository.obterTarefaPorId(tarefaId)
 
                 // Carregar os trabalhos da tarefa
                 trabalhos = trabalhoRepository.listarTrabalhosPorTarefa(tarefaId)
@@ -72,7 +72,7 @@ class TrabalhosViewModel : ViewModel() {
                 // Carregar dados dos usuários que criaram os trabalhos
                 val usuariosIds = trabalhos.mapNotNull { it.createdBy }.distinct()
                 if (usuariosIds.isNotEmpty()) {
-                    val listaUsuarios = userRepository.listarTodosUsuarios()
+                    val listaUsuarios = utilizadorRepository.listarTodosUtilizadores()
                     usuarios = listaUsuarios.filter { it.id in usuariosIds }.associateBy { it.id ?: "" }
                 }
             } catch (e: Exception) {
@@ -128,7 +128,7 @@ class TrabalhosViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                val sucesso = trabalhoRepository.excluirTrabalho(trabalhoId)
+                val sucesso = trabalhoRepository.eliminarTrabalho(trabalhoId)
 
                 if (sucesso) {
                     // Recarregar trabalhos se a exclusão for bem-sucedida

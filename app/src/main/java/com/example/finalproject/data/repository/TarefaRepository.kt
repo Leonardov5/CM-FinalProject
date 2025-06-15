@@ -1,12 +1,12 @@
 package com.example.finalproject.data.repository
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.service.AuthService
 import com.example.finalproject.data.service.SupabaseProvider
 import com.example.finalproject.data.service.UserService
 import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.query.Order
-import java.nio.file.Files.exists
 
 class TarefaRepository {
 
@@ -42,34 +42,14 @@ class TarefaRepository {
                 select()
             }.decodeSingle<Tarefa>()
 
-            println("DEBUG - Tarefa criada: $novaTarefa")
             novaTarefa
         } catch (e: Exception) {
-            println("DEBUG - Erro ao criar tarefa: ${e.message}")
+            e.printStackTrace()
             null
         }
     }
-    
-    suspend fun listarTarefasPorProjeto(projetoUUID: String): List<Tarefa> {
-        return try {
-            val tarefas = supabase.from("tarefa")
-                .select {
-                    filter {
-                        eq("projeto_uuid", projetoUUID)
-                    }
-                    order("created_at", Order.DESCENDING)
-                }
-                .decodeList<Tarefa>()
-                
-            println("DEBUG - Tarefas carregadas: ${tarefas.size}")
-            tarefas
-        } catch (e: Exception) {
-            println("DEBUG - Erro ao listar tarefas: ${e.message}")
-            emptyList()
-        }
-    }
 
-    suspend fun getTarefaById(taskId: String): Tarefa? {
+    suspend fun obterTarefaPorId(taskId: String): Tarefa? {
         return try {
             val tarefa = supabase.from("tarefa")
                 .select {
@@ -81,12 +61,12 @@ class TarefaRepository {
                 .decodeSingle<Tarefa>()
             tarefa
         } catch (e: Exception) {
-            println("DEBUG - Erro ao buscar tarefa por id: ${e.message}")
+            e.printStackTrace()
             null
         }
     }
 
-    suspend fun adicionarUsuarioATarefa(userId: String, tarefaId: String): Boolean {
+    suspend fun adicionarUtilizadorTarefa(userId: String, tarefaId: String): Boolean {
         return try {
             val result = supabase.from("utilizador_tarefa")
                 .insert(mapOf("utilizador_uuid" to userId, "tarefa_uuid" to tarefaId)) {
@@ -95,11 +75,12 @@ class TarefaRepository {
                 .decodeSingleOrNull<Map<String, String>>()
             true
         } catch (e: Exception) {
+            e.printStackTrace()
             false
         }
     }
 
-    suspend fun removerUsuarioDaTarefa(userId: String, tarefaId: String): Boolean {
+    suspend fun removerUtilizadorDaTarefa(userId: String, tarefaId: String): Boolean {
         return try {
             val result = supabase.from("utilizador_tarefa")
                 .delete {
@@ -110,31 +91,26 @@ class TarefaRepository {
                 }
             true
         } catch (e: Exception) {
+            e.printStackTrace()
             false
         }
     }
 
-    suspend fun getTrabalhadoresDaTarefa(tarefaId: String): List<String> {
+    suspend fun getTrabalhadoresTarefa(tarefaId: String): List<String> {
         return try {
             val result = supabase.from("utilizador_tarefa")
                 .select {
                     filter { eq("tarefa_uuid", tarefaId) }
                 }
                 .decodeList<Map<String, String>>()
-            println("DEBUG - Trabalhadores da tarefa $tarefaId: ${result.size}")
             result.mapNotNull { it["utilizador_uuid"] }
         } catch (e: Exception) {
+            e.printStackTrace()
             emptyList()
         }
     }
 
-    suspend fun getUsuarioJoinDate(userId: String, tarefaId: String): String? {
-        // Verificar se os IDs não estão vazios
-        if (userId.isBlank() || tarefaId.isBlank()) {
-            println("DEBUG - ID de usuário ou tarefa vazios. userId: '$userId', tarefaId: '$tarefaId'")
-            return null
-        }
-
+    suspend fun obterDataEntradaUtilizador(userId: String, tarefaId: String): String? {
         return try {
             val result = supabase.from("utilizador_tarefa")
                 .select {
@@ -149,7 +125,7 @@ class TarefaRepository {
 
             result?.get("created_at")
         } catch (e: Exception) {
-            println("DEBUG - Erro ao buscar data de entrada do usuário $userId: ${e.message}")
+            e.printStackTrace()
             null
         }
     }
@@ -158,12 +134,10 @@ class TarefaRepository {
         return try {
             val currentUser = UserService.getCurrentUserData()
             if (currentUser == null) {
-                println("DEBUG - Usuário atual não encontrado")
                 return emptyList()
             }
 
             if(currentUser.admin){
-                println("DEBUG - Usuário é administrador, retornando todas as tarefas")
                 return supabase.from("tarefa")
                     .select()
                     .decodeList<Tarefa>()
@@ -210,15 +184,14 @@ class TarefaRepository {
 
             val tarefas = (tarefasDiretas + tarefasGestor).distinctBy { it.id }
 
-            println("DEBUG - Tarefas filtradas: ${tarefas.size}")
             tarefas
         } catch (e: Exception) {
-            println("DEBUG - Erro ao listar tarefas: ${e.message}")
+            e.printStackTrace()
             emptyList()
         }
     }
 
-    suspend fun deletarTarefaPorId(taskId: String): Boolean {
+    suspend fun eliminarTarefaPorId(taskId: String): Boolean {
         return try {
             supabase.from("tarefa")
                 .delete {
@@ -226,11 +199,12 @@ class TarefaRepository {
                 }
             true
         } catch (e: Exception) {
-            println("DEBUG - Erro ao deletar tarefa: ${e.message}")
+            e.printStackTrace()
             false
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun atualizarTarefa(
         tarefaId: String,
         nome: String,
@@ -243,9 +217,6 @@ class TarefaRepository {
     ): Boolean {
         return try {
             val currentUserUUID = AuthService.getCurrentUserId()
-            println("DEBUG - Atualizando tarefa: $tarefaId")
-
-            // Criar timestamp ISO 8601 para o campo updated_at
             val currentTimestamp = java.time.OffsetDateTime.now().toString()
 
             supabase.from("tarefa")
@@ -262,21 +233,15 @@ class TarefaRepository {
                 }) {
                     filter { eq("tarefa_uuid", tarefaId) }
                 }
-
-            println("DEBUG - Tarefa atualizada com sucesso: $tarefaId")
             true
         } catch (e: Exception) {
-            println("DEBUG - Erro ao atualizar tarefa: ${e.message}")
+            e.printStackTrace()
             false
         }
     }
 
-    /**
-     * Get analytics data for a specific task
-     */
     suspend fun getTaskAnalytics(taskId: String): com.example.finalproject.data.model.TaskAnalytics? {
         return try {
-            // Query the view_task_analytics view for the specific task
             val result = supabase.from("view_task_analytics")
                 .select {
                     filter {
@@ -285,10 +250,8 @@ class TarefaRepository {
                 }
                 .decodeSingleOrNull<com.example.finalproject.data.model.TaskAnalytics>()
 
-            println("DEBUG - Task analytics loaded for task: $taskId")
             result
         } catch (e: Exception) {
-            println("DEBUG - Error fetching task analytics: ${e.message}")
             e.printStackTrace()
             null
         }

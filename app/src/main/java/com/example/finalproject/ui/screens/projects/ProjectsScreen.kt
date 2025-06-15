@@ -73,7 +73,7 @@ import com.example.finalproject.utils.updateAppLanguage
 fun ProjectsScreen(
     modifier: Modifier = Modifier,
     onProfileClick: () -> Unit = {},
-    onProjectClick: (String) -> Unit = {}, // Callback para navegação para detalhes do projeto
+    onProjectClick: (String) -> Unit = {},
 ) {
     val viewModel: ProjectsViewModel = viewModel()
     var isLanguageLoaded by remember { mutableStateOf(false) }
@@ -184,7 +184,7 @@ fun ProjectsScreen(
                 )
             },
             floatingActionButton = {
-                // Só mostrar o FAB se o usuário for admin
+                // Adicionar projeto apenas para admins
                 if (viewModel.isAdmin) {
                     FloatingActionButton(
                         onClick = {
@@ -205,7 +205,7 @@ fun ProjectsScreen(
             containerColor = MaterialTheme.colorScheme.background,
             contentWindowInsets = WindowInsets(0, 0, 0, 0)
         ) { paddingValues ->
-            // Projects List
+            // Lista de projetos
             if (viewModel.isLoading) {
                 Box(
                     modifier = Modifier
@@ -258,7 +258,7 @@ fun ProjectsScreen(
                 }
             }
 
-            // Diálogo para adicionar novo projeto
+            // Adicionar novo projeto
             if (viewModel.showAddDialog) {
                 Dialog(onDismissRequest = { viewModel.hideAddProjectDialog() }) {
                     Surface(

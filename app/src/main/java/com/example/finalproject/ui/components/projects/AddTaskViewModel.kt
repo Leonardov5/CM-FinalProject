@@ -12,19 +12,15 @@ import java.time.format.DateTimeFormatter
 
 class AddTaskViewModel : ViewModel() {
 
-    // Estado do formulário
     private val _uiState = MutableStateFlow(AddTaskUIState())
     val uiState: StateFlow<AddTaskUIState> = _uiState.asStateFlow()
 
-    // Formatador de data para ISO (para envio ao servidor)
     @RequiresApi(Build.VERSION_CODES.O)
     private val isoFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
 
-    // Listas de opções
     val prioridades = listOf("baixa", "media", "alta", "critica")
     val statusList = listOf("pendente", "em_andamento", "concluida", "cancelada")
 
-    // Funções para atualizar os campos
     fun updateNome(nome: String) {
         _uiState.update { it.copy(
             nome = nome,
@@ -67,7 +63,6 @@ class AddTaskViewModel : ViewModel() {
         ) }
     }
 
-    // Funções para controlar os diálogos de data/hora
     fun showDataInicioDialog() {
         _uiState.update { it.copy(showDataInicioDialog = true) }
     }
@@ -84,7 +79,6 @@ class AddTaskViewModel : ViewModel() {
         _uiState.update { it.copy(showDataFimDialog = false) }
     }
 
-    // Função para validar e submeter o formulário
     @RequiresApi(Build.VERSION_CODES.O)
     fun validateAndSubmitTask(
         onAddTask: (
@@ -98,7 +92,6 @@ class AddTaskViewModel : ViewModel() {
     ): Boolean {
         val currentState = _uiState.value
 
-        // Validar campos obrigatórios
         val isNomeValid = currentState.nome.isNotBlank()
         val isDescricaoValid = currentState.descricao.isNotBlank()
         val isPrioridadeValid = currentState.prioridade.isNotBlank()
@@ -106,7 +99,6 @@ class AddTaskViewModel : ViewModel() {
         val isDataInicioValid = currentState.dataInicio != null
         val isDataFimValid = currentState.dataFim != null
 
-        // Atualizar estado com erros
         _uiState.update { it.copy(
             nomeError = !isNomeValid,
             descricaoError = !isDescricaoValid,
@@ -116,12 +108,10 @@ class AddTaskViewModel : ViewModel() {
             dataFimError = !isDataFimValid
         ) }
 
-        // Verificar se todos os campos são válidos
         val isFormValid = isNomeValid && isDescricaoValid &&
                           isPrioridadeValid && isStatusValid &&
                           isDataInicioValid && isDataFimValid
 
-        // Submeter o formulário se for válido
         if (isFormValid) {
             onAddTask(
                 currentState.nome,
@@ -132,20 +122,17 @@ class AddTaskViewModel : ViewModel() {
                 currentState.dataFim?.format(isoFormatter)
             )
 
-            // Limpar o formulário após submissão
             resetForm()
         }
 
         return isFormValid
     }
 
-    // Função para resetar o formulário
     fun resetForm() {
         _uiState.update { AddTaskUIState() }
     }
 }
 
-// Classe que representa o estado da UI
 data class AddTaskUIState(
     val nome: String = "",
     val descricao: String = "",
@@ -154,7 +141,6 @@ data class AddTaskUIState(
     val dataInicio: LocalDateTime? = null,
     val dataFim: LocalDateTime? = null,
 
-    // Estados de erro
     val nomeError: Boolean = false,
     val descricaoError: Boolean = false,
     val prioridadeError: Boolean = false,
@@ -162,7 +148,6 @@ data class AddTaskUIState(
     val dataInicioError: Boolean = false,
     val dataFimError: Boolean = false,
 
-    // Estados de diálogos
     val showDataInicioDialog: Boolean = false,
     val showDataFimDialog: Boolean = false
 )

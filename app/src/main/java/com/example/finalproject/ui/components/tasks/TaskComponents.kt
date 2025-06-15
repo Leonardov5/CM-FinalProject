@@ -31,16 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.example.finalproject.R
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.model.TarefaStatus
-
-fun formatDate(iso: String?): String? {
-    return try {
-        val isoFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault())
-        val dateFormat = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
-        iso?.let { dateFormat.format(isoFormat.parse(it)) }
-    } catch (e: Exception) {
-        iso
-    }
-}
+import com.example.finalproject.utils.formatDate
 
 @Composable
 fun TabRow(
@@ -112,7 +103,7 @@ fun TaskCard(task: Tarefa, onClick: () -> Unit = {}) {
                 )
 
                 Text(
-                    text = stringResource(id = R.string.created_at) + " " + formatDate(task.createdAt),
+                    text = stringResource(id = R.string.created_at) + " " + formatDate(task.createdAt.toString()),
                     fontSize = 12.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

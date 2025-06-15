@@ -20,14 +20,6 @@ class ProjetoRepository {
     private val supabase = SupabaseProvider.client
     private val PROJETO_TABLE = "projeto"
 
-    /**
-     * Cria um novo projeto
-     * @param nome Nome do projeto
-     * @param descricao Descrição do projeto
-     * @param status Status inicial do projeto
-     * @param taxaConclusao Taxa de conclusão inicial do projeto
-     * @return O projeto criado ou null em caso de falha
-     */
     suspend fun criarProjeto(
         nome: String,
         descricao: String?,
@@ -47,35 +39,25 @@ class ProjetoRepository {
                     put("updated_at", now)
                 }
 
-                println("DEBUG - Criando projeto: $novoProjeto")
-
                 try {
-                    // Inserir o projeto e retornar o resultado diretamente
                     val resultado = supabase.from(PROJETO_TABLE)
                         .insert(novoProjeto) {
                             select()
                         }
                         .decodeSingle<Projeto>()
 
-                    println("DEBUG - Projeto criado com sucesso: $resultado")
                     resultado
                 } catch (e: Exception) {
-                    println("DEBUG - Erro ao criar projeto: ${e.message}")
                     e.printStackTrace()
                     null
                 }
             }
         } catch (e: Exception) {
-            println("DEBUG - Erro geral ao criar projeto: ${e.message}")
             e.printStackTrace()
             null
         }
     }
 
-    /**
-     * Lista os projetos com base no perfil do usuário atual
-     * @return Lista de projetos: todos os projetos para admin ou apenas os projetos do usuário para não-admin
-     */
     suspend fun listarProjetos(): List<Projeto> {
         return try {
             withContext(Dispatchers.IO) {
@@ -83,20 +65,11 @@ class ProjetoRepository {
                 val isAdmin = currentUser?.admin
                 val userId = currentUser?.id.toString()
 
-                println("DEBUG - ListarProjetos: isAdmin=$isAdmin, userId=$userId")
-
                 if (isAdmin == true) {
-                    // Administradores veem todos os projetos
-                    println("DEBUG - Buscando todos os projetos (admin)")
                     supabase.from(PROJETO_TABLE)
                         .select(columns = Columns.ALL)
                         .decodeList<Projeto>()
-                        .also { println("DEBUG - Projetos encontrados: ${it.size}") }
                 } else {
-                    // Usuários normais veem apenas seus projetos usando JOIN
-                    println("DEBUG - Buscando projetos do usuário com JOIN")
-
-                    // Faz o JOIN entre projeto e utilizador_projeto
                     supabase.from(PROJETO_TABLE)
                         .select(columns = Columns.raw("*,utilizador_projeto!inner(utilizador_uuid,ativo)")) {
                             filter {
@@ -105,22 +78,14 @@ class ProjetoRepository {
                             }
                         }
                         .decodeList<Projeto>()
-                        .also { println("DEBUG - Projetos do usuário encontrados: ${it.size}") }
                 }
             }
         } catch (e: Exception) {
-            println("DEBUG - Erro ao listar projetos: ${e.message}")
             e.printStackTrace()
             emptyList()
         }
     }
 
-
-    /**
-     * Obtém um projeto pelo UUID
-     * @param uuid UUID do projeto
-     * @return O projeto ou null caso não encontre
-     */
     suspend fun obterProjeto(uuid: UUID): Projeto? {
         return try {
             withContext(Dispatchers.IO) {
@@ -139,15 +104,6 @@ class ProjetoRepository {
         }
     }
 
-    /**
-     * Atualiza um projeto existente
-     * @param uuid UUID do projeto
-     * @param nome Novo nome do projeto
-     * @param descricao Nova descrição do projeto
-     * @param status Novo status do projeto
-     * @param taxaConclusao Nova taxa de conclusão do projeto
-     * @return true se a atualização foi bem-sucedida, false caso contrário
-     */
     suspend fun atualizarProjeto(
         uuid: UUID,
         nome: String,
@@ -182,12 +138,7 @@ class ProjetoRepository {
         }
     }
 
-    /**
-     * Apaga um projeto pelo UUID
-     * @param uuid UUID do projeto
-     * @return true se a exclusão foi bem-sucedida, false caso contrário
-     */
-    suspend fun apagarProjeto(uuid: UUID): Boolean {
+    suspend fun eliminarProjeto(uuid: UUID): Boolean {
         return try {
             withContext(Dispatchers.IO) {
                 supabase.from(PROJETO_TABLE)
@@ -205,8 +156,7 @@ class ProjetoRepository {
         }
     }
 
-    // Adiciona ou atualiza um usuário em um projeto
-    suspend fun adicionarUsuarioAoProjeto(
+    suspend fun adicionarUtilizadorProjeto(
         userId: String,
         projectId: String,
         isManager: Boolean
@@ -229,8 +179,7 @@ class ProjetoRepository {
         }
     }
 
-    // Lista todos os membros de um projeto
-    suspend fun listarMembrosDoProjeto(projectId: String): List<UserProject> {
+    suspend fun listarMembrosProjeto(projectId: String): List<UserProject> {
         return try {
             withContext(Dispatchers.IO) {
                 supabase.from("utilizador_projeto")
@@ -245,7 +194,6 @@ class ProjetoRepository {
         }
     }
 
-    // Lista todos os membros de um projeto com JOIN para obter informações completas
     suspend fun listarMembrosProjetoCompleto(projectId: String): List<UserProject> {
         return try {
             withContext(Dispatchers.IO) {
@@ -262,8 +210,7 @@ class ProjetoRepository {
         }
     }
 
-    // Atualiza o status e a função de um membro no projeto
-    suspend fun atualizarMembrosDoProjetoStatus(
+    suspend fun atualizarMembroDoProjeto(
         userId: String,
         projectId: String,
         isManager: Boolean,
@@ -291,6 +238,7 @@ class ProjetoRepository {
             false
         }
     }
+
     suspend fun getProjectAnalytics(projectId: String): ProjectAnalytics?{
         return try {
             withContext(Dispatchers.IO) {

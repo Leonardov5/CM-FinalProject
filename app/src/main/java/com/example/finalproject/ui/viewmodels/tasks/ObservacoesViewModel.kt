@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.model.Observacao
 import com.example.finalproject.data.model.User
 import com.example.finalproject.data.repository.ObservacaoRepository
-import com.example.finalproject.data.repository.UserRepository
+import com.example.finalproject.data.repository.UtilizadorRepository
 import com.example.finalproject.data.service.UserService
 import kotlinx.coroutines.launch
 import java.io.File
@@ -38,7 +38,7 @@ class ObservacoesViewModel : ViewModel() {
     var imagensTemporarias by mutableStateOf<List<File>>(emptyList())
 
     private val observacaoRepository = ObservacaoRepository()
-    private val userRepository = UserRepository()
+    private val utilizadorRepository = UtilizadorRepository()
 
     // Novo: usuário atual e status de administrador
     var user by mutableStateOf<User?>(null)
@@ -65,7 +65,7 @@ class ObservacoesViewModel : ViewModel() {
                 // Carregar dados dos usuários que criaram as observações
                 val usuariosIds = observacoes.mapNotNull { it.createdBy }.distinct()
                 if (usuariosIds.isNotEmpty()) {
-                    val listaUsuarios = userRepository.listarTodosUsuarios()
+                    val listaUsuarios = utilizadorRepository.listarTodosUtilizadores()
                     usuarios = listaUsuarios.filter { it.id in usuariosIds }.associateBy { it.id ?: "" }
                 }
             } catch (e: Exception) {
@@ -146,7 +146,7 @@ class ObservacoesViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                val sucesso = observacaoRepository.excluirObservacao(observacaoId)
+                val sucesso = observacaoRepository.eliminarObservacao(observacaoId)
 
                 if (sucesso) {
                     // Recarregar observações se a exclusão for bem-sucedida
@@ -249,7 +249,7 @@ class ObservacoesViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                val sucesso = observacaoRepository.excluirImagem(observacaoId, imagemUrl)
+                val sucesso = observacaoRepository.eliminarImagem(observacaoId, imagemUrl)
 
                 if (sucesso) {
                     // Recarregar observações

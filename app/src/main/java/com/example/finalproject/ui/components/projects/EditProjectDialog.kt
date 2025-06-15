@@ -53,12 +53,10 @@ fun EditProjectDialog(
     val isEditing = projeto != null
     val titleRes = if (isEditing) R.string.edit_project else R.string.add_project
 
-    // Inicializar o ViewModel com os dados do projeto
     LaunchedEffect(key1 = projeto) {
         viewModel.initWithProject(projeto)
     }
 
-    // Status possíveis
     val statusOptions = listOf(
         stringResource(id = R.string.active),
         stringResource(id = R.string.inactive),
@@ -66,7 +64,6 @@ fun EditProjectDialog(
         stringResource(id = R.string.cancelled)
     )
 
-    // Mapeamento entre o texto exibido e o valor interno
     val statusMapping = mapOf(
         stringResource(id = R.string.active) to "ativo",
         stringResource(id = R.string.inactive) to "inativo",
@@ -74,10 +71,8 @@ fun EditProjectDialog(
         stringResource(id = R.string.cancelled) to "cancelado"
     )
 
-    // Obter o texto do status atual para exibição
     val currentStatusText = statusMapping.entries.find { it.value == viewModel.status }?.key ?: viewModel.status
 
-    // Coletar estado do ViewModel
     val nome = viewModel.nome
     val descricao = viewModel.descricao
     val status = viewModel.status
@@ -86,11 +81,9 @@ fun EditProjectDialog(
     val errorMessage = viewModel.errorMessage
     val isLoading = viewModel.isLoading
 
-    // Estados locais da UI
     var taxaConclusaoStr by remember(taxaConclusao) { mutableStateOf(taxaConclusao.toString()) }
     var taxaConclusaoError by remember { mutableStateOf(false) }
 
-    // Observar eventos do ViewModel
     LaunchedEffect(key1 = true) {
         viewModel.events.collect { event ->
             when (event) {
@@ -100,7 +93,6 @@ fun EditProjectDialog(
                     val savedStatus = viewModel.status
                     val savedTaxaConclusao = viewModel.taxaConclusao
 
-                    // Informar sucesso ao componente pai
                     onSaveProject(savedNome, savedDescricao, savedStatus, savedTaxaConclusao)
                     onDismiss()
                 }
@@ -109,17 +101,13 @@ fun EditProjectDialog(
     }
 
     fun validateAndSave() {
-        // Validar a taxa de conclusão (deve ser entre 0 e 100)
         val taxaConclusaoValue = taxaConclusaoStr.toFloatOrNull()
         if (taxaConclusaoValue == null || taxaConclusaoValue < 0 || taxaConclusaoValue > 100) {
             taxaConclusaoError = true
             return
         }
 
-        // Atualizar o ViewModel
         viewModel.updateTaxaConclusao(taxaConclusaoValue)
-
-        // Salvar usando o ViewModel
         viewModel.saveProject(projeto?.id?.toString())
     }
 
@@ -141,7 +129,7 @@ fun EditProjectDialog(
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                // Título do diálogo
+                // Título
                 Text(
                     text = stringResource(id = titleRes),
                     style = MaterialTheme.typography.headlineSmall
@@ -149,7 +137,7 @@ fun EditProjectDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Campo de nome
+                // Nome
                 OutlinedTextField(
                     value = nome,
                     onValueChange = { viewModel.updateNome(it) },
@@ -161,7 +149,7 @@ fun EditProjectDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Campo de descrição
+                // Descrição
                 OutlinedTextField(
                     value = descricao,
                     onValueChange = { viewModel.updateDescricao(it) },
@@ -174,13 +162,12 @@ fun EditProjectDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Dropdown para status
+                // Status
                 DropdownMenuBox(
                     label = stringResource(R.string.status),
                     options = statusOptions,
                     selectedOption = currentStatusText,
                     onOptionSelected = { selectedText ->
-                        // Converter o texto exibido para o valor interno
                         val internalValue = statusMapping[selectedText] ?: selectedText
                         viewModel.updateStatus(internalValue)
                     },
@@ -189,7 +176,7 @@ fun EditProjectDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Campo de taxa de conclusão
+                // Taxa de conclusão
                 OutlinedTextField(
                     value = taxaConclusaoStr,
 
@@ -228,7 +215,7 @@ fun EditProjectDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Botões
+                // Guardar e cancelar
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End

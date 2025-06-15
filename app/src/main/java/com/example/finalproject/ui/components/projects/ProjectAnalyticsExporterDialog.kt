@@ -34,7 +34,6 @@ fun ProjectAnalyticsExporterDialog(
     val context = LocalContext.current
     val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-    // Obter strings traduzidas no contexto composable
     val fileSavedToText = stringResource(R.string.file_saved_to)
     val fileSavedSuccessToastText = stringResource(R.string.file_saved_success_toast)
     val fileExportedText = stringResource(R.string.file_exported)
@@ -42,34 +41,25 @@ fun ProjectAnalyticsExporterDialog(
     val cancelText = stringResource(R.string.cancel)
     val exportText = stringResource(R.string.export)
 
-    // Get the project name from the viewModel
     val viewModel = remember { ProjectDetailViewModel() }
 
-
-    // Load project data if not already loaded
     LaunchedEffect(projetoId) {
         viewModel.loadProject(projetoId)
     }
 
-    // Get the analytics exporter to monitor state
     val analyticsExporter = remember { ProjectAnalyticsExporter() }
 
-    // Success state to show confirmation
     var exportSuccess by remember { mutableStateOf(false) }
     var fileSaved by remember { mutableStateOf("") }
 
-    // Selected format state
     var selectedFormat by remember { mutableStateOf(ExportFormat.CSV) }
 
-    // Use actual project name or fallback to the ID if not available yet
     val projectName = viewModel.projeto?.nome?.replace(" ", "_") ?: "Project_$projetoId"
 
-    // Generate filename based on project name, not ID
     val fileName by remember(selectedFormat, projectName) {
         mutableStateOf("${projectName}_analytics_$currentDate${selectedFormat.extension}")
     }
 
-    // Check if we have storage permission
     val hasStoragePermission = remember {
         ContextCompat.checkSelfPermission(
             context,
@@ -77,13 +67,11 @@ fun ProjectAnalyticsExporterDialog(
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    // Listen for export success from analytics exporter
     LaunchedEffect(analyticsExporter.exportSuccess) {
         analyticsExporter.exportSuccess?.let { success ->
             if (success) {
                 exportSuccess = true
 
-                // Set the file path for display
                 val externalFilesDir = context.getExternalFilesDir(null)
                 val appStoragePath = if (hasStoragePermission) {
                     "Downloads/project_analytics"
@@ -93,14 +81,12 @@ fun ProjectAnalyticsExporterDialog(
 
                 fileSaved = "$fileSavedToText\n$appStoragePath/${fileName}"
 
-                // Show a toast message that the file was saved successfully
                 Toast.makeText(
                     context,
                     fileSavedSuccessToastText,
                     Toast.LENGTH_SHORT
                 ).show()
 
-                // Also print file location to logcat for debugging
                 println("File should be at: ${externalFilesDir?.absolutePath}/project_analytics/${fileName}")
             }
         }
@@ -128,7 +114,6 @@ fun ProjectAnalyticsExporterDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Format selection
                 Text(
                     text = stringResource(R.string.select_format),
                     style = MaterialTheme.typography.bodyMedium,
@@ -168,7 +153,6 @@ fun ProjectAnalyticsExporterDialog(
                     CircularProgressIndicator()
                 }
 
-                // Success message
                 if (exportSuccess) {
                     Card(
                         colors = CardDefaults.cardColors(
@@ -204,7 +188,6 @@ fun ProjectAnalyticsExporterDialog(
                     }
                 }
 
-                // Show error message if there is one
                 analyticsExporter.errorMessage?.let { error ->
                     Card(
                         colors = CardDefaults.cardColors(

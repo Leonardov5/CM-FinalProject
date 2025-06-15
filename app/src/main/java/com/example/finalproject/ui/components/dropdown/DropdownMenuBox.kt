@@ -16,7 +16,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.finalproject.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,7 +42,7 @@ fun DropdownMenuBox(
                 onValueChange = {},
                 readOnly = true,
                 label = { Text(label) },
-                placeholder = { Text("Selecione uma opção") },
+                placeholder = { Text(stringResource(R.string.select_option)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .menuAnchor(),

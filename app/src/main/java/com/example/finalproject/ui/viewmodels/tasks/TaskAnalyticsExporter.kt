@@ -36,9 +36,6 @@ class TaskAnalyticsExporter(
     var exportSuccess by mutableStateOf<Boolean?>(null)
         private set
 
-    /**
-     * Load analytics data for a specific task
-     */
     fun loadAnalytics(taskId: String) {
         isLoading = true
         errorMessage = null

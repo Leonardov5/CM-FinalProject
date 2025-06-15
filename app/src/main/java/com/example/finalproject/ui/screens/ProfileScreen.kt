@@ -86,6 +86,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.finalproject.R
 import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.data.service.SupabaseProvider
@@ -111,16 +113,12 @@ fun ProfileScreen(
     var selectedLanguage by remember { mutableStateOf("") }
     val viewModel: ProfileViewModel = viewModel()
 
-    // Carregar dados do perfil
     LaunchedEffect(Unit) {
         viewModel.loadProfileData(context)
-        // A imagem agora é carregada diretamente no ViewModel
     }
 
-    // Estados para controle de UI do menu de idioma
     var isLanguageMenuExpanded by remember { mutableStateOf(false) }
 
-    // Carregue as strings no início do Composable
     val profileTitle = stringResource(id = R.string.profile_title)
     val changeLanguage = stringResource(id = R.string.change_language)
     val portuguese = stringResource(id = R.string.portuguese)
@@ -138,8 +136,6 @@ fun ProfileScreen(
         selectedLanguage = if (savedLanguage == "en") english else portuguese
     }
 
-
-    // Launcher para seleção de imagem da galeria
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -245,7 +241,7 @@ fun ProfileScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Foto do perfil
+            // Imagem de perfil
             Box(
                 modifier = Modifier.size(120.dp)
             ) {
@@ -272,12 +268,23 @@ fun ProfileScreen(
                             color = Color.White,
                             modifier = Modifier.size(40.dp)
                         )
-                    } else if (viewModel.profileImageBitmap != null) {
-                        Image(
-                            bitmap = viewModel.profileImageBitmap!!.asImageBitmap(),
+                    } else if (!viewModel.profileImageUrl.isNullOrBlank()) {
+                        val context = LocalContext.current
+                        // É adicionado um timestamp à URL para evitar cache quando a imagem muda
+                        val imageUrlWithCacheBuster = remember(viewModel.profileImageUrl) {
+                            "${viewModel.profileImageUrl}?cache=${System.currentTimeMillis()}"
+                        }
+
+                        AsyncImage(
+                            model = ImageRequest.Builder(context)
+                                .data(imageUrlWithCacheBuster)
+                                .crossfade(true)
+                                .diskCachePolicy(coil.request.CachePolicy.DISABLED)
+                                .memoryCachePolicy(coil.request.CachePolicy.DISABLED)
+                                .build(),
                             contentDescription = stringResource(id = R.string.update_profile_image),
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
                         )
                     } else {
                         Text(
@@ -311,7 +318,7 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Campos de perfil
+            // Campos do perfil
             ProfileTextField(
                 value = viewModel.name,
                 onValueChange = { viewModel.onNameChange(it) },
@@ -396,7 +403,7 @@ fun ProfileScreen(
                         Column {
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            // Campo de senha atual
+                            // Password atual
                             ProfileTextField(
                                 value = viewModel.currentPassword,
                                 onValueChange = { viewModel.onCurrentPasswordChange(it) },
@@ -409,7 +416,7 @@ fun ProfileScreen(
 
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            // Campo de nova senha
+                            // Nova password
                             ProfileTextField(
                                 value = viewModel.newPassword,
                                 onValueChange = { viewModel.onNewPasswordChange(it) },
@@ -422,7 +429,7 @@ fun ProfileScreen(
 
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            // Campo de confirmação de senha
+                            // Confirmar nova password
                             ProfileTextField(
                                 value = viewModel.confirmPassword,
                                 onValueChange = { viewModel.onConfirmPasswordChange(it) },
@@ -435,7 +442,7 @@ fun ProfileScreen(
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            // Botão de atualizar senha
+                            // Botão para atualizar
                             Button(
                                 onClick = { viewModel.updatePassword() },
                                 modifier = Modifier.align(Alignment.End),
@@ -453,7 +460,7 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botão de salvar alterações
+            // Salvar alterações
             Button(
                 onClick = { viewModel.saveProfileChanges(context) },
                 modifier = Modifier.fillMaxWidth(),
@@ -475,7 +482,7 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botão de logout
+            // Logout
             OutlinedButton(
                 onClick = { viewModel.logout(onLogout) },
                 modifier = Modifier.fillMaxWidth(),
@@ -490,7 +497,6 @@ fun ProfileScreen(
         }
     }
 
-    // Mensagens de erro ou sucesso
     if (viewModel.errorMessage != null) {
         LaunchedEffect(viewModel.errorMessage) {
             Toast.makeText(context, viewModel.errorMessage, Toast.LENGTH_LONG).show()
@@ -507,7 +513,7 @@ fun ProfileScreen(
         }
     }
 
-    // Diálogo para confirmar senha ao alterar email
+    // Confirm password ao alterar email
     if (viewModel.showEmailPasswordDialog) {
         AlertDialog(
             onDismissRequest = {
@@ -559,7 +565,7 @@ fun ProfileScreen(
                     },
                     enabled = viewModel.passwordForEmailChange.isNotEmpty()
                 ) {
-                    Text(stringResource(id = R.string.confirm_password_dialog_confirm))                }
+                    Text(stringResource(id = R.string.confirm_password_dialog_confirm))}
             },
             dismissButton = {
                 TextButton(
@@ -567,7 +573,7 @@ fun ProfileScreen(
                         viewModel.hideEmailPasswordDialog()
                     }
                 ) {
-                    Text(stringResource(id = R.string.confirm_password_dialog_cancel))                }
+                    Text(stringResource(id = R.string.confirm_password_dialog_cancel))}
             }
         )
     }

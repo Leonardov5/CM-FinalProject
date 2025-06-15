@@ -85,11 +85,9 @@ fun ObservacoesScreen(
     viewModel: ObservacoesViewModel = viewModel()
 ) {
     val context = LocalContext.current
-
-    // Carregar observações e usuário quando a tela for iniciada
     LaunchedEffect(tarefaId) {
         viewModel.carregarObservacoes(tarefaId)
-        viewModel.loadUser() // Carrega o usuário atual e verifica se é admin
+        viewModel.loadUser()
     }
 
     var imagemAmpliada by remember { mutableStateOf<String?>(null) }
@@ -163,8 +161,8 @@ fun ObservacoesScreen(
                                 onDelete = {
                                     viewModel.excluirObservacao(
                                         observacaoId = observacao.id ?: "",
-                                        onSuccess = { /* Já recarrega as observações */ },
-                                        onError = { /* Mostrar mensagem de erro */ }
+                                        onSuccess = { },
+                                        onError = { }
                                     )
                                 },
                                 onImageClick = { imagemUrl ->
@@ -179,31 +177,31 @@ fun ObservacoesScreen(
         }
     }
 
-    // Dialog para adicionar nova observação
+    // Adicionar observação
     if (viewModel.showAddObservacaoDialog) {
         AddObservacaoDialog(
             onDismiss = { viewModel.toggleAddObservacaoDialog() },
             onSave = { viewModel.salvarObservacao(
                 onSuccess = { viewModel.toggleAddObservacaoDialog() },
-                onError = { /* Mostrar mensagem de erro */ }
+                onError = { }
             )},
             viewModel = viewModel
         )
     }
 
-    // Dialog para editar observação
+    // Editar observação
     if (viewModel.showEditObservacaoDialog) {
         EditObservacaoDialog(
             onDismiss = { viewModel.cancelarEdicao() },
             onSave = { viewModel.salvarEdicaoObservacao(
-                onSuccess = { /* Sucesso - dialog já será fechado */ },
-                onError = { /* Mostrar mensagem de erro */ }
+                onSuccess = { },
+                onError = { }
             )},
             viewModel = viewModel
         )
     }
 
-    // Dialog para ampliar imagem
+    // Abrir imagem ampliada
     imagemAmpliada?.let { url ->
         Dialog(onDismissRequest = { imagemAmpliada = null }) {
             Card(
@@ -221,7 +219,7 @@ fun ObservacoesScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Fechar"
+                            contentDescription = null
                         )
                     }
 
@@ -230,7 +228,7 @@ fun ObservacoesScreen(
                             .data(url)
                             .crossfade(true)
                             .build(),
-                        contentDescription = "Imagem ampliada",
+                        contentDescription = null,
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(max = 400.dp),
@@ -261,7 +259,6 @@ fun ObservacaoItem(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Cabeçalho com informações do usuário e data
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -271,7 +268,7 @@ fun ObservacaoItem(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Avatar do usuário
+                    // Imagem do utilizador
                     Box(
                         modifier = Modifier
                             .size(40.dp)
@@ -287,7 +284,7 @@ fun ObservacaoItem(
                         )
                     }
 
-                    // Nome do usuário
+                    // Nome
                     Column {
                         Text(
                             text = usuario?.nome ?: "Usuário desconhecido",
@@ -306,9 +303,8 @@ fun ObservacaoItem(
                     }
                 }
 
-                // Ações de editar e excluir
                 Row {
-                    // Botão de editar (apenas para o criador ou admin)
+                    // Editar observação´
                     if (viewModel.podeEditarObservacao(observacao)) {
                         IconButton(onClick = {
                             viewModel.iniciarEdicaoObservacao(observacao)
@@ -321,7 +317,7 @@ fun ObservacaoItem(
                         }
                     }
 
-                    // Botão de excluir (apenas para admins ou criador da observação)
+                    // Eliminar observação
                     if (isAdmin || observacao.createdBy == viewModel.user?.id) {
                         IconButton(onClick = { showDeleteConfirmation = true }) {
                             Icon(
@@ -368,12 +364,12 @@ fun ObservacaoItem(
         }
     }
 
-    // Diálogo de confirmação para excluir observação
+    // Confirmar eliminar observação
     if (showDeleteConfirmation) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirmation = false },
-            title = { Text("Confirmar exclusão") },
-            text = { Text("Tem certeza que deseja excluir esta observação? Esta ação não pode ser desfeita.") },
+            title = { Text(stringResource(R.string.confirm_delete_title)) },
+            text = { Text(stringResource(R.string.confirm_delete_observation)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -381,14 +377,14 @@ fun ObservacaoItem(
                         showDeleteConfirmation = false
                     },
                 ) {
-                    Text("Excluir")
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = { showDeleteConfirmation = false }
                 ) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -403,12 +399,12 @@ fun AddObservacaoDialog(
 ) {
     val context = LocalContext.current
 
-    // Launcher para selecionar imagens
+    // Selecionar imagens
     val imagemLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            // Criar arquivo temporário a partir da URI
+            // Cria um arquivo temporário
             val inputStream = context.contentResolver.openInputStream(uri)
             val tempFile = File.createTempFile("img", ".jpg", context.cacheDir)
             inputStream?.use { input ->
@@ -439,7 +435,7 @@ fun AddObservacaoDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Campo para descrição
+                // Descrição
                 OutlinedTextField(
                     value = viewModel.novaObservacaoTexto,
                     onValueChange = { viewModel.novaObservacaoTexto = it },
@@ -451,7 +447,7 @@ fun AddObservacaoDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Botão para adicionar imagens
+                // Adicionar imagens
                 Button(
                     onClick = { imagemLauncher.launch("image/*") },
                     modifier = Modifier.fillMaxWidth()
@@ -495,7 +491,7 @@ fun AddObservacaoDialog(
                                     contentScale = ContentScale.Crop
                                 )
 
-                                // Botão para remover imagem
+                                // Botão de remover imagem
                                 IconButton(
                                     onClick = { viewModel.removerImagem(index) },
                                     modifier = Modifier
@@ -518,7 +514,7 @@ fun AddObservacaoDialog(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Botões de ação
+                // Guardar e cancelar
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
@@ -551,15 +547,12 @@ fun EditObservacaoDialog(
     val context = LocalContext.current
     val observacao = viewModel.editandoObservacao ?: return
 
-    // Lista de imagens que devem ser mantidas (inicialmente todas as imagens atuais)
     var imagensAManter by remember { mutableStateOf(observacao.anexos) }
 
-    // Launcher para selecionar imagens
     val imagemLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            // Criar arquivo temporário a partir da URI
             val inputStream = context.contentResolver.openInputStream(uri)
             val tempFile = File.createTempFile("img", ".jpg", context.cacheDir)
             inputStream?.use { input ->
@@ -590,7 +583,7 @@ fun EditObservacaoDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Campo para descrição
+                // Descrição
                 OutlinedTextField(
                     value = viewModel.textoObservacaoEditada,
                     onValueChange = { viewModel.textoObservacaoEditada = it },
@@ -600,7 +593,7 @@ fun EditObservacaoDialog(
                     minLines = 3
                 )
 
-                // Exibir imagens existentes
+                // Imagens existentes
                 if (observacao.anexos.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -615,7 +608,6 @@ fun EditObservacaoDialog(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(observacao.anexos) { imagemUrl ->
-                            // Verificar se a imagem está na lista de imagens a manter
                             val mantida = imagemUrl in imagensAManter
 
                             Box(
@@ -636,7 +628,7 @@ fun EditObservacaoDialog(
                                     contentDescription = "Image of observation",
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .alpha(if (mantida) 1f else 0.5f),  // Reduz a opacidade das imagens que serão removidas
+                                        .alpha(if (mantida) 1f else 0.5f),
                                     contentScale = ContentScale.Crop
                                 )
 
@@ -673,7 +665,7 @@ fun EditObservacaoDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Botão para adicionar imagens
+                // Adicionar imagens
                 Button(
                     onClick = { imagemLauncher.launch("image/*") },
                     modifier = Modifier.fillMaxWidth()
@@ -739,7 +731,7 @@ fun EditObservacaoDialog(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Botões de ação
+                // Guardar e cancelar
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
@@ -754,8 +746,8 @@ fun EditObservacaoDialog(
                     Button(
                         onClick = {
                             viewModel.salvarEdicaoObservacao(
-                                onSuccess = onSave, // Corrigido: passando o callback onSave ao invés de onSuccess
-                                onError = { /* Mostrar erro */ },
+                                onSuccess = onSave,
+                                onError = { },
                                 imagensAtuais = imagensAManter
                             )
                         },

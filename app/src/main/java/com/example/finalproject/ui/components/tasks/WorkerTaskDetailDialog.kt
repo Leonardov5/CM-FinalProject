@@ -61,7 +61,6 @@ fun WorkerTaskDetailDialog(
     viewModel: TaskDetailViewModel
 ) {
     if (show && worker != null) {
-        // A data de entrada já está disponível no ViewModel
         val joinedAt = viewModel.workerJoinDate
 
         var showRemoveConfirmation by remember { mutableStateOf(false) }
@@ -76,7 +75,6 @@ fun WorkerTaskDetailDialog(
                     .padding(16.dp)
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    // Botão X no canto superior direito
                     IconButton(
                         onClick = onDismiss,
                         modifier = Modifier
@@ -91,14 +89,13 @@ fun WorkerTaskDetailDialog(
                         )
                     }
 
-                    // Conteúdo principal
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Foto do usuário
+                        // Imagem
                         Box(
                             modifier = Modifier
                                 .size(120.dp)
@@ -165,13 +162,9 @@ fun WorkerTaskDetailDialog(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        // Data em que se juntou à tarefa - usando a função formatDate do utils
-                        println("DEBUG - Data de entrada do trabalhador: $joinedAt")
-
+                        // Data
                         joinedAt?.let {
-                            println("DEBUG - Data de entrada do trabalhador: $it")
-
-                            InfoRow(
+                            InfoDateRow(
                                 icon = Icons.Default.Schedule,
                                 label = stringResource(id = R.string.joined_project_at) + ":",
                                 value = formatDate(it)
@@ -180,7 +173,7 @@ fun WorkerTaskDetailDialog(
 
                         Spacer(modifier = Modifier.height(32.dp))
 
-                        // Botão para remover da tarefa
+                        // Remover da tarefa
                         if (viewModel.isAdmin || viewModel.isManager){
                             Button(
                                 onClick = { showRemoveConfirmation = true },
@@ -202,7 +195,7 @@ fun WorkerTaskDetailDialog(
             }
         }
 
-        // Diálogo de confirmação para remover trabalhador
+        // Confirmar
         if (showRemoveConfirmation) {
             AlertDialog(
                 onDismissRequest = { showRemoveConfirmation = false },
@@ -229,7 +222,7 @@ fun WorkerTaskDetailDialog(
 }
 
 @Composable
-private fun InfoRow(
+private fun InfoDateRow(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
     value: String

@@ -10,7 +10,7 @@ import com.example.finalproject.data.service.UserService
 import kotlinx.coroutines.launch
 
 class RegisterViewModel : ViewModel() {
-    // Estados da UI
+
     var name by mutableStateOf("")
         private set
 
@@ -41,14 +41,12 @@ class RegisterViewModel : ViewModel() {
     var showConfirmPassword by mutableStateOf(false)
         private set
 
-    // Estados para diferentes tipos de mensagens
     var successMessage by mutableStateOf<String?>(null)
         private set
 
     var warningMessage by mutableStateOf<String?>(null)
         private set
 
-    // Funções para atualizar estados
     fun onNameChange(newName: String) {
         name = newName
         clearMessages()
@@ -94,7 +92,6 @@ class RegisterViewModel : ViewModel() {
         }
     }
 
-    // Função para realizar o registro completo (igual ao código original)
     fun register() {
         // Validação
         if (name.isBlank() || username.isBlank() || email.isBlank() ||
@@ -113,21 +110,17 @@ class RegisterViewModel : ViewModel() {
             return
         }
 
-        // Iniciar processo de registro
         viewModelScope.launch {
             try {
                 isLoading = true
                 errorMessage = null
 
-                // 1. Registrar o usuário no sistema de autenticação
                 val registerSuccess = AuthService.register(email, password)
 
                 if (registerSuccess) {
-                    // 2. Após registro bem-sucedido, fazer login automaticamente
                     val loginSuccess = AuthService.login(email, password)
 
                     if (loginSuccess) {
-                        // 3. Salvar os dados do usuário na base de dados (sem a senha)
                         val userDataSaved = UserService.saveUserData(
                             username = username,
                             nome = name,
@@ -135,13 +128,11 @@ class RegisterViewModel : ViewModel() {
                         )
 
                         if (userDataSaved) {
-                            // Sucesso completo
                             successMessage = "Registro realizado com sucesso!"
                             isRegistrationSuccessful = true
                         } else {
-                            // O usuário foi criado, mas os dados não foram salvos
                             warningMessage = "Usuário criado, mas houve erro ao salvar dados adicionais"
-                            isRegistrationSuccessful = true // Ainda consideramos sucesso
+                            isRegistrationSuccessful = true
                         }
                     } else {
                         errorMessage = "Falha no login automático após registro"
@@ -157,14 +148,12 @@ class RegisterViewModel : ViewModel() {
         }
     }
 
-    // Função para limpar estado de registro bem-sucedido (útil após navegação)
     fun clearRegistrationSuccessState() {
         isRegistrationSuccessful = false
         successMessage = null
         warningMessage = null
     }
 
-    // Função para limpar mensagens específicas
     fun clearSuccessMessage() {
         successMessage = null
     }
@@ -177,7 +166,6 @@ class RegisterViewModel : ViewModel() {
         errorMessage = null
     }
 
-    // Função para limpar todos os campos
     fun clearFields() {
         name = ""
         username = ""
@@ -187,45 +175,5 @@ class RegisterViewModel : ViewModel() {
         errorMessage = null
         successMessage = null
         warningMessage = null
-    }
-
-    // Função para validar email (opcional - pode ser usada para validação em tempo real)
-    private fun isValidEmail(email: String): Boolean {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    }
-
-    // Função para validação completa (pode ser chamada antes do registro)
-    fun validateFields(): Boolean {
-        when {
-            name.isBlank() -> {
-                errorMessage = "Nome é obrigatório"
-                return false
-            }
-            username.isBlank() -> {
-                errorMessage = "Nome de usuário é obrigatório"
-                return false
-            }
-            email.isBlank() -> {
-                errorMessage = "Email é obrigatório"
-                return false
-            }
-            !isValidEmail(email) -> {
-                errorMessage = "Email inválido"
-                return false
-            }
-            password.isBlank() -> {
-                errorMessage = "Senha é obrigatória"
-                return false
-            }
-            password.length < 6 -> {
-                errorMessage = "A senha deve ter pelo menos 6 caracteres"
-                return false
-            }
-            password != confirmPassword -> {
-                errorMessage = "As senhas não coincidem"
-                return false
-            }
-            else -> return true
-        }
     }
 }

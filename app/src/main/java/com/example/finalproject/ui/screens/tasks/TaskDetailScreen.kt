@@ -121,7 +121,6 @@ fun TaskDetailScreen(
         }
     }
 
-
     var showFabActions by remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
@@ -148,7 +147,6 @@ fun TaskDetailScreen(
             Column(
                 horizontalAlignment = Alignment.End
             ) {
-                // FAB menu
                 AnimatedVisibility(
                     visible = showFabActions,
                     enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }) + expandVertically(),
@@ -234,7 +232,6 @@ fun TaskDetailScreen(
                 }
                 viewModel.task == null -> {
                     Text(
-                        // TODO: Translate hard-coded string "Tarefa não encontrada" - should use stringResource
                         text = stringResource(id = R.string.task_not_found)
                     )
                 }
@@ -248,9 +245,7 @@ fun TaskDetailScreen(
                         onAddWorker = onAddWorker,
                         viewModel = viewModel,
                         onLogWork = { hours, description ->
-                            //viewModel.logWork(taskId, hours, description) {
-                                // feedback opcional
-                            //}
+
                         }
                     )
                 }
@@ -258,10 +253,8 @@ fun TaskDetailScreen(
         }
     }
 
-    // Monitorar o evento de navegação para trabalhos
     LaunchedEffect(viewModel.navigateToTrabalhosEvent) {
         viewModel.navigateToTrabalhosEvent?.let { tarefaId ->
-            // Navegar para a tela de trabalhos
             onNavigateToTrabalhos(tarefaId)
             viewModel.onTrabalhosNavigated()
         }
@@ -273,7 +266,7 @@ fun TaskDetailScreen(
             onDismiss = { viewModel.toggleAddWorkerDialog() },
             onAdd = { userIds ->
                 userIds.forEach { userId ->
-                    viewModel.addWorkerToTask(userId, taskId) { /* feedback opcional */ }
+                    viewModel.addWorkerToTask(userId, taskId) { }
                 }
                 viewModel.toggleAddWorkerDialog()
             }
@@ -350,7 +343,6 @@ fun TaskDetailScreen(
         )
     }
 
-    // Task Analytics Exporter Dialog
     if (viewModel.showTaskAnalyticsExporterDialog) {
         com.example.finalproject.ui.components.tasks.TaskAnalyticsExporterDialog(
             show = true,
@@ -379,7 +371,7 @@ private fun TaskContent(
     var selectedWorker by remember { mutableStateOf<User?>(null) }
     var showWorkerDialog by remember { mutableStateOf(false) }
 
-    // Efeito para buscar a data quando um trabalhador for selecionado
+    // Buscar a data de entrada do trabalhador selecionado
     LaunchedEffect(selectedWorker) {
         if (selectedWorker != null) {
             selectedWorker?.id?.let { userId ->
@@ -392,7 +384,7 @@ private fun TaskContent(
         }
     }
 
-    // Observar quando a data for carregada para mostrar o diálogo
+    // Esperar a data de entrada ser carregada para mostrar o diálogo
     LaunchedEffect(viewModel.workerJoinDate) {
         if (selectedWorker != null) {
             showWorkerDialog = true
@@ -405,7 +397,7 @@ private fun TaskContent(
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        // Título da task
+        // Título
         Text(
             text = task.nome,
             fontSize = 24.sp,
@@ -413,12 +405,12 @@ private fun TaskContent(
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
-        // Status indicator
+        // Status
         StatusChip(status = statusEnum)
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Seção de progresso
+        // Progresso
         TaskInfoSection(
             title = stringResource(id = R.string.progress),
             content = {
@@ -440,7 +432,7 @@ private fun TaskContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Seção de descrição
+        // Descrição
         task.descricao?.let {
             TaskInfoSection(
                 title = stringResource(id = R.string.description),
@@ -455,6 +447,7 @@ private fun TaskContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
+        // Data
         task.createdAt?.let {
             TaskInfoSection(
                 title = stringResource(id = R.string.created_at),
@@ -469,8 +462,7 @@ private fun TaskContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Seção de prioridade
-// Seção de prioridade
+        // Prioridade
         task.prioridade?.let {
             TaskInfoSection(
                 title = stringResource(id = R.string.priority),
@@ -493,7 +485,7 @@ private fun TaskContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Seção de observações
+        // Observações
         TaskInfoSection(
             title = stringResource(id = R.string.observations),
             content = {
@@ -501,7 +493,6 @@ private fun TaskContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            // Navegar para a tela de observações da tarefa
                             if (viewModel.task != null) {
                                 viewModel.navigateToObservacoes(viewModel.task!!.id ?: "")
                             }
@@ -541,7 +532,7 @@ private fun TaskContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Seção de trabalhos
+        // Trabalhos
         TaskInfoSection(
             title = stringResource(id = R.string.works),
             content = {
@@ -549,7 +540,6 @@ private fun TaskContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            // Navegar para a tela de trabalhos da tarefa
                             if (viewModel.task != null) {
                                 viewModel.navigateToTrabalhos(viewModel.task!!.id ?: "")
                             }
@@ -589,7 +579,7 @@ private fun TaskContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Seção de trabalhadores
+        // Trabalhadores
         TaskInfoSection(
             title = stringResource(id = R.string.workers),
             content = {

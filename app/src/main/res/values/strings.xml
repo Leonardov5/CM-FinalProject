@@ -262,4 +262,6 @@
     <string name="notification_user_added_to_project_title">Added to a project</string>
     <string name="notification_user_added_to_project_message">You have been added to a project</string>
     <string name="search">Search</string>
+    <string name="select_option">Select an option</string>
+    <string name="confirm_delete_observation">Are you sure you want to delete this observation? This action cannot be undone.</string>
 </resources>

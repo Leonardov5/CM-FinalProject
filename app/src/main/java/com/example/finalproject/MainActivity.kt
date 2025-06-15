@@ -60,7 +60,6 @@ class MainActivity : ComponentActivity() {
 
 
             FinalProjectTheme(dynamicColor = false) {
-                // Usar o Navigation Component
                 AppNavigation()
             }
             scheduleSyncOnNetworkAvailable()

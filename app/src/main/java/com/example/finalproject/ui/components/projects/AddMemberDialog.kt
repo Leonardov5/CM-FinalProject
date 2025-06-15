@@ -109,7 +109,6 @@ fun AddMemberDialog(
                 )
                 Spacer(Modifier.height(12.dp))
 
-                // Lista de usuários filtrados
                 if (filteredUsers.isNotEmpty() && search.isNotBlank()) {
                     LazyColumn(
                         modifier = Modifier
@@ -185,16 +184,6 @@ fun AddMemberDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(id = R.string.cancel)) }
         }
     )
-}
-
-@Composable
-fun Colors(
-    containerColor: Color,
-    contentColor: Color,
-    disabledContainerColor: Color,
-    disabledContentColor: Color
-) {
-    TODO("Not yet implemented")
 }
 
 @Composable

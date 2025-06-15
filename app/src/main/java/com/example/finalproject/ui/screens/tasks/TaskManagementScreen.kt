@@ -136,7 +136,7 @@ fun TaskManagementScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Tasks List
+                // Tarefas
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -190,7 +190,7 @@ fun TaskManagementScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // List of projects
+                    // Lista de projetos
                     viewModel.projects.forEach { projeto ->
                         val isSelected = viewModel.selectedProject?.id == projeto.id
                         Surface(

@@ -209,7 +209,7 @@ fun UpdatesScreen(
                 CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else {
-            // Updates List
+            // Notifications list
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -246,7 +246,7 @@ fun UpdateCard(
     message: String,
     getFormattedDate: (Notificacao) -> String,
     onClick: (String) -> Unit = {},
-    onDelete: (String) -> Unit = {}  // Nova função de callback para exclusão
+    onDelete: (String) -> Unit = {}
 ) {
     val id = notificacao.id ?: return
 
@@ -259,7 +259,7 @@ fun UpdateCard(
         onClick = { onClick(id) }
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            // Botão de excluir no canto superior direito
+            // Close notification button
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
@@ -290,14 +290,12 @@ fun UpdateCard(
                 }
             }
 
-            // Conteúdo original do card
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
                 verticalAlignment = Alignment.Top
             ) {
-                // Notification icon com circle background
                 Box(
                     modifier = Modifier
                         .size(40.dp)

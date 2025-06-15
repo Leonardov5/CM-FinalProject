@@ -11,7 +11,7 @@ import com.example.finalproject.data.model.User
 import com.example.finalproject.data.model.UserProject
 import com.example.finalproject.data.repository.ProjetoRepository
 import com.example.finalproject.data.repository.TarefaRepository
-import com.example.finalproject.data.repository.UserRepository
+import com.example.finalproject.data.repository.UtilizadorRepository
 import com.example.finalproject.data.service.UserService
 import kotlinx.coroutines.launch
 
@@ -79,7 +79,7 @@ class TaskDetailViewModel(
             try {
                 task?.id?.let { tarefaId ->
 
-                    val date = taskRepository.getUsuarioJoinDate(userId, tarefaId)
+                    val date = taskRepository.obterDataEntradaUtilizador(userId, tarefaId)
 
                     workerJoinDate = date
                 }
@@ -116,7 +116,7 @@ class TaskDetailViewModel(
         viewModelScope.launch {
             try {
                 // Carregar a lista de IDs dos trabalhadores da tarefa
-                trabalhadoresTarefa = taskRepository.getTrabalhadoresDaTarefa(tarefaId)
+                trabalhadoresTarefa = taskRepository.getTrabalhadoresTarefa(tarefaId)
 
                 isLoading = false
             } catch (e: Exception) {
@@ -128,9 +128,9 @@ class TaskDetailViewModel(
 
     fun loadMembrosProjeto(projetoId: String) {
         viewModelScope.launch {
-            val membros = projetoRepository.listarMembrosDoProjeto(projetoId) // retorna List<UserProject>
+            val membros = projetoRepository.listarMembrosProjeto(projetoId) // retorna List<UserProject>
             membrosProjetoUserProject = membros
-            val allUsers = UserRepository().listarTodosUsuarios()
+            val allUsers = UtilizadorRepository().listarTodosUtilizadores()
             membrosProjeto = membros.mapNotNull { membro ->
                 allUsers.find { it.id == membro.userId }
             }
@@ -157,7 +157,7 @@ class TaskDetailViewModel(
         viewModelScope.launch {
             isLoading = true
             try {
-                task = taskRepository.getTarefaById(taskId)
+                task = taskRepository.obterTarefaPorId(taskId)
             } catch (e: Exception) {
                 println("Error fetching task: ${e.message}")
             } finally {
@@ -168,7 +168,7 @@ class TaskDetailViewModel(
 
     fun addWorkerToTask(userId: String, tarefaId: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val result = taskRepository.adicionarUsuarioATarefa(userId, tarefaId)
+            val result = taskRepository.adicionarUtilizadorTarefa(userId, tarefaId)
             println("Debug - Adding worker to task: $userId to $tarefaId, result: $result")
             onResult(result)
             if (result) {
@@ -184,7 +184,7 @@ class TaskDetailViewModel(
 
     fun removeWorkerFromTask(userId: String, tarefaId: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val result = taskRepository.removerUsuarioDaTarefa(userId, tarefaId)
+            val result = taskRepository.removerUtilizadorDaTarefa(userId, tarefaId)
             onResult(result)
             if (result) {
                 loadTask(tarefaId)
@@ -238,7 +238,7 @@ class TaskDetailViewModel(
     fun deletarTarefa(taskId: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             isLoading = true
-            val sucesso = taskRepository.deletarTarefaPorId(taskId)
+            val sucesso = taskRepository.eliminarTarefaPorId(taskId)
             isLoading = false
             onResult(sucesso)
         }

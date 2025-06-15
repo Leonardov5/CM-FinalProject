@@ -54,16 +54,14 @@ fun RegisterScreen(
     var isLanguageLoaded by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    // Observar o estado de registro bem-sucedido
     LaunchedEffect(viewModel.isRegistrationSuccessful) {
         if (viewModel.isRegistrationSuccessful) {
-            viewModel.clearFields() // Limpar campos após registro bem-sucedido
+            viewModel.clearFields()
             viewModel.clearRegistrationSuccessState()
             onRegisterSuccess()
         }
     }
 
-    // Observar mensagens de sucesso
     LaunchedEffect(viewModel.successMessage) {
         viewModel.successMessage?.let { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -71,7 +69,6 @@ fun RegisterScreen(
         }
     }
 
-    // Observar mensagens de aviso
     LaunchedEffect(viewModel.warningMessage) {
         viewModel.warningMessage?.let { message ->
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
@@ -79,7 +76,6 @@ fun RegisterScreen(
         }
     }
 
-    // Observar mensagens de erro
     LaunchedEffect(viewModel.errorMessage) {
         viewModel.errorMessage?.let { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -92,7 +88,6 @@ fun RegisterScreen(
         updateAppLanguage(context, savedLanguage)
         isLanguageLoaded = true
     }
-
 
     if( isLanguageLoaded ) {
         Surface(
@@ -209,7 +204,6 @@ fun RegisterScreen(
                     }
                 )
 
-                // Mostrar mensagem de erro na UI (além do Toast)
                 if (viewModel.errorMessage != null) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -240,7 +234,7 @@ fun RegisterScreen(
 
                 OutlinedButton(
                     onClick = {
-                        viewModel.clearFields() // Limpar campos ao voltar para login
+                        viewModel.clearFields()
                         onNavigateToLogin()
                     },
                     modifier = Modifier.fillMaxWidth(),

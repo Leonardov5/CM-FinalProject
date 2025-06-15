@@ -43,7 +43,7 @@ fun BottomNavigation(
         val isAdmin = profileViewModel.isAdmin
     }
 
-    if (!isLanguageLoaded) return // Wait until language is loaded
+    if (!isLanguageLoaded) return
 
     val items = mutableListOf(
         NavigationItem(
