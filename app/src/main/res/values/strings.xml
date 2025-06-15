@@ -286,4 +286,7 @@
     <string name="profile_email_update_error">Failed to update email. Check your password or if the email is already in use.</string>
     <string name="password_update_server_error">Failed to update password on server</string>
     <string name="logout_success">Logged out successfully</string>
+    <string name="performance">Performance</string>
+    <string name="no_rating_yet">No rating yet\n</string>
+    <string name="clear_rating">Clear rating</string>
 </resources>

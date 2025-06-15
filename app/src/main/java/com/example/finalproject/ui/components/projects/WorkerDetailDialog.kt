@@ -18,6 +18,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -26,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,8 +60,9 @@ fun WorkerDetailDialog(
     show: Boolean,
     worker: UserProject?,
     onDismiss: () -> Unit,
-    onEdit: (String, Boolean, Boolean) -> Unit = { _, _, _ -> },
-    isAdmin: Boolean = false
+    onEdit: (String, Boolean, Boolean, Int) -> Unit = { _, _, _, _ -> },
+    isAdmin: Boolean = false,
+    isManager: Boolean = false
 ) {
     if (show && worker != null) {
         Dialog(onDismissRequest = onDismiss) {
@@ -188,32 +192,36 @@ fun WorkerDetailDialog(
                             )
                         }
 
-                        // Opção de gestor
-                        if (isAdmin) {
+                        if (isAdmin || isManager) {
                             Spacer(modifier = Modifier.height(16.dp))
 
                             var isManagerState by remember { mutableStateOf(worker.isManager) }
                             var isActiveState by remember { mutableStateOf(worker.active) }
+                            var performanceState by remember { mutableStateOf(worker.performance) }
 
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Checkbox(
-                                    checked = isManagerState,
-                                    onCheckedChange = { isManagerState = it }
-                                )
+                            // Gestor
+                            if (isAdmin) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Checkbox(
+                                        checked = isManagerState,
+                                        onCheckedChange = { isManagerState = it }
+                                    )
 
-                                Text(
-                                    text = stringResource(id = R.string.manager),
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .clickable { isManagerState = !isManagerState }
-                                )
+                                    Text(
+                                        text = stringResource(id = R.string.manager),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clickable { isManagerState = !isManagerState }
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
 
-                            Spacer(modifier = Modifier.height(8.dp))
-
+                            // Ativo/Inativo
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.fillMaxWidth()
@@ -237,10 +245,58 @@ fun WorkerDetailDialog(
 
                             Spacer(modifier = Modifier.height(16.dp))
 
+                            Text(
+                                text = stringResource(id = R.string.performance),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Estrelas
+                            Row(
+                                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                for (i in 1..5) {
+                                    Icon(
+                                        imageVector = if (i <= performanceState) Icons.Default.Star else Icons.Default.StarOutline,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .padding(horizontal = 4.dp)
+                                            .clickable {
+                                                performanceState = i
+                                            }
+                                    )
+                                }
+                            }
+
+                            if (performanceState > 0) {
+                                TextButton(
+                                    onClick = { performanceState = 0 },
+                                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                                ) {
+                                    Text(
+                                        text = stringResource(id = R.string.clear_rating),
+                                        fontSize = 14.sp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
                             // Guardar
                             Button(
-                                onClick = { onEdit(worker.userId, isManagerState, isActiveState) },
-                                enabled = isManagerState != worker.isManager || isActiveState != worker.active,
+                                onClick = {
+                                    onEdit(worker.userId, isManagerState, isActiveState, performanceState)
+                                },
+                                enabled = (isManagerState != worker.isManager) ||
+                                          isActiveState != worker.active ||
+                                          performanceState != worker.performance,
                                 modifier = Modifier
                                     .fillMaxWidth(0.8f)
                                     .align(Alignment.CenterHorizontally)
@@ -251,9 +307,46 @@ fun WorkerDetailDialog(
                                     fontWeight = FontWeight.Medium
                                 )
                             }
-                        }
+                        } else {
+                            // Mostrar performance em modo de visualização para usuários normais
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = stringResource(id = R.string.performance),
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Start,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Estrelas
+                            Row(
+                                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                for (i in 1..5) {
+                                    Icon(
+                                        imageVector = if (i <= worker.performance) Icons.Default.Star else Icons.Default.StarOutline,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(32.dp)
+                                    )
+                                }
+                            }
+
+                            // Sem avaliação
+                            if (worker.performance == 0) {
+                                Text(
+                                    text = stringResource(id = R.string.no_rating_yet),
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }

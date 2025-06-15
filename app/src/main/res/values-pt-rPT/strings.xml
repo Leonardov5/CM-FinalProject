@@ -286,4 +286,7 @@
     <string name="profile_email_update_error">Erro ao atualizar o email. Verifique a palavra-passe ou se o email já está em uso.</string>
     <string name="password_update_server_error">Erro ao atualizar a palavra-passe no servidor</string>
     <string name="logout_success">Sessão terminada com sucesso</string>
+    <string name="performance">Performance</string>
+    <string name="no_rating_yet">No rating yet\n</string>
+    <string name="clear_rating">Clear rating</string>
 </resources>

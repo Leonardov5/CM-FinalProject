@@ -174,6 +174,7 @@ fun ProjectDetailScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.padding(bottom = 16.dp)
                     ) {
+
                         if(viewModel.isAdmin  || viewModel.isManager) {
                             ActionButton(
                                 icon = Icons.Default.Add,
@@ -509,12 +510,13 @@ fun ProjectDetailScreen(
             show = true,
             worker = viewModel.selectedWorker,
             onDismiss = { viewModel.hideWorkerDetailDialog() },
-            onEdit = { userId, isManager, isActive ->
+            onEdit = { userId, isManager, isActive, performance ->
                 scope.launch {
-                    viewModel.updateWorkerRole(userId, isManager, isActive)
+                    viewModel.updateWorkerRole(userId, isManager, isActive, performance)
                     Toast.makeText(context, workerDataUpdatedSuccess, Toast.LENGTH_SHORT).show()                }
             },
-            isAdmin = viewModel.isAdmin || viewModel.isManager
+            isAdmin = viewModel.isAdmin,
+            isManager = viewModel.isAdmin || viewModel.isManager
         )
     }
 

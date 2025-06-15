@@ -214,7 +214,8 @@ class ProjetoRepository {
         userId: String,
         projectId: String,
         isManager: Boolean,
-        isActive: Boolean
+        isActive: Boolean,
+        performance: Int
     ): Boolean {
         return try {
             withContext(Dispatchers.IO) {
@@ -223,6 +224,7 @@ class ProjetoRepository {
                     put("projeto_uuid", projectId)
                     put("e_gestor", isManager)
                     put("ativo", isActive)
+                    put("performance", performance)
                 }
                 supabase.from("utilizador_projeto")
                     .upsert(data) {
