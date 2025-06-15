@@ -276,4 +276,14 @@
     <string name="error_project_update_exception">Erro ao atualizar projeto: %1$s</string>
     <string name="error_project_create_failed">Falha ao criar o projeto</string>
     <string name="logout_error">Errou ao sair da conta</string>
+    <string name="work_delete_permission_error">Você não tem permissão para excluir trabalhos</string>
+    <string name="work_delete_error">Erro ao excluir trabalho</string>
+    <string name="work_delete_error_with_message">Erro ao excluir trabalho: %1$s</string>
+    <string name="error_loading_works">Erro ao carregar trabalhos</string>
+    <string name="profile_load_error">Erro ao carregar dados do perfil</string>
+    <string name="profile_update_server_error">Erro ao atualizar o perfil no servidor</string>
+    <string name="profile_update_local_success">Perfil atualizado localmente (modo offline)</string>
+    <string name="profile_email_update_error">Erro ao atualizar o email. Verifique a palavra-passe ou se o email já está em uso.</string>
+    <string name="password_update_server_error">Erro ao atualizar a palavra-passe no servidor</string>
+    <string name="logout_success">Sessão terminada com sucesso</string>
 </resources>

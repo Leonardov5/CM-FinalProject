@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.finalproject.R
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.model.Trabalho
 import com.example.finalproject.data.model.Utilizador
@@ -29,7 +30,7 @@ class TrabalhosViewModel : ViewModel() {
     var isLoading by mutableStateOf(false)
         private set
 
-    var error by mutableStateOf<String?>(null)
+    var errorRes by mutableStateOf<Int?>(null)
         private set
 
     var tarefaId by mutableStateOf<String?>(null)
@@ -52,7 +53,7 @@ class TrabalhosViewModel : ViewModel() {
     fun carregarTrabalhos(tarefaId: String) {
         this.tarefaId = tarefaId
         isLoading = true
-        error = null
+        errorRes = null
 
         viewModelScope.launch {
             try {
@@ -66,7 +67,7 @@ class TrabalhosViewModel : ViewModel() {
                     utilizadores = listaUtilizadores.filter { it.id in utilizadoresIds }.associateBy { it.id ?: "" }
                 }
             } catch (e: Exception) {
-                error = "Erro ao carregar trabalhos: ${e.message}"
+                errorRes = R.string.error_loading_works
             } finally {
                 isLoading = false
             }
@@ -103,9 +104,9 @@ class TrabalhosViewModel : ViewModel() {
         return if (userId != null) utilizadores[userId] else null
     }
 
-    fun eliminarTrabalho(trabalhoId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+    fun eliminarTrabalho(trabalhoId: String, onSuccess: () -> Unit, onError: (Int) -> Unit) {
         if (!isAdminUser && !isManager) {
-            onError("Você não tem permissão para excluir trabalhos")
+            onError(R.string.work_delete_permission_error)
             return
         }
 
@@ -119,13 +120,17 @@ class TrabalhosViewModel : ViewModel() {
                     tarefaId?.let { carregarTrabalhos(it) }
                     onSuccess()
                 } else {
-                    onError("Erro ao excluir trabalho")
+                    onError(R.string.work_delete_error)
                 }
             } catch (e: Exception) {
-                onError("Erro ao excluir trabalho: ${e.message}")
+                onError(R.string.work_delete_error_with_message)
             } finally {
                 isLoading = false
             }
         }
+    }
+
+    fun clearError() {
+        errorRes = null
     }
 }

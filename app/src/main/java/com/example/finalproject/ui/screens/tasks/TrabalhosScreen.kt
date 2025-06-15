@@ -80,10 +80,18 @@ fun TrabalhosScreen(
 ) {
     val context = LocalContext.current
     var showLogWorkDialog by remember { mutableStateOf(false) }
+    var errorMessageId by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(tarefaId) {
         viewModel.carregarTrabalhos(tarefaId)
         viewModel.loadUser()
+    }
+
+    LaunchedEffect(viewModel.errorRes) {
+        if (viewModel.errorRes != null) {
+            errorMessageId = viewModel.errorRes
+            viewModel.clearError()
+        }
     }
 
     Scaffold(
@@ -124,14 +132,15 @@ fun TrabalhosScreen(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
-                viewModel.error != null -> {
+                errorMessageId != null -> {
                     Text(
-                        text = viewModel.error ?: stringResource(id = R.string.unknown_error),
+                        text = stringResource(id = errorMessageId!!),
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier
                             .align(Alignment.Center)
                             .padding(16.dp)
                     )
+                    errorMessageId = null
                 }
                 viewModel.trabalhos.isEmpty() -> {
                     Text(

@@ -193,7 +193,7 @@ class ProfileViewModel: ViewModel() {
                     errorMessageRes = R.string.invalid_credentials
                 }
             } catch (e: Exception) {
-                errorMessageRes = R.string.profile_update_error
+                errorMessageRes = R.string.profile_load_error
                 e.printStackTrace()
             } finally {
                 isLoading = false
@@ -217,10 +217,9 @@ class ProfileViewModel: ViewModel() {
                     if (success) {
                         successMessageRes = R.string.profile_update_success
                     } else {
-                        errorMessageRes = R.string.profile_update_error
+                        errorMessageRes = R.string.profile_update_server_error
                     }
                 } else {
-                    // Salva localmente se estiver offline
                     val db = AppDatabase.getInstance(context)
                     val userDao = db.userDao()
                     val userId = AuthService.getCurrentUserId()
@@ -235,7 +234,7 @@ class ProfileViewModel: ViewModel() {
                             updatedAt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
                         )
                         userDao.insertOrUpdate(localUser)
-                        successMessageRes = R.string.profile_update_success
+                        successMessageRes = R.string.profile_update_local_success
                     } else {
                         errorMessageRes = R.string.invalid_credentials
                     }
@@ -273,18 +272,17 @@ class ProfileViewModel: ViewModel() {
 
                     if (updateInDbSuccess) {
                         successMessageRes = R.string.profile_update_success
-                        originalEmail = email // Atualizar o email original para evitar repetir o diálogo
+                        originalEmail = email
                     } else {
-                        errorMessageRes = R.string.profile_update_error
+                        errorMessageRes = R.string.profile_update_server_error
                     }
                 } else {
-                    // Senha incorreta ou problema ao atualizar o email
-                    errorMessageRes = R.string.invalid_credentials
-                    email = originalEmail // Restaurar o email original
+                    errorMessageRes = R.string.profile_email_update_error
+                    email = originalEmail
                 }
             } catch (e: Exception) {
-                errorMessageRes = R.string.profile_update_error
-                email = originalEmail // Restaurar o email original em caso de erro
+                errorMessageRes = R.string.profile_email_update_error
+                email = originalEmail
             } finally {
                 isSaving = false
                 passwordForEmailChange = ""
@@ -330,10 +328,10 @@ class ProfileViewModel: ViewModel() {
                     confirmPassword = ""
                     isPasswordChangeVisible = false
                 } else {
-                    errorMessageRes = R.string.password_update_error
+                    errorMessageRes = R.string.password_update_server_error
                 }
             } catch (e: Exception) {
-                errorMessageRes = R.string.password_update_error
+                errorMessageRes = R.string.password_update_server_error
             } finally {
                 isSaving = false
             }
@@ -358,7 +356,6 @@ class ProfileViewModel: ViewModel() {
                 val supabase = SupabaseProvider.client
                 supabase.storage.from("perfil")
                     .upload(fileName, bytes, upsert = true)
-
 
                 val imageUrl = supabase.storage.from("perfil")
                     .publicUrl(fileName)
@@ -385,6 +382,7 @@ class ProfileViewModel: ViewModel() {
             try {
                 val success = AuthService.logout()
                 if (success) {
+                    successMessageRes = R.string.logout_success
                     onLogoutSuccess()
                 } else {
                     errorMessageRes = R.string.logout_error

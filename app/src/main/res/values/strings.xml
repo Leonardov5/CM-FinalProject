@@ -276,4 +276,14 @@
     <string name="error_project_update_exception">Error updating project: %1$s</string>
     <string name="error_project_create_failed">Failed while creating the Project</string>
     <string name="logout_error">Failed to Logout</string>
+    <string name="work_delete_permission_error">You do not have permission to delete works</string>
+    <string name="work_delete_error">Error deleting work</string>
+    <string name="work_delete_error_with_message">Error deleting work: %1$s</string>
+    <string name="error_loading_works">Error loading works</string>
+    <string name="profile_load_error">Failed to load profile data</string>
+    <string name="profile_update_server_error">Failed to update profile on server</string>
+    <string name="profile_update_local_success">Profile updated locally (offline mode)</string>
+    <string name="profile_email_update_error">Failed to update email. Check your password or if the email is already in use.</string>
+    <string name="password_update_server_error">Failed to update password on server</string>
+    <string name="logout_success">Logged out successfully</string>
 </resources>
