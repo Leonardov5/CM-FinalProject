@@ -1,4 +1,3 @@
-// UserManagementViewModel.kt
 package com.example.finalproject.ui.viewmodels.users
 
 import androidx.compose.runtime.getValue
@@ -6,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.data.repository.UtilizadorRepository
 import com.example.finalproject.data.service.UserService
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,10 +15,10 @@ import kotlinx.coroutines.launch
 class UserManagementViewModel(
     private val utilizadorRepository: UtilizadorRepository = UtilizadorRepository()
     ) : ViewModel() {
-    private val _users = MutableStateFlow<List<User>>(emptyList())
+    private val _users = MutableStateFlow<List<Utilizador>>(emptyList())
     val users = _users.asStateFlow()
 
-    var userToEdit by mutableStateOf<User?>(null)
+    var userToEdit by mutableStateOf<Utilizador?>(null)
         private set
 
     var showEditDialog by mutableStateOf(false)
@@ -59,12 +58,12 @@ class UserManagementViewModel(
         showCreateDialog = !showCreateDialog
     }
 
-    fun togleEditDialog(user: User? = null) {
+    fun togleEditDialog(user: Utilizador? = null) {
         userToEdit = user
         showEditDialog = !showEditDialog
     }
 
-    fun editarUsuario(userId: String, nome: String, username: String, onResult: (Boolean) -> Unit) {
+    fun editarUtilizador(userId: String, nome: String, username: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             val sucesso = utilizadorRepository.atualizarUtilizador(userId, nome, username)
             if (sucesso) loadUsers()

@@ -1,5 +1,7 @@
 package com.example.finalproject.ui.viewmodels.tasks
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.model.Tarefa
@@ -19,7 +21,6 @@ class EditTaskViewModel(
     private val _uiState = MutableStateFlow(EditTaskUIState())
     val uiState: StateFlow<EditTaskUIState> = _uiState.asStateFlow()
 
-    // Inicializar com os dados da tarefa
     fun initWithTask(tarefa: Tarefa) {
         _uiState.value = EditTaskUIState(
             nome = tarefa.nome,
@@ -32,7 +33,6 @@ class EditTaskViewModel(
         )
     }
 
-    // Funções para atualizar campos
     fun updateNome(nome: String) {
         _uiState.value = _uiState.value.copy(nome = nome, nomeError = false)
     }
@@ -61,7 +61,7 @@ class EditTaskViewModel(
         _uiState.value = _uiState.value.copy(taxaConclusao = taxaConclusao, taxaConclusaoError = false)
     }
 
-    // Controle dos diálogos de data
+
     fun showDataInicioDialog() {
         _uiState.value = _uiState.value.copy(showDataInicioDialog = true)
     }
@@ -78,19 +78,17 @@ class EditTaskViewModel(
         _uiState.value = _uiState.value.copy(showDataFimDialog = false)
     }
 
-    // Resetar formulário
     fun resetForm() {
         _uiState.value = EditTaskUIState()
     }
 
-    // Validar e enviar
+    @RequiresApi(Build.VERSION_CODES.O)
     fun validateAndSubmitTask(
         id: String,
         onSave: (String, String, String, String, String, String?, String?, Double) -> Unit
     ): Boolean {
         val currentState = _uiState.value
 
-        // Validar campos obrigatórios
         var isValid = true
 
         if (currentState.nome.isBlank()) {
@@ -118,7 +116,6 @@ class EditTaskViewModel(
             isValid = false
         }
 
-        // Se válido, salvar
         if (isValid) {
             viewModelScope.launch {
                 repository.atualizarTarefa(
@@ -132,7 +129,6 @@ class EditTaskViewModel(
                     taxaConclusao = currentState.taxaConclusao
                 )
 
-                // Notificar o componente pai
                 onSave(
                     id,
                     currentState.nome,
@@ -149,7 +145,6 @@ class EditTaskViewModel(
         return isValid
     }
 
-    // Classe de estado da UI
     data class EditTaskUIState(
         val nome: String = "",
         val descricao: String = "",

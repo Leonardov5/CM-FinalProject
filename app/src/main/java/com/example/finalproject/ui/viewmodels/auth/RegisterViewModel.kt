@@ -96,7 +96,6 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun register() {
-        // Validação
         if (name.isBlank() || username.isBlank() || email.isBlank() ||
             password.isBlank() || confirmPassword.isBlank()) {
             errorMessage = getApplication<Application>().getString(R.string.fill_all_fields)

@@ -14,12 +14,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.finalproject.R
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 
 
 @Composable
 fun EditUserDialog(
-    user: User,
+    user: Utilizador,
     onDismiss: () -> Unit,
     onConfirm: (String, String) -> Unit
 ) {

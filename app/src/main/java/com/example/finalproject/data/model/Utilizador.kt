@@ -3,11 +3,8 @@ package com.example.finalproject.data.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/**
- * Modelo de dados para representar um usuário
- */
 @Serializable
-data class User(
+data class Utilizador(
     @SerialName("utilizador_uuid")
     val id: String = "",
     val nome: String = "",

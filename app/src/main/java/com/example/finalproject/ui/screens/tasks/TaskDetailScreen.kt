@@ -68,7 +68,7 @@ import com.example.finalproject.R
 import com.example.finalproject.data.PreferencesManager
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.model.TarefaStatus
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.ui.components.tasks.EditTaskDialog
 import com.example.finalproject.ui.components.tasks.AddWorkerDialog
 import com.example.finalproject.ui.components.tasks.LogWorkDialog
@@ -291,7 +291,7 @@ fun TaskDetailScreen(
             text = { Text(stringResource(id = R.string.delete_task_dialog_text, viewModel.task?.nome ?: "")) },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.deletarTarefa(taskId) { sucesso ->
+                    viewModel.eliminarTarefa(taskId) { sucesso ->
                         viewModel.toggleDeleteTaskDialog()
                         if (sucesso) {
                             onBackPressed()
@@ -368,7 +368,7 @@ private fun TaskContent(
     onLogWork: (hours: Int, description: String) -> Unit = { _, _ -> }
 ) {
     val statusEnum = viewModel.statusToEnum(task.status)
-    var selectedWorker by remember { mutableStateOf<User?>(null) }
+    var selectedWorker by remember { mutableStateOf<Utilizador?>(null) }
     var showWorkerDialog by remember { mutableStateOf(false) }
 
     // Buscar a data de entrada do trabalhador selecionado

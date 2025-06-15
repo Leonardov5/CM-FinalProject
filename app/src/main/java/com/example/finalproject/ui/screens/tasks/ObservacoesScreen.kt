@@ -70,12 +70,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.finalproject.R
 import com.example.finalproject.data.model.Observacao
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.ui.viewmodels.tasks.ObservacoesViewModel
 import com.example.finalproject.utils.formatDate
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -156,10 +154,10 @@ fun ObservacoesScreen(
                         items(viewModel.observacoes) { observacao ->
                             ObservacaoItem(
                                 observacao = observacao,
-                                usuario = viewModel.obterUsuario(observacao.createdBy),
+                                utilizador = viewModel.obterUtilizador(observacao.createdBy),
                                 isAdmin = viewModel.isAdmin(),
                                 onDelete = {
-                                    viewModel.excluirObservacao(
+                                    viewModel.eliminarObservacao(
                                         observacaoId = observacao.id ?: "",
                                         onSuccess = { },
                                         onError = { }
@@ -243,7 +241,7 @@ fun ObservacoesScreen(
 @Composable
 fun ObservacaoItem(
     observacao: Observacao,
-    usuario: User?,
+    utilizador : Utilizador?,
     isAdmin: Boolean,
     onDelete: () -> Unit,
     onImageClick: (String) -> Unit,
@@ -278,7 +276,7 @@ fun ObservacaoItem(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = usuario?.nome?.firstOrNull()?.toString() ?: "?",
+                            text = utilizador?.nome?.firstOrNull()?.toString() ?: "?",
                             color = MaterialTheme.colorScheme.onPrimary,
                             fontWeight = FontWeight.Bold
                         )
@@ -287,7 +285,7 @@ fun ObservacaoItem(
                     // Nome
                     Column {
                         Text(
-                            text = usuario?.nome ?: "Usuário desconhecido",
+                            text = utilizador?.nome ?: "Utilizador desconhecido",
                             fontWeight = FontWeight.Medium,
                             fontSize = 16.sp
                         )
@@ -545,7 +543,7 @@ fun EditObservacaoDialog(
     viewModel: ObservacoesViewModel
 ) {
     val context = LocalContext.current
-    val observacao = viewModel.editandoObservacao ?: return
+    val observacao = viewModel.observacaoEmEdicao ?: return
 
     var imagensAManter by remember { mutableStateOf(observacao.anexos) }
 

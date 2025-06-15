@@ -36,7 +36,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.outlined.Analytics
-import androidx.compose.material.icons.outlined.Monitor
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -68,7 +67,7 @@ import androidx.navigation.NavController
 import com.example.finalproject.R
 import com.example.finalproject.Screen
 import com.example.finalproject.data.PreferencesManager
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.ui.components.projects.AddMemberDialog
 import com.example.finalproject.ui.components.projects.AddTaskDialog
 import com.example.finalproject.ui.components.projects.EditProjectDialog
@@ -76,8 +75,6 @@ import com.example.finalproject.ui.components.projects.ProjectAnalyticsExporterD
 import com.example.finalproject.ui.components.projects.WorkerDetailDialog
 import com.example.finalproject.ui.components.projects.WorkersListProject
 import com.example.finalproject.ui.theme.primaryLight
-import com.example.finalproject.ui.theme.surfaceVariantLight
-import com.example.finalproject.ui.viewmodels.projects.ProjectAnalyticsExporter
 import com.example.finalproject.ui.viewmodels.projects.ProjectDetailViewModel
 import com.example.finalproject.utils.updateAppLanguage
 import kotlinx.coroutines.launch
@@ -100,7 +97,7 @@ fun formatDate(iso: String?): String? {
 fun ProjectDetailScreen(
     projetoId: String,
     navController: NavController,
-    currentUser: User? = null,
+    currentUser: Utilizador? = null,
     onBackClick: () -> Unit = {},
     onAddTaskClick: () -> Unit = {},
     viewModel: ProjectDetailViewModel = viewModel()
