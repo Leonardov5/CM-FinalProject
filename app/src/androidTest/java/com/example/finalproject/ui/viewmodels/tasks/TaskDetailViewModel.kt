@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.finalproject.data.model.Tarefa
 import com.example.finalproject.data.model.TarefaStatus
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.data.model.UserProject
 
 // Mock implementation that will be used during tests
@@ -69,15 +69,15 @@ class TaskDetailViewModel : ViewModel() {
     )
         private set
 
-    var membrosProjeto by mutableStateOf<List<User>>(
+    var membrosProjeto by mutableStateOf<List<Utilizador>>(
         listOf(
-            User(id = "user1", nome = "John Doe", email = "john@example.com"),
-            User(id = "user2", nome = "Jane Smith", email = "jane@example.com")
+            Utilizador(id = "user1", nome = "John Doe", email = "john@example.com"),
+            Utilizador(id = "user2", nome = "Jane Smith", email = "jane@example.com")
         )
     )
         private set
 
-    var filtredMembros by mutableStateOf<List<User>>(emptyList())
+    var filtredMembros by mutableStateOf<List<Utilizador>>(emptyList())
         private set
 
     // Methods from original ViewModel
@@ -97,7 +97,7 @@ class TaskDetailViewModel : ViewModel() {
         workerJoinDate = date
     }
 
-    fun checkUser(currentUser: User? = null) {
+    fun checkUser(currentUser: Utilizador? = null) {
         // Mock implementation
         isAdmin = true
         isManager = true
@@ -166,7 +166,7 @@ class TaskDetailViewModel : ViewModel() {
         onComplete()
     }
 
-    fun deletarTarefa(taskId: String, onResult: (Boolean) -> Unit) {
+    fun eliminarTarefa(taskId: String, onResult: (Boolean) -> Unit) {
         onResult(true)
     }
 

@@ -151,17 +151,12 @@ class ProfileViewModel: ViewModel() {
         isPasswordChangeVisible = !isPasswordChangeVisible
     }
 
-    fun showEmailPasswordDialog() {
-        showEmailPasswordDialog = true
-    }
-
     fun hideEmailPasswordDialog() {
         showEmailPasswordDialog = false
         passwordForEmailChange = ""
         email = originalEmail
     }
 
-    // Carregar dados do perfil
     fun loadProfileData(context: Context) {
         viewModelScope.launch {
             isLoading = true
@@ -171,7 +166,6 @@ class ProfileViewModel: ViewModel() {
                 val userId = AuthService.getCurrentUserId()
 
                 if (userId != null) {
-                    // Carregar dados do banco de dados local primeiro
                     val localUser = userDao.getUserById(userId)
                     if (localUser != null) {
                         name = localUser.nome
@@ -181,14 +175,11 @@ class ProfileViewModel: ViewModel() {
                         profileImageUrl = localUser.fotografia
                     }
 
-                    // Verificar conectividade
                     isOnline = isOnline()
 
-                    // Se estiver online, sincronizar dados
                     if (isOnline) {
                         UserSyncManager.syncUserDataWithConflictResolution(context)
 
-                        // Atualizar os dados locais após a sincronização
                         val updatedUser = userDao.getUserById(userId)
                         if (updatedUser != null) {
                             name = updatedUser.nome
@@ -210,7 +201,6 @@ class ProfileViewModel: ViewModel() {
         }
     }
 
-    // Função para salvar o perfil sem alterar o email
     fun saveProfileWithoutEmailChange(context: Context) {
         viewModelScope.launch {
             isSaving = true
@@ -230,7 +220,7 @@ class ProfileViewModel: ViewModel() {
                         errorMessageRes = R.string.profile_update_error
                     }
                 } else {
-                    // Salvar localmente se estiver offline
+                    // Salva localmente se estiver offline
                     val db = AppDatabase.getInstance(context)
                     val userDao = db.userDao()
                     val userId = AuthService.getCurrentUserId()
@@ -258,7 +248,6 @@ class ProfileViewModel: ViewModel() {
         }
     }
 
-    // Função para verificar se o email foi alterado e decidir o fluxo de salvamento
     fun saveProfileChanges(context: Context) {
         if (email != originalEmail) {
             showEmailPasswordDialog = true
@@ -267,7 +256,6 @@ class ProfileViewModel: ViewModel() {
         }
     }
 
-    // Função para salvar o perfil com alteração de email (requer verificação de senha)
     fun saveProfileWithEmailChange(context: Context, password: String) {
         viewModelScope.launch {
             isSaving = true
@@ -275,11 +263,9 @@ class ProfileViewModel: ViewModel() {
             successMessageRes = null
 
             try {
-                // Primeiro, verificar se a senha está correta e atualizar o email na autenticação
                 val emailUpdateSuccess = AuthService.updateEmail(email, password)
 
                 if (emailUpdateSuccess) {
-                    // Depois de atualizar o email na autenticação, atualizamos no banco de dados
                     val updateInDbSuccess = UserService.updateUserData(
                         username = username,
                         nome = name
@@ -301,16 +287,14 @@ class ProfileViewModel: ViewModel() {
                 email = originalEmail // Restaurar o email original em caso de erro
             } finally {
                 isSaving = false
-                passwordForEmailChange = "" // Limpar a senha por segurança
+                passwordForEmailChange = ""
                 showEmailPasswordDialog = false
             }
         }
     }
 
-    // Função para atualizar a senha
     fun updatePassword(context: Context) {
         viewModelScope.launch {
-            // Validar as senhas
             if (currentPassword.isBlank()) {
                 errorMessageRes = R.string.password_required_error
                 return@launch
@@ -331,24 +315,19 @@ class ProfileViewModel: ViewModel() {
                 return@launch
             }
 
-            // Limpar mensagens anteriores
             errorMessageRes = null
             successMessageRes = null
 
-            // Mostrar indicador de loading
             isSaving = true
 
             try {
-                // Chamar o serviço para atualizar a senha
                 val success = AuthService.updatePassword(currentPassword, newPassword)
 
                 if (success) {
                     successMessageRes = R.string.password_update_success
-                    // Limpar os campos de senha
                     currentPassword = ""
                     newPassword = ""
                     confirmPassword = ""
-                    // Fechar a seção de alteração de senha
                     isPasswordChangeVisible = false
                 } else {
                     errorMessageRes = R.string.password_update_error
@@ -361,7 +340,6 @@ class ProfileViewModel: ViewModel() {
         }
     }
 
-    // Função para fazer upload da imagem de perfil
     fun uploadProfileImage(context: Context, uri: Uri) {
         viewModelScope.launch {
             isUploadingImage = true
@@ -409,10 +387,10 @@ class ProfileViewModel: ViewModel() {
                 if (success) {
                     onLogoutSuccess()
                 } else {
-                    errorMessageRes = R.string.profile_update_error
+                    errorMessage = "Erro ao fazer logout"
                 }
             } catch (e: Exception) {
-                errorMessageRes = R.string.profile_update_error
+                errorMessage = "Erro ao fazer logout: ${e.message}"
             }
         }
     }

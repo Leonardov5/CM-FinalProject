@@ -1,7 +1,9 @@
 [versions]
+accompanistPager = "0.28.0"
 agp = "8.9.2"
 androidxJunit = "1.1.5"
 appcompat = "1.7.1"
+appintro = "6.3.1"
 artifactid = "version"
 coilCompose = "2.5.0"
 core = "1.6.1"
@@ -31,6 +33,8 @@ uiTestJunit4 = "x.x.x"
 workRuntimeKtx = "2.10.1"
 
 [libraries]
+accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
+accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanistPager" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-core = { module = "androidx.core:core", version.ref = "coreKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,6 +45,7 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRunt
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
+appintro = { module = "com.github.AppIntro:AppIntro", version.ref = "appintro" }
 artifactid = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 core = { module = "androidx.test:core", version.ref = "core" }

@@ -50,28 +50,41 @@ android {
 }
 
 dependencies {
-    // Supabase dependencies
+
+    // Supabase
     implementation(libs.postgrest.kt)
     implementation(libs.gotrue.kt)
     implementation(libs.storage.kt)
     implementation(libs.ktor.client.android)
 
-    // Coil para carregamento de imagens
+    // Coil para carregar de imagens
     implementation(libs.coil.compose)
 
-    //icons
     implementation(libs.androidx.material.icons.extended)
+
+    implementation("androidx.compose.foundation:foundation:1.6.0")
+
+    implementation(libs.accompanist.pager)
+    implementation(libs.accompanist.pager.indicators)
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+
+    implementation(libs.androidx.work.runtime.ktx)
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    kapt(libs.artifactid)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -79,10 +92,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    kapt(libs.artifactid)
-    implementation(libs.androidx.work.runtime.ktx)
     androidTestImplementation(libs.mockito.kotlin)
     androidTestImplementation(libs.ui.test.junit4)
     androidTestImplementation(libs.core)

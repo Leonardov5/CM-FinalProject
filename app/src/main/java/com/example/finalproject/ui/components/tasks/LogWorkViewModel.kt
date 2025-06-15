@@ -119,7 +119,7 @@ class LogWorkViewModel : ViewModel() {
                     onSuccess()
                 } else {
                     isLoading = false
-                    errorMessage = "Falha ao registrar o trabalho"
+                    errorMessage = "Falha ao registar o trabalho"
                 }
             } catch (e: Exception) {
                 isLoading = false

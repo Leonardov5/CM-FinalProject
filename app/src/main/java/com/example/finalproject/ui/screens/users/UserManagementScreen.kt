@@ -1,6 +1,5 @@
 package com.example.finalproject.ui.screens.users
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,9 +22,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.finalproject.R
-import com.example.finalproject.Screen
 import com.example.finalproject.data.PreferencesManager
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.ui.components.users.EditUserDialog
 import com.example.finalproject.ui.components.users.RegisterUserDialog
 import com.example.finalproject.ui.viewmodels.users.UserManagementViewModel
@@ -40,7 +38,7 @@ fun UserManagementScreen(
 ) {
 
     val users by viewModel.users.collectAsState()
-    var userToDelete by remember { mutableStateOf<User?>(null) }
+    var userToDelete by remember { mutableStateOf<Utilizador?>(null) }
 
     var adminPasswordInput by remember { mutableStateOf("") }
     var adminPasswordError by remember { mutableStateOf<String?>(null) }
@@ -191,7 +189,7 @@ fun UserManagementScreen(
             user = viewModel.userToEdit!!,
             onDismiss = { viewModel.togleEditDialog(null) },
             onConfirm = { nome, username ->
-                viewModel.editarUsuario(viewModel.userToEdit!!.id, nome, username) { sucesso ->
+                viewModel.editarUtilizador(viewModel.userToEdit!!.id, nome, username) { sucesso ->
                     viewModel.togleEditDialog(null)
                 }
             }

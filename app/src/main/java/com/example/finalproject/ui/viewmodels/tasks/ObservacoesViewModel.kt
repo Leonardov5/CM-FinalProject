@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finalproject.data.model.Observacao
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.data.repository.ObservacaoRepository
 import com.example.finalproject.data.repository.UtilizadorRepository
 import com.example.finalproject.data.service.UserService
@@ -18,7 +18,7 @@ class ObservacoesViewModel : ViewModel() {
     var observacoes by mutableStateOf<List<Observacao>>(emptyList())
         private set
 
-    var usuarios by mutableStateOf<Map<String, User>>(emptyMap())
+    var utilizadores by mutableStateOf<Map<String, Utilizador>>(emptyMap())
         private set
 
     var isLoading by mutableStateOf(false)
@@ -33,22 +33,19 @@ class ObservacoesViewModel : ViewModel() {
     var showAddObservacaoDialog by mutableStateOf(false)
         private set
 
-    // Nova observação
     var novaObservacaoTexto by mutableStateOf("")
     var imagensTemporarias by mutableStateOf<List<File>>(emptyList())
 
     private val observacaoRepository = ObservacaoRepository()
     private val utilizadorRepository = UtilizadorRepository()
 
-    // Novo: usuário atual e status de administrador
-    var user by mutableStateOf<User?>(null)
+    var user by mutableStateOf<Utilizador?>(null)
         private set
 
     var isAdminUser by mutableStateOf(false)
         private set
 
-    // Estados para edição
-    var editandoObservacao by mutableStateOf<Observacao?>(null)
+    var observacaoEmEdicao by mutableStateOf<Observacao?>(null)
     var showEditObservacaoDialog by mutableStateOf(false)
     var textoObservacaoEditada by mutableStateOf("")
 
@@ -59,14 +56,12 @@ class ObservacoesViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                // Carregar as observações da tarefa
                 observacoes = observacaoRepository.listarObservacoesPorTarefa(tarefaId)
 
-                // Carregar dados dos usuários que criaram as observações
-                val usuariosIds = observacoes.mapNotNull { it.createdBy }.distinct()
-                if (usuariosIds.isNotEmpty()) {
-                    val listaUsuarios = utilizadorRepository.listarTodosUtilizadores()
-                    usuarios = listaUsuarios.filter { it.id in usuariosIds }.associateBy { it.id ?: "" }
+                val utilizadoresIds = observacoes.mapNotNull { it.createdBy }.distinct()
+                if (utilizadoresIds.isNotEmpty()) {
+                    val listaUtilizadores = utilizadorRepository.listarTodosUtilizadores()
+                    utilizadores = listaUtilizadores.filter { it.id in utilizadoresIds }.associateBy { it.id ?: "" }
                 }
             } catch (e: Exception) {
                 error = "Erro ao carregar observações: ${e.message}"
@@ -79,7 +74,6 @@ class ObservacoesViewModel : ViewModel() {
     fun toggleAddObservacaoDialog() {
         showAddObservacaoDialog = !showAddObservacaoDialog
         if (!showAddObservacaoDialog) {
-            // Limpar campos ao fechar o diálogo
             novaObservacaoTexto = ""
             imagensTemporarias = emptyList()
         }
@@ -109,12 +103,10 @@ class ObservacoesViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                // Converter arquivos de imagem para ByteArray
                 val imagensBytes = imagensTemporarias.map { arquivo ->
                     arquivo.readBytes()
                 }
 
-                // Criar observação
                 val novaObservacao = observacaoRepository.criarObservacao(
                     tarefaId = tarefaIdAtual,
                     observacao = novaObservacaoTexto,
@@ -122,10 +114,8 @@ class ObservacoesViewModel : ViewModel() {
                 )
 
                 if (novaObservacao != null) {
-                    // Recarregar observações
                     carregarObservacoes(tarefaIdAtual)
 
-                    // Limpar campos
                     novaObservacaoTexto = ""
                     imagensTemporarias = emptyList()
 
@@ -141,7 +131,7 @@ class ObservacoesViewModel : ViewModel() {
         }
     }
 
-    fun excluirObservacao(observacaoId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+    fun eliminarObservacao(observacaoId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         isLoading = true
 
         viewModelScope.launch {
@@ -149,7 +139,6 @@ class ObservacoesViewModel : ViewModel() {
                 val sucesso = observacaoRepository.eliminarObservacao(observacaoId)
 
                 if (sucesso) {
-                    // Recarregar observações se a exclusão for bem-sucedida
                     tarefaId?.let { carregarObservacoes(it) }
                     onSuccess()
                 } else {
@@ -163,11 +152,11 @@ class ObservacoesViewModel : ViewModel() {
         }
     }
 
-    fun obterUsuario(userId: String?): User? {
-        return if (userId != null) usuarios[userId] else null
+    fun obterUtilizador(userId: String?): Utilizador? {
+        return if (userId != null) utilizadores[userId] else null
     }
 
-    fun loadUser(currentUser: User? = null) {
+    fun loadUser(currentUser: Utilizador? = null) {
         viewModelScope.launch {
             try {
                 user = currentUser ?: UserService.getCurrentUserData()
@@ -183,21 +172,21 @@ class ObservacoesViewModel : ViewModel() {
     }
 
     fun iniciarEdicaoObservacao(observacao: Observacao) {
-        editandoObservacao = observacao
+        observacaoEmEdicao = observacao
         textoObservacaoEditada = observacao.observacao
-        imagensTemporarias = emptyList() // Limpa as imagens temporárias para novas adições
+        imagensTemporarias = emptyList()
         showEditObservacaoDialog = true
     }
 
     fun cancelarEdicao() {
-        editandoObservacao = null
+        observacaoEmEdicao = null
         textoObservacaoEditada = ""
         imagensTemporarias = emptyList()
         showEditObservacaoDialog = false
     }
 
     fun salvarEdicaoObservacao(onSuccess: () -> Unit, onError: (String) -> Unit, imagensAtuais: List<String> = emptyList()) {
-        val observacao = editandoObservacao
+        val observacao = observacaoEmEdicao
         if (observacao == null) {
             onError("Nenhuma observação selecionada para edição")
             return
@@ -212,12 +201,10 @@ class ObservacoesViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                // Converter arquivos de imagem para ByteArray
                 val imagensBytes = imagensTemporarias.map { arquivo ->
                     arquivo.readBytes()
                 }
 
-                // Atualizar observação
                 val observacaoAtualizada = observacaoRepository.atualizarObservacao(
                     observacaoId = observacao.id ?: "",
                     textoObservacao = textoObservacaoEditada,
@@ -226,10 +213,8 @@ class ObservacoesViewModel : ViewModel() {
                 )
 
                 if (observacaoAtualizada != null) {
-                    // Recarregar observações
                     tarefaId?.let { carregarObservacoes(it) }
 
-                    // Limpar campos
                     cancelarEdicao()
 
                     onSuccess()
@@ -244,30 +229,7 @@ class ObservacoesViewModel : ViewModel() {
         }
     }
 
-    fun excluirImagemDeObservacao(observacaoId: String, imagemUrl: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
-        isLoading = true
-
-        viewModelScope.launch {
-            try {
-                val sucesso = observacaoRepository.eliminarImagem(observacaoId, imagemUrl)
-
-                if (sucesso) {
-                    // Recarregar observações
-                    tarefaId?.let { carregarObservacoes(it) }
-                    onSuccess()
-                } else {
-                    onError("Erro ao excluir imagem")
-                }
-            } catch (e: Exception) {
-                onError("Erro ao excluir imagem: ${e.message}")
-            } finally {
-                isLoading = false
-            }
-        }
-    }
-
     fun podeEditarObservacao(observacao: Observacao): Boolean {
-        // Usuário pode editar se for o criador ou administrador
         return user?.id == observacao.createdBy
     }
 }

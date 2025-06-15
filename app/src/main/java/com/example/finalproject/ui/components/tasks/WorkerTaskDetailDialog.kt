@@ -47,7 +47,7 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.finalproject.R
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.ui.theme.primaryLight
 import com.example.finalproject.ui.viewmodels.tasks.TaskDetailViewModel
 import com.example.finalproject.utils.formatDate
@@ -55,7 +55,7 @@ import com.example.finalproject.utils.formatDate
 @Composable
 fun WorkerTaskDetailDialog(
     show: Boolean,
-    worker: User?,
+    worker: Utilizador?,
     onDismiss: () -> Unit,
     onRemove: (String) -> Unit = { _ -> },
     viewModel: TaskDetailViewModel

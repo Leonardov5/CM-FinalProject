@@ -23,7 +23,6 @@ class ProjectAnalyticsExporter(
     private val projetoRepository: ProjetoRepository = ProjetoRepository()
 ) : ViewModel() {
 
-    // UI states
     var isLoading by mutableStateOf(false)
         private set
 
@@ -36,9 +35,6 @@ class ProjectAnalyticsExporter(
     var exportSuccess by mutableStateOf<Boolean?>(null)
         private set
 
-    /**
-     * Load analytics data for a specific project
-     */
     fun loadAnalytics(projectId: String) {
         isLoading = true
         errorMessage = null
@@ -59,14 +55,10 @@ class ProjectAnalyticsExporter(
         }
     }
 
-    /**
-     * Export analytics data to file
-     */
     fun exportAnalytics(projectId: String, filePath: String, format: ExportFormat = ExportFormat.CSV) {
         viewModelScope.launch {
             try {
                 val data = analyticsData ?: run {
-                    // Try loading data if not already loaded
                     val result = projetoRepository.getProjectAnalytics(projectId)
                     if (result == null) {
                         setError("No data to export")
@@ -81,7 +73,6 @@ class ProjectAnalyticsExporter(
                     ExportFormat.TXT -> generateTxtContent(data)
                 }
 
-                // Ensure the file has the correct extension
                 val finalFilePath = if (!filePath.endsWith(format.extension)) {
                     "$filePath${format.extension}"
                 } else {
@@ -97,17 +88,11 @@ class ProjectAnalyticsExporter(
         }
     }
 
-    /**
-     * Set error message and update export success status
-     */
     fun setError(message: String) {
         errorMessage = message
         exportSuccess = false
     }
 
-    /**
-     * Generate CSV content
-     */
     private fun generateCsvContent(data: ProjectAnalytics): String {
         return buildString {
             append("Project Analytics Report\n")
@@ -121,9 +106,6 @@ class ProjectAnalyticsExporter(
         }
     }
 
-    /**
-     * Generate JSON content
-     */
     private fun generateJsonContent(data: ProjectAnalytics): String {
         return buildString {
             append("{\n")
@@ -139,9 +121,6 @@ class ProjectAnalyticsExporter(
         }
     }
 
-    /**
-     * Generate TXT content
-     */
     private fun generateTxtContent(data: ProjectAnalytics): String {
         return buildString {
             append("Project Analytics Report\n")
@@ -156,9 +135,6 @@ class ProjectAnalyticsExporter(
         }
     }
 
-    /**
-     * Reset states after export operation
-     */
     fun resetExportState() {
         exportSuccess = null
         errorMessage = null

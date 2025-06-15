@@ -4,8 +4,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -66,13 +64,11 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.finalproject.R
 import com.example.finalproject.data.model.Trabalho
-import com.example.finalproject.data.model.User
+import com.example.finalproject.data.model.Utilizador
 import com.example.finalproject.ui.components.tasks.LogWorkDialog
 import com.example.finalproject.ui.theme.primaryLight
 import com.example.finalproject.ui.viewmodels.tasks.TrabalhosViewModel
 import com.example.finalproject.utils.formatDate
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -192,10 +188,10 @@ fun TrabalhosScreen(
                         items(viewModel.trabalhos.sortedByDescending { it.data }) { trabalho ->
                             TrabalhoItem(
                                 trabalho = trabalho,
-                                usuario = viewModel.obterUsuario(trabalho.createdBy),
+                                utilizador = viewModel.obterUtilizador(trabalho.createdBy),
                                 onDelete = {
                                     if (viewModel.isAdminUser || viewModel.isManager) {
-                                        viewModel.excluirTrabalho(
+                                        viewModel.eliminarTrabalho(
                                             trabalhoId = trabalho.id ?: "",
                                             onSuccess = { /* Já recarrega os trabalhos */ },
                                             onError = { /* Mostrar mensagem de erro */ }
@@ -229,7 +225,7 @@ fun TrabalhosScreen(
 @Composable
 fun TrabalhoItem(
     trabalho: Trabalho,
-    usuario: User?,
+    utilizador: Utilizador?,
     onDelete: () -> Unit,
     isAdmin: Boolean,
     isManager: Boolean
@@ -261,11 +257,11 @@ fun TrabalhoItem(
                             .background(MaterialTheme.colorScheme.surfaceVariant),
                         contentAlignment = Alignment.Center
                     ) {
-                        if (usuario != null && !usuario.fotografia.isNullOrBlank()) {
+                        if (utilizador != null && !utilizador.fotografia.isNullOrBlank()) {
                             val context = LocalContext.current
                             AsyncImage(
                                 model = ImageRequest.Builder(context)
-                                    .data(usuario.fotografia)
+                                    .data(utilizador.fotografia)
                                     .crossfade(true)
                                     .build(),
                                 contentDescription = null,
@@ -273,7 +269,7 @@ fun TrabalhoItem(
                                 modifier = Modifier.fillMaxSize()
                             )
                         } else {
-                            if (usuario != null) {
+                            if (utilizador != null) {
                                 Image(
                                     imageVector = Icons.Default.Person,
                                     contentDescription = null,
@@ -282,7 +278,7 @@ fun TrabalhoItem(
                                 )
                             } else {
                                 Text(
-                                    text = usuario?.nome ?: stringResource(id = R.string.unknown_user),
+                                    text = utilizador?.nome ?: stringResource(id = R.string.unknown_user),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -293,7 +289,7 @@ fun TrabalhoItem(
                     // Nome do utilizador
                     Column {
                         Text(
-                            text = usuario?.nome ?: stringResource(id = R.string.unknown_user),
+                            text = utilizador?.nome ?: stringResource(id = R.string.unknown_user),
                             fontWeight = FontWeight.Medium,
                             fontSize = 16.sp
                         )
